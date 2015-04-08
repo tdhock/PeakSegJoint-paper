@@ -1,3 +1,8 @@
+auto
+Rplots.pdf
+*~
+figure-*.png
+figure-*.tex
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
