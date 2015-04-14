@@ -1,4 +1,4 @@
-% -*- compile-command: "make HOCKING-peak-penalty-slides.pdf" -*-
+% -*- compile-command: "make HOCKING-PeakSegJoint-slides.pdf" -*-
 \documentclass{beamer}
 \usepackage{tikz}
 \usepackage[all]{xy}
@@ -45,5 +45,28 @@
 \maketitle
 
 \input{figure-profiles}
+
+\begin{frame}
+  \frametitle{Comparison of PeakSeg and Joint model}
+
+  \includegraphics[width=\textwidth]{figure-timings-profiles}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Comparing timings to segment 8 samples}
+
+  \small
+
+  Segment each sample (PeakSeg):
+
+  \input{table-timings-PeakSeg}
+
+  \vskip 0.2 cm
+
+  Segment each genomic region (PeakSegJoint):
+
+  \input{table-timings}
+
+\end{frame}
 
 \end{document}
