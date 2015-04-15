@@ -18,6 +18,17 @@ ann.colors <-
 profile.list <- with(H3K36me3.TDH.other.chunk1, split(counts, counts$sample.id))
 region.list <-
   with(H3K36me3.TDH.other.chunk1, split(regions, regions$sample.id))
+## Comment for() loop below to ignore extra peakEnd annotation.
+for(sample.id in names(region.list)){
+  df <- region.list[[sample.id]]
+  r <- df[1,]
+  r$chromStart <- 43360000
+  r$chromEnd <- 43370000
+  r$annotation <- "peakEnd"
+  region.list[[sample.id]] <- rbind(df, r)
+}
+all.regions <- do.call(rbind, region.list)
+
 chrom.range <- with(H3K36me3.TDH.other.chunk1$counts, {
   c(min(chromStart), max(chromEnd))
 })
@@ -68,7 +79,7 @@ bases.per.problem.vec <- (4.5) * (2^(12:17))
 count.dt <- data.table(H3K36me3.TDH.other.chunk1$counts)
 setkey(count.dt, chromStart, chromEnd)
 
-regions.dt <- data.table(H3K36me3.TDH.other.chunk1$regions)
+regions.dt <- data.table(all.regions)
 regions.dt$region.i <- 1:nrow(regions.dt)
 setkey(regions.dt, chromStart, chromEnd)
 
@@ -78,7 +89,10 @@ resolution.err.list <- list()
 problem.list <- list()
 for(bases.per.problem in bases.per.problem.vec){
   problemStart <- seq(0, chrom.range[2], by=bases.per.problem)
-  problemStart <- as.integer(c(problemStart, problemStart+bases.per.problem/2))
+  problemStart <-
+    as.integer(c(problemStart,
+                 problemStart+bases.per.problem/3,
+                 problemStart+2*bases.per.problem/3))
   problemEnd <- problemStart+bases.per.problem
   peakStart <- as.integer(problemStart+bases.per.problem/4)
   peakEnd <- as.integer(problemEnd-bases.per.problem/4)
@@ -96,7 +110,7 @@ for(bases.per.problem in bases.per.problem.vec){
                       fill=annotation),
                   alpha=0.5,
                   color="grey",
-                  data=H3K36me3.TDH.other.chunk1$regions)+
+                  data=all.regions)+
     scale_fill_manual(values=ann.colors)+
     geom_segment(aes(problemStart/1e3, problem.name,
                      xend=problemEnd/1e3, yend=problem.name),
@@ -121,15 +135,21 @@ for(bases.per.problem in bases.per.problem.vec){
     problem.regions <- overlap.regions[problem.name]
     regions.by.sample <- split(problem.regions, problem.regions$sample.id)
 
+    problem.count.list <- ProfileList(problem.counts)
+    ## max(sapply(problem.count.list, with, min(chromStart)))
+    ## min(sapply(problem.count.list, with, max(chromEnd)))
     seconds <- system.time({
-      fit <- PeakSegJointHeuristic(problem.counts)
+      fit <- PeakSegJointHeuristic(problem.count.list)
       converted <- ConvertModelList(fit)
     })[["elapsed"]]
 
     joint.time.list[[problem.name]] <-
       data.frame(problem.dt, seconds,
                  data=nrow(problem.counts))
-    
+
+    segments.by.peaks <- if(!is.null(converted$segments$peaks)){
+      with(converted, split(segments, segments$peaks))
+    }
     peaks.by.peaks <- if(!is.null(converted$peaks$peaks)){
       with(converted, split(peaks, peaks$peaks))
     }else{
@@ -181,12 +201,24 @@ for(bases.per.problem in bases.per.problem.vec){
     peaks.str <- paste(best.error$peaks)
     best.regions <- do.call(rbind, problem.err.list[[peaks.str]])
     best.peaks <- peaks.by.peaks[[peaks.str]]
+    best.segments <- segments.by.peaks[[peaks.str]]
 
     if(nrow(best.peaks)){
       best.peak.list[[paste(bases.per.problem)]][[problem.name]] <-
         data.frame(best.peaks, problem.i=problem.dt$problem.i)
     }
 
+    count.na.list <- list()
+    for(sample.id in names(problem.count.list)){
+      df <- problem.count.list[[sample.id]]
+      r <- tail(df, 1)
+      r$chromStart <- r$chromEnd
+      count.na.list[[sample.id]] <-
+        data.frame(sample.id, rbind(df, r))
+    }
+    count.na <- do.call(rbind, count.na.list)
+
+    resPlot <- 
     ggplot()+
       scale_linetype_manual("error type",
                             limits=c("correct", 
@@ -196,7 +228,6 @@ for(bases.per.problem in bases.per.problem.vec){
                             values=c(correct=0,
                               "false negative"=3,
                               "false positive"=1))+
-      xlab("position on chromosome (kilo bases = kb)")+
       geom_tallrect(aes(xmin=chromStart/1e3, xmax=chromEnd/1e3,
                         fill=annotation),
                     alpha=0.5,
@@ -213,20 +244,39 @@ for(bases.per.problem in bases.per.problem.vec){
                            floor(limits[2])
                          })+
       xlab("position on chromosome (kilo bases = kb)")+
-      geom_line(aes(chromStart/1e3, count),
-                data=problem.counts,
+      geom_step(aes(chromStart/1e3, count),
+                data=count.na,
+                size=1,
                 color="grey50")+
-      geom_segment(aes(chromStart/1e3, 0,
-                       xend=chromEnd/1e3, yend=0),
-                   size=3,
-                   color="deepskyblue",
-                   data=best.peaks)+
+      ## geom_segment(aes(chromStart/1e3, 0,
+      ##                  xend=chromEnd/1e3, yend=0),
+      ##              size=3,
+      ##              color="deepskyblue",
+      ##              data=best.peaks)+
+      geom_segment(aes(chromStart/1e3, mean,
+                       xend=chromEnd/1e3, yend=mean),
+                   data=best.segments,
+                   color="green")+
       theme_bw()+
       scale_fill_manual(values=ann.colors)+
       theme(panel.margin=grid::unit(0, "cm"))+
       facet_grid(sample.id ~ ., scales="free", labeller=function(var, val){
         sub("McGill0", "", val)
       })
+    vline.df <-
+      data.frame(base=c(fit$data_start_end[2], max(best.segments$chromStart)),
+                 what=c("data end", "peak end"))
+    ## this next plot shows the right edge of the data, and that in
+    ## particular the peak does not end at the exact same location as
+    ## the data.
+    
+    ## bases.per.problem <- 294912
+    ##problem.name <- "chr21:43057152-43352064"
+    resPlot+coord_cartesian(xlim=c(43351900, 43352100)/1e3)+
+      geom_vline(aes(xintercept=base/1e3), data=vline.df)+
+      geom_text(aes(base/1e3, 0, label=paste0(what, " ")),
+                hjust=1,
+                data=data.frame(sample.id="label", vline.df))
   }#problem.name
   resolution.stats <- do.call(rbind, resolution.stat.list)
   stopifnot(all.equal(sum(resolution.stats$total.weight), nrow(regions.dt)))
@@ -273,20 +323,20 @@ ggplot()+
                     fill=annotation),
                 alpha=0.5,
                 color="grey",
-                data=H3K36me3.TDH.other.chunk1$regions)+
+                data=all.regions)+
   scale_color_manual(values=c(PeakSeg="deepskyblue",
                        PeakSegJoint="black"),
                      limits=c("PeakSeg", "PeakSegJoint"))+
+  geom_segment(aes(chromStart/1e3, y,
+                   color=model,
+                   xend=chromEnd/1e3, yend=y),
+               size=2,
+               data=data.frame(peaks.df, model="PeakSeg"))+
   geom_segment(aes(chromStart/1e3, 0,
                    color=model,
                    xend=chromEnd/1e3, yend=0),
                size=2,
-               data=data.frame(peaks.df, model="PeakSeg"))+
-  ## geom_segment(aes(chromStart/1e3, 0,
-  ##                  color=model,
-  ##                  xend=chromEnd/1e3, yend=0),
-  ##              size=2,
-  ##              data=data.frame(best.peaks, model="PeakSegJoint"))+
+               data=data.frame(best.peaks, model="PeakSegJoint"))+
   scale_fill_manual(values=ann.colors)+
   geom_step(aes(chromStart/1e3, count),
             data=H3K36me3.TDH.other.chunk1$counts,
