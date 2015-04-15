@@ -19,14 +19,15 @@ profile.list <- with(H3K36me3.TDH.other.chunk1, split(counts, counts$sample.id))
 region.list <-
   with(H3K36me3.TDH.other.chunk1, split(regions, regions$sample.id))
 ## Comment for() loop below to ignore extra peakEnd annotation.
-for(sample.id in names(region.list)){
-  df <- region.list[[sample.id]]
-  r <- df[1,]
-  r$chromStart <- 43360000
-  r$chromEnd <- 43370000
-  r$annotation <- "peakEnd"
-  region.list[[sample.id]] <- rbind(df, r)
-}
+## for(sample.id in names(region.list)){
+##   df <- region.list[[sample.id]]
+##   r <- df[1,]
+##   ##r$chromStart <- 43320000
+##   r$chromStart <- 43270000
+##   r$chromEnd <- 43380000
+##   r$annotation <- "peakEnd"
+##   region.list[[sample.id]] <- rbind(df, r)
+## }
 all.regions <- do.call(rbind, region.list)
 
 chrom.range <- with(H3K36me3.TDH.other.chunk1$counts, {
@@ -74,7 +75,10 @@ for(sample.id in names(profile.list)){
 error.regions <- do.call(rbind, error.region.list)
 peaks.df <- do.call(rbind, peak.list)
 
-bases.per.problem.vec <- (4.5) * (2^(12:17))
+bases.per.problem.vec <-
+  as.integer(sort(c((4.5) * (2^(12:17))
+                    ##,(4.9) * (2^(12:16))
+                    )))
 
 count.dt <- data.table(H3K36me3.TDH.other.chunk1$counts)
 setkey(count.dt, chromStart, chromEnd)
@@ -88,11 +92,19 @@ best.peak.list <- list()
 resolution.err.list <- list()
 problem.list <- list()
 for(bases.per.problem in bases.per.problem.vec){
-  problemStart <- seq(0, chrom.range[2], by=bases.per.problem)
+  problemSeq <- seq(0, chrom.range[2], by=bases.per.problem)
   problemStart <-
-    as.integer(c(problemStart,
-                 problemStart+bases.per.problem/3,
-                 problemStart+2*bases.per.problem/3))
+    as.integer(c(problemSeq,
+                 problemSeq+bases.per.problem/3,
+                 problemSeq+2*bases.per.problem/3))
+  problemStart <-
+    as.integer(c(problemSeq,
+                 problemSeq+bases.per.problem/4,
+                 problemSeq+2*bases.per.problem/4,
+                 problemSeq+3*bases.per.problem/4))
+  problemStart <-
+    as.integer(c(problemSeq,
+                 problemSeq+bases.per.problem/2))
   problemEnd <- problemStart+bases.per.problem
   peakStart <- as.integer(problemStart+bases.per.problem/4)
   peakEnd <- as.integer(problemEnd-bases.per.problem/4)
@@ -285,6 +297,7 @@ for(bases.per.problem in bases.per.problem.vec){
                weighted.error=sum(resolution.stats$weighted.error))
 }
 resolution.err <- do.call(rbind, resolution.err.list)
+print(resolution.err)
 best.res <- resolution.err[which.min(resolution.err$weighted.error), ]
 best.res.str <- paste(best.res$bases.per.problem)
 best.peaks <- do.call(rbind, best.peak.list[[best.res.str]])
@@ -326,7 +339,7 @@ ggplot()+
                 data=all.regions)+
   scale_color_manual(values=c(PeakSeg="deepskyblue",
                        PeakSegJoint="black"),
-                     limits=c("PeakSeg", "PeakSegJoint"))+
+                     limits=c("PeakSegJoint", "PeakSeg"))+
   geom_segment(aes(chromStart/1e3, y,
                    color=model,
                    xend=chromEnd/1e3, yend=y),
@@ -351,9 +364,7 @@ ggplot()+
                    xend=problemEnd/1e3, yend=problem.i),
                data=data.frame(sample.id="problems", best.problems))+
   theme(panel.margin=grid::unit(0, "cm"))+
-  coord_cartesian(xlim=with(H3K36me3.TDH.other.chunk1$counts, {
-    c(min(chromStart), max(chromEnd))/1e3
-  }))+
+  coord_cartesian(xlim=(chrom.range+c(-1,1)*chrom.bases/7)/1e3)+
   facet_grid(sample.id ~ ., scales="free", labeller=function(var, val){
     sub("McGill0", "", val)
   })
