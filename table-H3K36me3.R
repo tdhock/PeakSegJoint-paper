@@ -363,13 +363,17 @@ ggplot()+
   geom_segment(aes(problemStart/1e3, problem.i,
                    xend=problemEnd/1e3, yend=problem.i),
                data=data.frame(sample.id="problems", best.problems))+
+  geom_text(aes(max(best.problems$problemStart)/1e3, 1,
+                label=paste(bases.per.problem, "bases/problem")),
+            vjust=0, 
+            data=data.frame(sample.id="problems", best.res))+
   theme(panel.margin=grid::unit(0, "cm"))+
   coord_cartesian(xlim=(chrom.range+c(-1,1)*chrom.bases/7)/1e3)+
   facet_grid(sample.id ~ ., scales="free", labeller=function(var, val){
     sub("McGill0", "", val)
   })
 
-png("figure-timings-profiles.png", width=9, h=7, res=200, units="in")
+png("figure-H3K36me3-profiles.png", width=9, h=7, res=200, units="in")
 print(problemsPlot)
 dev.off()
 
@@ -392,7 +396,7 @@ single.times.df <-
         data.frame(seconds=sum(single.times$seconds), sample.id="total"))
 single.times.xt <- xtable(single.times.df)
 print(single.times.xt, include.rownames=FALSE, floating=FALSE,
-      file="table-timings-PeakSeg.tex")
+      file="table-H3K36me3-PeakSeg.tex")
 
 xt <- xtable(best.times.df)
-print(xt, file="table-timings.tex", floating=FALSE)
+print(xt, file="table-H3K36me3.tex", floating=FALSE)

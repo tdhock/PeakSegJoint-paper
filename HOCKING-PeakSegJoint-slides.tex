@@ -47,25 +47,51 @@
 \input{figure-profiles}
 
 \begin{frame}
-  \frametitle{Comparison of PeakSeg and Joint model}
+  \frametitle{H3K36me3 data, PeakSeg and Joint model}
 
-  \includegraphics[width=\textwidth]{figure-timings-profiles}
+  \includegraphics[width=\textwidth]{figure-H3K36me3-profiles}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Comparing timings to segment 8 samples}
+  \frametitle{Timings on example H3K36me3 data}
 
   \small
 
-  Segment each sample (PeakSeg):
+  Segment each of 8 samples (PeakSeg):
 
-  \input{table-timings-PeakSeg}
+  \input{table-H3K36me3-PeakSeg}
 
   \vskip 0.2 cm
 
-  Segment each genomic region (PeakSegJoint):
+  Segment each of 4 genomic regions (PeakSegJoint):
 
-  \input{table-timings}
+  \input{table-H3K36me3}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{H3K4me3 data, PeakSeg and Joint model}
+
+  \includegraphics[width=\textwidth]{figure-H3K4me3-profiles}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Timings on example H3K4me3 data}
+
+  \small
+
+\parbox{1.5in}{
+  Segment each of\\
+  10 samples\\ (PeakSeg)
+
+  \input{table-H3K4me3-PeakSeg}
+}
+\parbox{2in}{
+  Segment each of\\
+  10 genomic regions\\(PeakSegJoint)
+
+  \input{table-H3K4me3}
+}
 
 \end{frame}
 
