@@ -373,6 +373,9 @@ ggplot()+
     sub("McGill0", "", val)
   })
 
+problemsPlot+
+  coord_cartesian(xlim=c(43214142, 43223588)/1e3)
+
 png("figure-H3K36me3-profiles.png", width=9, h=7, res=200, units="in")
 print(problemsPlot)
 dev.off()
