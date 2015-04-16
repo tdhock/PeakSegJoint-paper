@@ -1,4 +1,4 @@
-HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoint.png
+HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoint.png refs.bib
 	rm -f *.aux *.bbl
 	pdflatex HOCKING-PeakSegJoint-paper
 	bibtex HOCKING-PeakSegJoint-paper

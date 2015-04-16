@@ -59,17 +59,19 @@ Address \\
 \maketitle
 
 \begin{abstract}
-  Peak detection is a central problem in genomic data analysis, and
-  current algorithms for this task are unsupervised and mostly
-  effective for a single data type and pattern (e.g. H3K4me3 data with
-  a sharp peak pattern). We propose PeakSeg, a new constrained maximum
-  likelihood segmentation model for peak detection with an efficient
-  inference algorithm: constrained dynamic programming. We investigate
-  un\-super\-vised and super\-vised learning of penalties for
-  the critical model selection problem. We show that the 
-  super\-vised method has state-of-the-art peak
-  detection across all data sets in a benchmark that includes both
-  sharp H3K4me3 and broad H3K36me3 patterns.
+  Joint peak detection is a central problem when comparing samples in
+  genomic data analysis, and current algorithms for this task are
+  unsupervised and mostly effective for a single data type and pattern
+  (e.g. H3K4me3 data with a sharp peak pattern). We propose
+  PeakSegJoint, a new constrained multi-sample maximum likelihood
+  segmentation model. To select the number of peaks in the
+  segmentation, we propose a new supervised penalty learning model. To
+  infer the parameters of these two models, we propose to use a
+  discrete optimization heuristic for the segmentation, and convex
+  optimization for the penalty learning. We show that this method
+  achieves state-of-the-art peak detection, and results in
+  interpretable peaks that occur in exactly the same positions across
+  samples.
 \end{abstract}
 
 \section{Introduction}
@@ -90,6 +92,20 @@ positive class is enriched (peaks) and the negative class is
 background noise. Importantly, peaks and background occur in long
 contiguous segments across the genome.
 
+\section{Related work}
+
+\citet{hierarchical-joint} describe an HMM. TODO describe.
+
+\citet{JAMM} describe JAMM a joint method for analyzing replicates. It
+says that it and DFilter are both ``universal'' for broad and narrow
+peaks. They used TF bindings sites as positive controls. They say that
+it is better to analyze replicates independantly than to pool
+replicates.
+
+\citet{PePr} describe PePr a method for identifying consistent or
+differential peaks across replicates. They applied it to TF data sets,
+and used visual inspection to test (but not train).
+
 \begin{figure}[b!]
   \centering
   \includegraphics[width=\textwidth]{figure-PeakSegJoint}
@@ -97,6 +113,16 @@ contiguous segments across the genome.
     for $S=3$ samples and $p\in\{0, 1, 2, 3\}$ peaks.}
   \label{fig:PeakSegJoint}
 \end{figure}
+
+\section{Model}
+
+\section{Algorithm}
+
+\section{Results}
+
+\section{Discussion}
+
+\section{Conclusions}
 
 \bibliographystyle{abbrvnat}
 \bibliography{refs}
