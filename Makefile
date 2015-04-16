@@ -1,4 +1,4 @@
-HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex
+HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoint.png
 	rm -f *.aux *.bbl
 	pdflatex HOCKING-PeakSegJoint-paper
 	bibtex HOCKING-PeakSegJoint-paper
@@ -12,4 +12,6 @@ figure-profiles.tex: figure-profiles.R
 table-H3K36me3.tex: table-H3K36me3.R
 	R --no-save < $<
 table-H3K4me3.tex: table-H3K4me3.R
+	R --no-save < $<
+figure-PeakSegJoint.png: figure-PeakSegJoint.R
 	R --no-save < $<

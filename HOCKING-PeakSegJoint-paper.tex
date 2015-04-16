@@ -3,7 +3,7 @@
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{natbib}
-
+\usepackage{graphicx}
 
 \title{PeakSegJoint: supervised detection of the same peaks jointly
   across several ChIP-seq samples}
@@ -90,6 +90,13 @@ positive class is enriched (peaks) and the negative class is
 background noise. Importantly, peaks and background occur in long
 contiguous segments across the genome.
 
+\begin{figure}[b!]
+  \centering
+  \includegraphics[width=\textwidth]{figure-PeakSegJoint}
+  \caption{Blue line segments show the sequence of PeakSegJoint models
+    for $S=3$ samples and $p\in\{0, 1, 2, 3\}$ peaks.}
+  \label{fig:PeakSegJoint}
+\end{figure}
 
 \bibliographystyle{abbrvnat}
 \bibliography{refs}
