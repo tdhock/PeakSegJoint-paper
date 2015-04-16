@@ -130,6 +130,8 @@ exhibit the same pattern type.
 
 \citet{hierarchical-joint} describe an HMM. TODO describe.
 
+\citet{jmosaics} is another model. TODO describe.
+
 \citet{JAMM} describe JAMM a joint method for analyzing replicates. It
 says that it and DFilter are both ``universal'' for broad and narrow
 peaks. They used TF bindings sites as positive controls. They say that
@@ -301,16 +303,15 @@ matrices $\mathbf X_1,\dots, \mathbf X_n\in\RR^{d\times S}$. We will
 learn a function $f:\RR^{d\times S}\rightarrow\RR$ that predicts
 region-specific penalty values $f(\mathbf X_i) = \log \lambda_i\in\RR$
 for each genomic region $i$. In particular we will learn a weight
-vector $\mathbf w\in\RR^d$ in an affine function $f(\mathbf X) =
-1^\intercal \mathbf X \mathbf w$.
+vector $\mathbf w\in\RR^d$ in a linear function $f(\mathbf X) =
+\mathbf 1_S^\intercal \mathbf X \mathbf w$, where $\mathbf 1_S$ is a
+vector of $S$ ones.
 
 For supervision we use the annotated region labels $L_i$ to compute
 the annotation error (\ref{eq:error}) and a target interval $\mathbf
-y_i = \left[
-  \begin{array}{cc}
-    \underline y_i & \overline y_i
-  \end{array}
-\right]\in\RR^2$ of penalty values. We used the algorithm of
+y_i = (
+    \underline y_i, \overline y_i
+)$ of penalty values. We used the algorithm of
 \citet{HOCKING-penalties} to compute the exact target interval.
 % The
 % target interval consists of the lower $\underline y_i$ and upper
@@ -318,7 +319,7 @@ y_i = \left[
 % penalty space that has minimum error (\ref{eq:error}). 
 Briefly,
 a predicted penalty in the target interval $f(\mathbf
-X_i)\in[\underline y_i,\, \overline y_i]$ implies that the
+X_i)\in\mathbf y_i$ implies that the
 PeakSegJoint model with $p^*\left[\exp f(\mathbf X_i), \mathbf
   Z_i\right]$ peaks achieves the minimum number of incorrect labels
 $L_i$, among all $S+1$ PeakSegJoint models for genomic region $i$.
@@ -327,13 +328,89 @@ $L_i$, among all $S+1$ PeakSegJoint models for genomic region $i$.
 %     Z)}(\mathbf Z) \big), L_i\right]$ (TODO: should we actually show
 % this equation or just use words?).
 
-
+A target interval $\mathbf y$ is used with the squared hinge loss
+$\phi(x)=(x-1)^2 I(x\leq 1)$ to define the surrogate loss
+\begin{equation}
+  \label{eq:surrogate_loss}
+  \ell\left[
+    \mathbf y,\,
+    \log \hat \lambda
+    \right]
+    =
+    \phi\big[
+      \log\hat\lambda - \underline y
+    \big]
+    +
+    \phi\big[
+    \overline y - \log\hat\lambda
+    \big],
+\end{equation}
+for a predicted penalty value $\hat \lambda$. For a weight parameter
+$\mathbf w\in\RR^d$, the average surrogate loss over the entire data
+set is
+\begin{equation}
+  \label{eq:average_surrogate}
+  \mathcal L(\mathbf w) =
+  \frac 1 n
+  \sum_{i=1}^n
+  \ell\left[
+    \mathbf y_i,\,
+    \mathbf 1_S^\intercal \mathbf X_i \mathbf w
+    \right].
+\end{equation}
+Finally, we add a 1-norm penalty to regularize and encourage a sparse
+weight vector, thus obtaining the following convex supervised penalty
+learning problem:
+\begin{equation}
+  \label{argmin_w}
+  \mathbf{\hat w}^\gamma = 
+  \argmin_{\mathbf w\in\RR^d}
+  \mathcal L(\mathbf w) + \gamma ||\mathbf w||_1.
+\end{equation}
 
 \section{Algorithms}
 
 \subsection{Heuristic discrete optimization for joint segmentation}
 
+TODO: make figure that explains bin pyramid.
+
 \subsection{Convex optimization for supervised penalty learning}
+
+An optimality condition for (\ref{argmin_w}) is 
+\begin{equation}
+  \label{eq:optimality}
+  \nabla \mathcal L(\mathbf w) \in \gamma \partial ||\mathbf w||_1.
+\end{equation}
+The gradient of the smooth average surrogate loss is
+\begin{equation}
+  \label{eq:average_gradient}
+  \nabla \mathcal L(\mathbf w) = 
+  \sum_{i=1}^n 
+  \nabla \ell \left[
+    \mathbf y_i,\,
+    \mathbf 1_S^\intercal \mathbf X_i \mathbf w
+  \right],
+\end{equation}
+where the gradient of one observation $i$ is
+\begin{equation}
+  \label{eq:one_gradient}
+  \nabla \ell \left[
+    \mathbf y_i,\,
+    \mathbf 1_S^\intercal \mathbf X_i \mathbf w 
+  \right]
+  =
+  \mathbf X_i^\intercal \mathbf 1_S
+  \left[
+    \phi'\big(
+    \mathbf 1_S^\intercal \mathbf X_i \mathbf w - \underline y_i
+    \big)
+    -
+    \phi'\big(
+    \overline y_i - \mathbf 1_S^\intercal \mathbf X_i \mathbf w
+    \big)
+  \right],
+\end{equation}
+and the derivative of the squared hinge loss is $\phi'(x)=2(x-1)I(x\leq 1)$.
 
 \section{Results}
 
