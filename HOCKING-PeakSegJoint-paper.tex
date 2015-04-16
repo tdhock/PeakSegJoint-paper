@@ -4,6 +4,18 @@
 \usepackage{url}
 \usepackage{natbib}
 \usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\Lik}{Lik}
+\DeclareMathOperator*{\Peaks}{Peaks}
+\DeclareMathOperator*{\Segments}{Segments}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\maximize}{maximize}
+\DeclareMathOperator*{\minimize}{minimize}
+\newcommand{\sign}{\operatorname{sign}}
+\newcommand{\RR}{\mathbb R}
+\newcommand{\ZZ}{\mathbb Z}
+\newcommand{\NN}{\mathbb N}
 
 \title{PeakSegJoint: supervised detection of the same peaks jointly
   across several ChIP-seq samples}
@@ -114,9 +126,132 @@ and used visual inspection to test (but not train).
   \label{fig:PeakSegJoint}
 \end{figure}
 
-\section{Model}
+\section{Models}
 
-\section{Algorithm}
+\subsection{PeakSeg: finding the best $0,\dots,P$ peaks in a single
+  sample}
+
+Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned reads
+across $B$ bases, and a maximum number of peaks $p_{\text{max}}\leq
+B$, the PeakSeg model with $p\in\{0, \dots, p_{\text{max}}\}$ peaks is
+\begin{align}
+  \label{PeakSeg}
+  \mathbf{\tilde m}^p(\mathbf z)  =
+    \argmin_{\mathbf m\in\RR^{B}} &\ \ 
+    \rho(\mathbf m, \mathbf z) 
+    \tag{\textbf{PeakSeg}}
+\\
+    \text{such that} &\ \  \Peaks(\mathbf m)=p,  \\
+     \forall j\in\{1, \dots, B\}, &\ \ P_j(\mathbf m) \in\{0, 1\},
+\end{align}
+where the Poisson loss function is
+\begin{equation}\label{eq:rho}
+  \rho(\mathbf m, \mathbf y)= \sum_{j=1}^B m_j - y_j \log m_j,
+\end{equation} 
+the model complexity is the number of peaks
+\begin{equation}
+  \Peaks(\mathbf m)=(\Segments(\mathbf m)-1)/2,
+\end{equation}
+which is a function of the number of segments
+\begin{equation}
+  \Segments(\mathbf m)=1+\sum_{j=2}^B I(m_j \neq m_{j-1}),
+\end{equation}
+and the peak indicator at base $j$ is
+\begin{equation}
+  \label{eq:peaks}
+  P_j(\mathbf m) = \sum_{k=2}^j \sign( m_{k} - m_{k-1} ),
+\end{equation}
+with $P_1(\mathbf m)=0$ by convention.
+
+\subsection{PeakSegJoint: finding the best common peak in $0,\dots, S$
+  samples}
+
+For $S$ sample profiles $\mathbf z_1, \dots, \mathbf z_S\in\ZZ_+^B$
+defined on the same $B$ bases, we stack the vectors into a matrix
+$\mathbf Z\in\ZZ_+^{B \times S}$. Consider the following model which
+allows each sample to have either 0 or 1 peaks, with a total of
+$p\in\{0, \dots, S\}$ peaks:
+\begin{align}
+  \label{Unconstrained}
+  \mathbf{\tilde M}^p(\mathbf Z)  =
+  \argmin_{\mathbf m\in\RR^{B\times S}} &\ \ 
+  \sum_{s=1}^S 
+  \rho(\mathbf m_s, \mathbf z_s) 
+  \tag{\textbf{Unconstrained}}
+  \\
+  \text{such that} &\ p = \sum_{s=1}^S \Peaks(\mathbf m_s)
+  \label{total_Peaks}
+  \\
+  &\ \forall s\in\{1, \dots, S\},\, 
+  \Peaks(\mathbf m_s)\in\{0, 1\},  
+  \label{zero_or_one}
+  \\
+  &\ \forall s\in\{1, \dots, S\},\, 
+  \forall j\in\{1, \dots, B\},\, P_j(\mathbf m_s) \in\{0, 1\}.
+  \label{up_down}
+\end{align}
+This optimization problem is \ref{Unconstrained} in the sense that the
+peaks are not required to be in the exact same locations in each of
+the $S$ samples. The constraint (\ref{up_down}) is the same
+constraint as in \ref{PeakSeg}), which here requires the segment mean
+of each sample $\mathbf m_s$ to have alternating changes (up, down,
+up, down and not up, up, down). The constraint on the number of peaks
+per sample (\ref{zero_or_one}) means that each sample may have either
+zero or one peak. Finally, the overall constraint (\ref{total_Peaks})
+means that there are a total of $p$ samples with exactly 1 peak (not
+necessarily with the same start/end positions across samples).
+
+It is easy to see that the \ref{Unconstrained} solution in $p$ peaks
+can be written in terms of the \ref{PeakSeg} solutions in 0 or 1 peaks:
+\begin{equation}
+  \label{eq:unconstrained_PeakSeg}
+  \mathbf{\tilde M}^p = \left[
+    \begin{array}{ccc}
+      \mathbf{\tilde m}^{p_1}(\mathbf z_1) & 
+      \cdots &
+      \mathbf{\tilde m}^{p_S}(\mathbf z_S) 
+    \end{array}
+  \right],
+\end{equation}
+for some $p_1,\dots, p_S\in\{0, 1\}$ with $P=\sum_{i=s}^S p_s$.
+
+The PeakSegJoint model is defined by introducing one more constraint
+(\ref{joint_constraint}):
+\begin{align}
+  \label{PeakSegJoint}
+  \mathbf{\hat M}^p(\mathbf Z)  =
+  \argmin_{\mathbf m\in\RR^{B\times S}} &\ \ 
+  \sum_{s=1}^S 
+  \rho(\mathbf m_s, \mathbf z_s) 
+  \tag{\textbf{PeakSegJoint}}
+  \\
+  \text{such that} &\ p = \sum_{s=1}^S \Peaks(\mathbf m_s)
+  \nonumber
+  \\
+  &\ \forall s\in\{1, \dots, S\},\, 
+  \Peaks(\mathbf m_s)\in\{0, 1\},  
+  \nonumber
+  \\
+  &\ \forall s\in\{1, \dots, S\},\,
+  \forall j\in\{1, \dots, B\},\, P_j(\mathbf m_s) \in\{0, 1\},
+  \nonumber
+  \\
+  &\ \forall s_1\neq s_2\mid
+  \nonumber
+  \Peaks(\mathbf m_{s_1})=\Peaks(\mathbf  m_{s_2})=1,\,
+  \forall j\in\{1, \dots, B\},\\
+  &\ \ P_j(\mathbf m_{s_1}) = P_j(\mathbf m_{s_2}).
+  \label{joint_constraint}
+\end{align}
+TODO: explain.
+
+\subsection{Supervised penalty learning}
+
+\section{Algorithms}
+
+\subsection{Heuristic discrete optimization for joint segmentation}
+
+\subsection{Convex optimization for supervised penalty learning}
 
 \section{Results}
 
