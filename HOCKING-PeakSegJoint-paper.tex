@@ -104,6 +104,28 @@ positive class is enriched (peaks) and the negative class is
 background noise. Importantly, peaks and background occur in long
 contiguous segments across the genome.
 
+TODO: more intro about joint peak detection.
+
+In supervised peak detection, there are $n$ labeled genomic regions,
+and each $i\in\{1, \dots, n\}$ has a set of labels $L_i$ (``noPeaks,''
+``peaks,'' etc. as in Figures~TODO). These labels define a non-convex
+annotation error function
+\begin{equation}
+  \label{eq:error}
+  E[c(\mathbf y_i),  L_i] =
+  \text{FP}[c(\mathbf y_i), L_i] +
+  \text{FN}[c(\mathbf y_i), L_i]
+\end{equation}
+which counts the number of false positive (FP) and false negative (FN)
+regions, so it takes values in the non-negative integers. The goal of
+learning is to find a peak caller~$c$ with minimal error on some test
+profiles:
+\begin{equation}
+  \label{eq:min_error}
+  \minimize_c \sum_{i\in\text{test}} E[c(\mathbf y_i),  L_i].
+\end{equation}
+More specifically, we suppose that the training data and the test data
+exhibit the same pattern type.
 \section{Related work}
 
 \citet{hierarchical-joint} describe an HMM. TODO describe.
@@ -128,8 +150,8 @@ and used visual inspection to test (but not train).
 
 \section{Models}
 
-\subsection{PeakSeg: finding the best $0,\dots,P$ peaks in a single
-  sample}
+\subsection{PeakSeg: finding the best $0,\dots,p_{\text{max}}$ peaks
+  in a single sample}
 
 Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned reads
 across $B$ bases, and a maximum number of peaks $p_{\text{max}}\leq
@@ -138,7 +160,7 @@ B$, the PeakSeg model with $p\in\{0, \dots, p_{\text{max}}\}$ peaks is
   \label{PeakSeg}
   \mathbf{\tilde m}^p(\mathbf z)  =
     \argmin_{\mathbf m\in\RR^{B}} &\ \ 
-    \rho(\mathbf m, \mathbf z) 
+    \text{PoissonLoss}(\mathbf m, \mathbf z) 
     \tag{\textbf{PeakSeg}}
 \\
     \text{such that} &\ \  \Peaks(\mathbf m)=p,  \\
@@ -146,7 +168,7 @@ B$, the PeakSeg model with $p\in\{0, \dots, p_{\text{max}}\}$ peaks is
 \end{align}
 where the Poisson loss function is
 \begin{equation}\label{eq:rho}
-  \rho(\mathbf m, \mathbf y)= \sum_{j=1}^B m_j - y_j \log m_j,
+  \text{PoissonLoss}(\mathbf m, \mathbf y)= \sum_{j=1}^B m_j - y_j \log m_j,
 \end{equation} 
 the model complexity is the number of peaks
 \begin{equation}
@@ -176,7 +198,7 @@ $p\in\{0, \dots, S\}$ peaks:
   \mathbf{\tilde M}^p(\mathbf Z)  =
   \argmin_{\mathbf m\in\RR^{B\times S}} &\ \ 
   \sum_{s=1}^S 
-  \rho(\mathbf m_s, \mathbf z_s) 
+  \text{PoissonLoss}(\mathbf m_s, \mathbf z_s) 
   \tag{\textbf{Unconstrained}}
   \\
   \text{such that} &\ p = \sum_{s=1}^S \Peaks(\mathbf m_s)
@@ -215,14 +237,14 @@ can be written in terms of the \ref{PeakSeg} solutions in 0 or 1 peaks:
 \end{equation}
 for some $p_1,\dots, p_S\in\{0, 1\}$ with $P=\sum_{i=s}^S p_s$.
 
-The PeakSegJoint model is defined by introducing one more constraint
-(\ref{joint_constraint}):
+The PeakSegJoint model with $p\in\{0, \dots, S\}$ peaks is defined by
+introducing one more constraint (\ref{joint_constraint}):
 \begin{align}
   \label{PeakSegJoint}
   \mathbf{\hat M}^p(\mathbf Z)  =
   \argmin_{\mathbf m\in\RR^{B\times S}} &\ \ 
   \sum_{s=1}^S 
-  \rho(\mathbf m_s, \mathbf z_s) 
+  \text{PoissonLoss}(\mathbf m_s, \mathbf z_s) 
   \tag{\textbf{PeakSegJoint}}
   \\
   \text{such that} &\ p = \sum_{s=1}^S \Peaks(\mathbf m_s)
@@ -246,6 +268,66 @@ The PeakSegJoint model is defined by introducing one more constraint
 TODO: explain.
 
 \subsection{Supervised penalty learning}
+
+In the last section we considered data $\mathbf Z\in\ZZ_+^{B\times S}$
+for $S$ samples in a single genomic region with $B$ bases. Now assume
+that we have data $\mathbf Z_1,\dots, \mathbf Z_n\in\ZZ_+^{B\times S}$
+for $n$ genomic regions, along with annotated region labels
+$L_1,\dots, L_n$. 
+
+For each genomic region $i\in\{1,\dots,n\}$ we can compute a sequence
+of \ref{PeakSegJoint} models $\mathbf{\hat M}^0(\mathbf Z_i),\dots,
+\mathbf{\hat M}^S(\mathbf Z_i)$, but how will we predict which of
+these $S+1$ models will be best?
+% in terms of the test annotated region labels $L_i$? 
+This is the segmentation model selection problem, which we propose to
+solve via supervised learning of a penalty function.
+
+First, for a positive penalty constant $\lambda\in\RR_+$, we define
+the optimal number of peaks as
+\begin{equation}
+  \label{eq:optimal_segments}
+  p^*(\lambda, \mathbf Z) =
+  \argmin_{p\in\{0, \dots, S\}}
+  p \lambda + 
+  \text{PoissonLoss}\left[
+    \mathbf{\hat M}^p(\mathbf Z),
+    \mathbf Z
+  \right].
+\end{equation}
+Also suppose that we can compute $d$-dimensional sample-specific
+feature vectors $\mathbf x\in\RR^d$ and stack them to obtain feature
+matrices $\mathbf X_1,\dots, \mathbf X_n\in\RR^{d\times S}$. We will
+learn a function $f:\RR^{d\times S}\rightarrow\RR$ that predicts
+region-specific penalty values $f(\mathbf X_i) = \log \lambda_i\in\RR$
+for each genomic region $i$. In particular we will learn a weight
+vector $\mathbf w\in\RR^d$ in an affine function $f(\mathbf X) =
+1^\intercal \mathbf X \mathbf w$.
+
+For supervision we use the annotated region labels $L_i$ to compute
+the annotation error (\ref{eq:error}) and a target interval $\mathbf
+y_i = \left[
+  \begin{array}{cc}
+    \underline y_i & \overline y_i
+  \end{array}
+\right]\in\RR^2$ of penalty values. We used the algorithm of
+\citet{HOCKING-penalties} to compute the exact target interval.
+% The
+% target interval consists of the lower $\underline y_i$ and upper
+% $\overline y_i$ limits of the largest region of the $\log \lambda$
+% penalty space that has minimum error (\ref{eq:error}). 
+Briefly,
+a predicted penalty in the target interval $f(\mathbf
+X_i)\in[\underline y_i,\, \overline y_i]$ implies that the
+PeakSegJoint model with $p^*\left[\exp f(\mathbf X_i), \mathbf
+  Z_i\right]$ peaks achieves the minimum number of incorrect labels
+$L_i$, among all $S+1$ PeakSegJoint models for genomic region $i$.
+%  $\exp f(\mathbf X_i)\in \argmin_\lambda
+% E\left[ \mathbf P\big( \mathbf{\hat M}^{p^*(\lambda, \mathbf
+%     Z)}(\mathbf Z) \big), L_i\right]$ (TODO: should we actually show
+% this equation or just use words?).
+
+
 
 \section{Algorithms}
 
