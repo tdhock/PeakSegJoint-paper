@@ -5,7 +5,7 @@ works_with_R("3.1.3",
              ggplot2="1.0",
              dplyr="0.4.0",
              "tdhock/PeakSegDP@fe06a5b91d68c5d1ec471cb15c3ec3935dc2624d",
-             "tdhock/PeakSegJoint@547ca81ce92c38b7c7f78cd071efc5afa96cb289",
+             "tdhock/PeakSegJoint@361a3f1a9037947a1c79a3e754fded04f712008d",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732")
 
 data(H3K36me3.TDH.other.chunk1)

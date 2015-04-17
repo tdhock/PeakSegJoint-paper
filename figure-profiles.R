@@ -1,14 +1,16 @@
 ## -*- compile-command: "make HOCKING-PeakSegJoint-slides.pdf" -*-
 works_with_R("3.1.3",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@361a3f1a9037947a1c79a3e754fded04f712008d")
+             "tdhock/PeakSegJoint@e6bc386c555e203cc80343814939d51785c03af1")
 
 data(H3K36me3.TDH.other.chunk1)
+lims <- c(43100000, 43205000)
+lims.df <- data.frame(chromStart=lims[1], chromEnd=lims[2])
 some.counts <-
   subset(H3K36me3.TDH.other.chunk1$counts,
-         43100000 < chromEnd & chromStart < 43205000)
+         lims[1] < chromEnd & chromStart < lims[2])
 some.regions <- subset(H3K36me3.TDH.other.chunk1$regions,
-                       chromStart < 43205000)
+                       chromStart < lims[2])
 
 figure.list <- list()
 
@@ -664,7 +666,8 @@ sort.samples <- function(df){
   df$sample.id <- factor(df$sample.id, sample.order)
   df
 }
-figure.list[["H3K36me3 data and labels (zoom to one peak)"]] <- regions.plot <- 
+
+figure.list[["Peaks visually obvious in H3K36me3 data"]] <- 
   ggplot()+
     scale_y_continuous("aligned read coverage",
                        breaks=function(limits){
@@ -682,14 +685,9 @@ figure.list[["H3K36me3 data and labels (zoom to one peak)"]] <- regions.plot <-
                data=data.frame(status=c("correct", "false positive",
                                  "false negative")))+
   xlab("position on chromosome (kilo bases = kb)")+
-  geom_tallrect(aes(xmin=chromStart/1e3, xmax=chromEnd/1e3,
-                    fill=annotation),
-                alpha=0.5,
-                color="grey",
-                data=sort.samples(some.regions))+
   scale_fill_manual(values=ann.colors)+
   geom_step(aes(chromStart/1e3, count),
-            data=sort.samples(some.counts),
+            data=sort.samples(H3K36me3.TDH.other.chunk1$counts),
             color="grey50")+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "cm"))+
@@ -730,7 +728,7 @@ figure.list[["H3K36me3 data and visually determined labels"]] <-
     sub("McGill0", "", val)
   })
 
-figure.list[["Peaks visually obvious in H3K36me3 data"]] <- 
+figure.list[["H3K36me3 data and labels (zoom to one peak)"]] <- regions.plot <- 
   ggplot()+
     scale_y_continuous("aligned read coverage",
                        breaks=function(limits){
@@ -748,9 +746,14 @@ figure.list[["Peaks visually obvious in H3K36me3 data"]] <-
                data=data.frame(status=c("correct", "false positive",
                                  "false negative")))+
   xlab("position on chromosome (kilo bases = kb)")+
+  geom_tallrect(aes(xmin=chromStart/1e3, xmax=chromEnd/1e3,
+                    fill=annotation),
+                alpha=0.5,
+                color="grey",
+                data=sort.samples(some.regions))+
   scale_fill_manual(values=ann.colors)+
   geom_step(aes(chromStart/1e3, count),
-            data=sort.samples(H3K36me3.TDH.other.chunk1$counts),
+            data=sort.samples(some.counts),
             color="grey50")+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "cm"))+
