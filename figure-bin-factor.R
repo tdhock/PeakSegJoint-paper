@@ -1,15 +1,13 @@
 works_with_R("3.1.3",
-             ##"tdhock/PeakSegJoint@547ca81ce92c38b7c7f78cd071efc5afa96cb289",
+             ggplot2="1.0",
+             "tdhock/PeakSegJoint@361a3f1a9037947a1c79a3e754fded04f712008d",
              microbenchmark="1.3.0")
-
-library(microbenchmark)
-library(PeakSegJoint)
 
 data(H3K36me3.TDH.other.chunk1)
 some.counts <-
   subset(H3K36me3.TDH.other.chunk1$counts,
          43100000 < chromEnd & chromStart < 43205000)
-
+##gctorture(TRUE)
 m.args <- list()
 results <- list()
 param.values <-
@@ -31,26 +29,26 @@ for(param in param.values){
 set.seed(1)
 times <- microbenchmark(list=m.args, times=3)
 results.df <- do.call(rbind, results)
-optimal.timing <-
-  data.frame(seconds=optimal.seconds, what="seconds")
 
-library(ggplot2)
 ggplot()+
-  ggtitle(paste("heuristic segmentation accurate within 10 bases",
-                "and much faster than optimal segmentation",
-                sep="\n"))+
-  scale_x_log10()+
-  scale_y_log10()+
-  geom_point(aes(as.numeric(as.character(param)), diff.bases),
-             data=data.frame(results.df, what="diff.bases"),
-             pch=1)+
-  facet_grid(what ~ ., scales="free")+
-  geom_hline(aes(yintercept=seconds), data=optimal.timing)+
-  geom_text(aes(10, seconds,
-                label=sprintf("optimal segmentation = %.1f seconds",
-                  seconds)),
-            hjust=0,
-            vjust=1.5,
-            data=optimal.timing)+
-  geom_point(aes(as.numeric(as.character(expr)), time/1e9),
-             data=data.frame(times, what="seconds"), pch=1)
+  ##coord_equal()+
+  geom_text(aes(chromStart, chromEnd, label=param),
+             data=results.df)
+
+param.plot <- 
+ggplot()+
+  ylab("")+
+  geom_segment(aes(param, chromStart/1e3,
+                   xend=param, yend=chromEnd/1e3),
+               data=data.frame(results.df, what="peak position (kb)"))+
+  scale_x_log10("bin factor suboptimality parameter")+
+  ##scale_y_log10()+
+  facet_grid(what ~ ., scales = "free")+
+  theme_bw()+
+  theme(panel.margin=grid::unit(0, "cm"))+
+  geom_point(aes(as.numeric(as.character(expr)), log10(time/1e9)),
+             data=data.frame(times, what="log10(seconds)"), pch=1)
+
+pdf("figure-bin-factor.pdf", h=4)
+print(param.plot)
+dev.off()
