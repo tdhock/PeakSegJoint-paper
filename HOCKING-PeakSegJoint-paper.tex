@@ -198,7 +198,7 @@ $p\in\{0, \dots, S\}$ peaks:
 \begin{align}
   \label{Unconstrained}
   \mathbf{\tilde M}^p(\mathbf Z)  =
-  \argmin_{\mathbf m\in\RR^{B\times S}} &\ \ 
+  \argmin_{\mathbf M\in\RR^{B\times S}} &\ \ 
   \sum_{s=1}^S 
   \text{PoissonLoss}(\mathbf m_s, \mathbf z_s) 
   \tag{\textbf{Unconstrained}}
@@ -216,13 +216,13 @@ $p\in\{0, \dots, S\}$ peaks:
 \end{align}
 This optimization problem is \ref{Unconstrained} in the sense that the
 peaks are not required to be in the exact same locations in each of
-the $S$ samples. The constraint (\ref{up_down}) is the same
-constraint as in \ref{PeakSeg}), which here requires the segment mean
-of each sample $\mathbf m_s$ to have alternating changes (up, down,
-up, down and not up, up, down). The constraint on the number of peaks
-per sample (\ref{zero_or_one}) means that each sample may have either
-zero or one peak. Finally, the overall constraint (\ref{total_Peaks})
-means that there are a total of $p$ samples with exactly 1 peak (not
+the $S$ samples. The constraint (\ref{up_down}) is the same constraint
+as in \ref{PeakSeg}, which here requires the segment mean $\mathbf
+m_s$ of each sample to have alternating changes (up, down, up, down
+and not up, up, down). The constraint on the number of peaks per
+sample (\ref{zero_or_one}) means that each sample may have either zero
+or one peak. Finally, the overall constraint (\ref{total_Peaks}) means
+that there is a total of $p$ samples each with exactly 1 peak (not
 necessarily with the same start/end positions across samples).
 
 It is easy to see that the \ref{Unconstrained} solution in $p$ peaks
@@ -237,14 +237,14 @@ can be written in terms of the \ref{PeakSeg} solutions in 0 or 1 peaks:
     \end{array}
   \right],
 \end{equation}
-for some $p_1,\dots, p_S\in\{0, 1\}$ with $P=\sum_{i=s}^S p_s$.
+for some $p_1,\dots, p_S\in\{0, 1\}$ with $p=\sum_{i=s}^S p_s$.
 
 The PeakSegJoint model with $p\in\{0, \dots, S\}$ peaks is defined by
 introducing one more constraint (\ref{joint_constraint}):
 \begin{align}
   \label{PeakSegJoint}
   \mathbf{\hat M}^p(\mathbf Z)  =
-  \argmin_{\mathbf m\in\RR^{B\times S}} &\ \ 
+  \argmin_{\mathbf M\in\RR^{B\times S}} &\ \ 
   \sum_{s=1}^S 
   \text{PoissonLoss}(\mathbf m_s, \mathbf z_s) 
   \tag{\textbf{PeakSegJoint}}
@@ -303,8 +303,8 @@ matrices $\mathbf X_1,\dots, \mathbf X_n\in\RR^{d\times S}$. We will
 learn a function $f:\RR^{d\times S}\rightarrow\RR$ that predicts
 region-specific penalty values $f(\mathbf X_i) = \log \lambda_i\in\RR$
 for each genomic region $i$. In particular we will learn a weight
-vector $\mathbf w\in\RR^d$ in a linear function $f(\mathbf X) =
-\mathbf 1_S^\intercal \mathbf X \mathbf w$, where $\mathbf 1_S$ is a
+vector $\mathbf w\in\RR^d$ in a linear function $f_{\mathbf w}(\mathbf X) =
+\mathbf w^\intercal \mathbf X \mathbf 1_S$, where $\mathbf 1_S$ is a
 vector of $S$ ones.
 
 For supervision we use the annotated region labels $L_i$ to compute
@@ -345,7 +345,7 @@ $\phi(x)=(x-1)^2 I(x\leq 1)$ to define the surrogate loss
     \overline y - \log\hat\lambda
     \big],
 \end{equation}
-for a predicted penalty value $\hat \lambda$. For a weight parameter
+for a predicted penalty value $\hat \lambda\in\RR_+$. For a weight parameter
 $\mathbf w\in\RR^d$, the average surrogate loss over the entire data
 set is
 \begin{equation}
@@ -355,7 +355,7 @@ set is
   \sum_{i=1}^n
   \ell\left[
     \mathbf y_i,\,
-    \mathbf 1_S^\intercal \mathbf X_i \mathbf w
+     f_{\mathbf w}( \mathbf X_i )
     \right].
 \end{equation}
 Finally, we add a 1-norm penalty to regularize and encourage a sparse
@@ -367,6 +367,12 @@ learning problem:
   \argmin_{\mathbf w\in\RR^d}
   \mathcal L(\mathbf w) + \gamma ||\mathbf w||_1.
 \end{equation}
+
+To predict on test data $\mathbf Z$ with features $\mathbf
+X$, we compute the the predicted penalty $\hat \lambda = \exp
+f_{\mathbf{\hat w}}(\mathbf X)$, the predicted number of
+peaks $\hat p = p^*(\hat \lambda, \mathbf Z)$, and finally the
+predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
 
 \section{Algorithms}
 
@@ -388,7 +394,7 @@ The gradient of the smooth average surrogate loss is
   \sum_{i=1}^n 
   \nabla \ell \left[
     \mathbf y_i,\,
-    \mathbf 1_S^\intercal \mathbf X_i \mathbf w
+    f_{\mathbf w}(  \mathbf X_i )
   \right],
 \end{equation}
 where the gradient of one observation $i$ is
@@ -396,17 +402,17 @@ where the gradient of one observation $i$ is
   \label{eq:one_gradient}
   \nabla \ell \left[
     \mathbf y_i,\,
-    \mathbf 1_S^\intercal \mathbf X_i \mathbf w 
+    f_{\mathbf w}( \mathbf X_i )
   \right]
   =
-  \mathbf X_i^\intercal \mathbf 1_S
+  \mathbf X_i \mathbf 1_S
   \left[
     \phi'\big(
-    \mathbf 1_S^\intercal \mathbf X_i \mathbf w - \underline y_i
+    f_{\mathbf w}( \mathbf X_i ) - \underline y_i
     \big)
     -
     \phi'\big(
-    \overline y_i - \mathbf 1_S^\intercal \mathbf X_i \mathbf w
+    \overline y_i - f_{\mathbf w}( \mathbf X_i )
     \big)
   \right],
 \end{equation}
