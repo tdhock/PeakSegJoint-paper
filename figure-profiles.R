@@ -1,5 +1,7 @@
+## -*- compile-command: "make HOCKING-PeakSegJoint-slides.pdf" -*-
 works_with_R("3.1.3",
-             "tdhock/PeakSegJoint@24bfd2fab1972a117e31ccd1e3cd0b8b5c52b420")
+             "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
+             "tdhock/PeakSegJoint@361a3f1a9037947a1c79a3e754fded04f712008d")
 
 data(H3K36me3.TDH.other.chunk1)
 some.counts <-
@@ -282,7 +284,6 @@ ggplot()+
   })
 ## for 0, 1, ..., maxPeaks, run the bin pyramid grid search,
 ## around the peaks found in this first step.
-library(PeakError)
 flat.segs <- function(sample.ids){
   data.frame(chromStart=max.chromStart,
              chromEnd=min.chromEnd,
@@ -663,7 +664,7 @@ sort.samples <- function(df){
   df$sample.id <- factor(df$sample.id, sample.order)
   df
 }
-figure.list[["H3K36me3 data and labels"]] <- regions.plot <- 
+figure.list[["H3K36me3 data and labels (zoom to one peak)"]] <- regions.plot <- 
   ggplot()+
     scale_y_continuous("aligned read coverage",
                        breaks=function(limits){
@@ -689,6 +690,67 @@ figure.list[["H3K36me3 data and labels"]] <- regions.plot <-
   scale_fill_manual(values=ann.colors)+
   geom_step(aes(chromStart/1e3, count),
             data=sort.samples(some.counts),
+            color="grey50")+
+  theme_bw()+
+  theme(panel.margin=grid::unit(0, "cm"))+
+  facet_grid(sample.id ~ ., scales="free", labeller=function(var, val){
+    sub("McGill0", "", val)
+  })
+
+figure.list[["H3K36me3 data and visually determined labels"]] <- 
+  ggplot()+
+    scale_y_continuous("aligned read coverage",
+                       breaks=function(limits){
+                         floor(limits[2])
+                       })+
+    scale_linetype_manual("error type",
+                          limits=c("correct", 
+                            "false negative",
+                            "false positive"
+                                   ),
+                          values=c(correct=0,
+                            "false negative"=3,
+                            "false positive"=1))+
+    geom_blank(aes(linetype=status),
+               data=data.frame(status=c("correct", "false positive",
+                                 "false negative")))+
+  xlab("position on chromosome (kilo bases = kb)")+
+  geom_tallrect(aes(xmin=chromStart/1e3, xmax=chromEnd/1e3,
+                    fill=annotation),
+                alpha=0.5,
+                color="grey",
+                data=sort.samples(H3K36me3.TDH.other.chunk1$regions))+
+  scale_fill_manual(values=ann.colors)+
+  geom_step(aes(chromStart/1e3, count),
+            data=sort.samples(H3K36me3.TDH.other.chunk1$counts),
+            color="grey50")+
+  theme_bw()+
+  theme(panel.margin=grid::unit(0, "cm"))+
+  facet_grid(sample.id ~ ., scales="free", labeller=function(var, val){
+    sub("McGill0", "", val)
+  })
+
+figure.list[["Peaks visually obvious in H3K36me3 data"]] <- 
+  ggplot()+
+    scale_y_continuous("aligned read coverage",
+                       breaks=function(limits){
+                         floor(limits[2])
+                       })+
+    scale_linetype_manual("error type",
+                          limits=c("correct", 
+                            "false negative",
+                            "false positive"
+                                   ),
+                          values=c(correct=0,
+                            "false negative"=3,
+                            "false positive"=1))+
+    geom_blank(aes(linetype=status),
+               data=data.frame(status=c("correct", "false positive",
+                                 "false negative")))+
+  xlab("position on chromosome (kilo bases = kb)")+
+  scale_fill_manual(values=ann.colors)+
+  geom_step(aes(chromStart/1e3, count),
+            data=sort.samples(H3K36me3.TDH.other.chunk1$counts),
             color="grey50")+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "cm"))+

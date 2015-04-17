@@ -1,3 +1,4 @@
+## -*- compile-command: "make HOCKING-PeakSegJoint-slides.pdf" -*-
 works_with_R("3.1.3",
              xtable="1.7.4",
              data.table="1.9.5",
