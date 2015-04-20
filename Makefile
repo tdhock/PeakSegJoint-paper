@@ -19,3 +19,5 @@ figure-bin-factor.pdf: figure-bin-factor.R
 	R --no-save < $<
 table-nrsf.tex: table-nrsf.R 
 	R --no-save < $<
+H3K27ac_TDH_control.RData: H3K27ac_TDH_control.R
+	R --no-save < $<

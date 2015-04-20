@@ -1,0 +1,26 @@
+chr11:93,859,704-93,861,917 peakStart thyroid skeletalMuscle 
+chr11:93,862,674-93,865,073 peakEnd thyroid skeletalMuscle 
+chr11:93,914,970-93,916,994 peakStart thyroid
+chr11:93,919,732-93,922,252 peakEnd thyroid
+chr11:93,929,666-93,961,778 noPeaks
+chr11:93,965,897-93,971,101 peakStart thyroidInput thyroid skeletalMuscleInput
+chr11:93,971,585-93,975,014 peakEnd thyroidInput thyroid skeletalMuscleInput
+
+chr11:54,994,452-55,000,904 noPeaks
+chr11:55,018,143-55,028,929 noPeaks
+chr11:55,045,989-55,048,163 peakStart thyroid thyroidInput
+chr11:55,051,327-55,053,397 peakEnd thyroid thyroidInput
+
+chr11:51,578,847-51,579,663 peakStart thyroidInput thyroid skeletalMuscleInput skeletalMuscle
+chr11:51,579,670-51,580,277 peakEnd thyroidInput thyroid skeletalMuscleInput skeletalMuscle
+chr11:51,586,547-51,586,950 peakStart skeletalMuscle skeletalMuscleInput
+chr11:51,586,988-51,587,337 peakEnd skeletalMuscle skeletalMuscleInput
+chr11:51,588,690-51,588,988 peakStart skeletalMuscle skeletalMuscleInput
+chr11:51,589,008-51,589,194 peakEnd skeletalMuscle skeletalMuscleInput
+
+chr11:807,731-809,746 peakStart thyroid skeletalMuscle
+chr11:809,750-812,046 peakEnd thyroid skeletalMuscle
+chr11:836,070-840,812 noPeaks
+chr11:1,016,037-1,016,801 peakStart thyroidInput thyroid skeletalMuscleInput skeletalMuscle
+chr11:1,016,832-1,018,307 peakEnd thyroidInput thyroid skeletalMuscleInput skeletalMuscle
+
