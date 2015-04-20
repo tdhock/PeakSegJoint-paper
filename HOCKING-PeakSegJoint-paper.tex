@@ -382,15 +382,14 @@ TODO: make figure that explains bin pyramid.
 
 \subsection{Convex optimization for supervised penalty learning}
 
-An optimality condition for (\ref{argmin_w}) is 
-\begin{equation}
-  \label{eq:optimality}
-  \nabla \mathcal L(\mathbf w) \in \gamma \partial ||\mathbf w||_1.
-\end{equation}
-The gradient of the smooth average surrogate loss is
+The convex supervised learning problem (\ref{argmin_w}) can be
+computed using gradient-based methods such as FISTA, a Fast Iterative
+Shinkage-Thresholding Algorithm \citep{fista}. To apply FISTA, we need
+to compute the gradient of the smooth average surrogate loss,
 \begin{equation}
   \label{eq:average_gradient}
   \nabla \mathcal L(\mathbf w) = 
+  \frac 1 n
   \sum_{i=1}^n 
   \nabla \ell \left[
     \mathbf y_i,\,
@@ -417,6 +416,15 @@ where the gradient of one observation $i$ is
   \right],
 \end{equation}
 and the derivative of the squared hinge loss is $\phi'(x)=2(x-1)I(x\leq 1)$.
+
+We used the Lipschitz constant and stopping criterion suggested by
+\citet{HOCKING-penalties}.
+
+% An optimality condition for (\ref{argmin_w}) is 
+% \begin{equation}
+%   \label{eq:optimality}
+%   \nabla \mathcal L(\mathbf w) \in \gamma \partial ||\mathbf w||_1.
+% \end{equation}
 
 \section{Results}
 

@@ -1,11 +1,11 @@
 ## -*- compile-command: "make HOCKING-PeakSegJoint-slides.pdf" -*-
-works_with_R("3.1.3",
+works_with_R("3.2.0",
              xtable="1.7.4",
              data.table="1.9.5",
              ggplot2="1.0",
              dplyr="0.4.0",
              "tdhock/PeakSegDP@fe06a5b91d68c5d1ec471cb15c3ec3935dc2624d",
-             "tdhock/PeakSegJoint@547ca81ce92c38b7c7f78cd071efc5afa96cb289",
+             "tdhock/PeakSegJoint@e6bc386c555e203cc80343814939d51785c03af1",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732")
 
 load("~/projects/chip-seq-paper/chunks/H3K4me3_TDH_other/18/regions.RData")
@@ -65,6 +65,10 @@ for(sample.id in names(profile.list)){
 }
 error.regions <- do.call(rbind, error.region.list)
 peaks.df <- do.call(rbind, peak.list)
+
+positive.regions <- subset(regions, annotation %in% c("peakStart", "peakEnd"))
+positive.bases <- with(positive.regions, chromEnd-chromStart)
+positive.quartile <- quantile(positive.bases)
 
 bases.per.problem.vec <-
   as.integer(sort(c((4.5) * (2^(9:14))

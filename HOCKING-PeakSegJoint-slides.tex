@@ -72,6 +72,53 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle{H3K27ac and Input data, PeakSeg and Joint model}
+
+  \includegraphics[width=\textwidth]{figure-H3K27ac-profiles}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Timings on example H3K27ac data}
+
+  \scriptsize
+
+  \parbox{2in}{
+    Find best \\
+  0,...,9 peaks\\
+  in each of 8 samples\\
+  (80 PeakSeg models)
+
+  \input{table-H3K27ac-PeakSeg}
+  }
+  \parbox{2in}{
+  Find best common peak\\
+  in 0,...,8 samples\\
+  in each of 11 genomic regions\\
+  (99 PeakSegJoint models)
+
+  \input{table-H3K27ac}
+  }
+
+\end{frame}
+
+\section{Conclusions}
+
+\begin{frame}
+  \frametitle{Thanks for your attention!}
+  Write me at \alert{\texttt{toby.hocking@mail.mcgill.ca}} to collaborate!
+
+  \vskip 1cm
+
+  Source code for slides, figures, paper online!\\
+  \small
+  \url{https://github.com/tdhock/PeakSegJoint-paper}
+  \vskip 1cm
+
+  Supplementary slides appear after this one.
+
+\end{frame}
+
+\begin{frame}
   \frametitle{H3K4me3 data, PeakSeg and Joint model}
 
   \includegraphics[width=\textwidth]{figure-H3K4me3-profiles}
@@ -127,53 +174,6 @@
   (25 PeakSegJoint models)
 
   \input{table-nrsf}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{H3K27ac and Input data, PeakSeg and Joint model}
-
-  \includegraphics[width=\textwidth]{figure-H3K27ac-profiles}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Timings on example H3K27ac data}
-
-  \scriptsize
-
-  \parbox{2in}{
-    Find best \\
-  0,...,9 peaks\\
-  in each of 8 samples\\
-  (80 PeakSeg models)
-
-  \input{table-H3K27ac-PeakSeg}
-  }
-  \parbox{2in}{
-  Find best common peak\\
-  in 0,...,8 samples\\
-  in each of 11 genomic regions\\
-  (99 PeakSegJoint models)
-
-  \input{table-H3K27ac}
-  }
-
-\end{frame}
-
-\section{Conclusions}
-
-\begin{frame}
-  \frametitle{Thanks for your attention!}
-  Write me at \alert{\texttt{toby.hocking@mail.mcgill.ca}} to collaborate!
-
-  \vskip 1cm
-
-  Source code for slides, figures, paper online!\\
-  \small
-  \url{https://github.com/tdhock/PeakSegJoint-paper}
-  \vskip 1cm
-
-  Supplementary slides appear after this one.
 
 \end{frame}
 
