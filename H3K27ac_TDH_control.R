@@ -108,7 +108,7 @@ sample.list <-
 McGill0014="http://epigenomesportal.ca/public_data/donor/McGill0014/MS001401/H3K27ac/MS001401.skeletalMuscle.H3K27ac.signal.bigWig",
 McGill0013="http://epigenomesportal.ca/public_data/donor/McGill0013/MS001301/H3K27ac/MS001301.skeletalMuscle.H3K27ac.signal.bigWig",
 McGill0015="http://epigenomesportal.ca/public_data/donor/McGill0015/MS001501/H3K27ac/MS001501.skeletalMuscle.H3K27ac.signal.bigWig",
-McGill0015="http://epigenomesportal.ca/public_data/donor/McGill0016/MS001601/H3K27ac/MS001601.skeletalMuscle.H3K27ac.signal.bigWig",
+McGill0016="http://epigenomesportal.ca/public_data/donor/McGill0016/MS001601/H3K27ac/MS001601.skeletalMuscle.H3K27ac.signal.bigWig",
 McGill0019="http://epigenomesportal.ca/public_data/donor/McGill0019/MS001901/H3K27ac/MS001901.skeletalMuscle.H3K27ac.signal.bigWig",
 McGill0036="http://epigenomesportal.ca/public_data/donor/McGill0036/MS003601/H3K27ac/MS003601.skeletalMuscle.H3K27ac.signal.bigWig",
 McGill0037="http://epigenomesportal.ca/public_data/donor/McGill0037/MS003701/H3K27ac/MS003701.skeletalMuscle.H3K27ac.signal.bigWig"),
@@ -223,9 +223,11 @@ for(chunk.id in names(match.by.chunk)){
                    annotation)
     }
   }#ann.i
+  unsorted.regions <- do.call(rbind, region.list)
+  sorted.regions <- unsorted.regions[order(unsorted.regions$chromStart), ]
   chunk.data <- 
     list(counts=do.call(rbind, chunk.sample.list),
-         regions=do.call(rbind, region.list))
+         regions=sorted.regions)
   ggplot()+
     scale_y_continuous("aligned read coverage",
                        breaks=function(limits){
