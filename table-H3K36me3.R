@@ -307,8 +307,9 @@ best.res <- resolution.err[which.min(resolution.err$weighted.error), ]
 best.res.str <- paste(best.res$bases.per.problem)
 best.peaks <- do.call(rbind, best.peak.list[[best.res.str]])
 best.problems <- problem.list[[best.res.str]]
-prob.peaks <- best.peaks
-prob.peaks$sample.id <- "step 1"
+prob.peaks <-
+  data.frame(unique(best.peaks[, c("problem.i", "chromStart", "chromEnd")]),
+             sample.id="step 1")
 
 all.problems <- do.call(rbind, problem.list)
 ggplot()+
