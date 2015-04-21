@@ -308,7 +308,7 @@ best.res.str <- paste(best.res$bases.per.problem)
 best.peaks <- do.call(rbind, best.peak.list[[best.res.str]])
 best.problems <- problem.list[[best.res.str]]
 prob.peaks <- best.peaks
-prob.peaks$sample.id <- "problems"
+prob.peaks$sample.id <- "step 1"
 
 all.problems <- do.call(rbind, problem.list)
 ggplot()+
@@ -323,6 +323,7 @@ uniq.peaks <- unique(best.peaks[, c("chromStart", "chromEnd")])
 clustered.peaks <- clusterPeaks(uniq.peaks)
 cluster.list <- split(clustered.peaks, clustered.peaks$cluster)
 newprob.list <- list()
+refined.list <- list()
 for(cluster.name in names(cluster.list)){
   cluster <- cluster.list[[cluster.name]]
   cluster.chromStart <- min(cluster$chromStart)
@@ -342,21 +343,76 @@ for(cluster.name in names(cluster.list)){
   }else{
     Inf
   }
-  problem.chromStart <- cluster.mid - half.bases
-  if(problem.chromStart < chromEnd.before){
-    problem.chromStart <- as.integer((chromEnd.before+cluster.chromStart)/2)
+  problemStart <- cluster.mid - half.bases
+  if(problemStart < chromEnd.before){
+    problemStart <- as.integer((chromEnd.before+cluster.chromStart)/2)
   }
-  problem.chromEnd <- cluster.mid + half.bases
-  if(chromStart.after < problem.chromEnd){
-    problem.chromEnd <- as.integer((chromStart.after+cluster.chromEnd)/2)
+  problemEnd <- cluster.mid + half.bases
+  if(chromStart.after < problemEnd){
+    problemEnd <- as.integer((chromStart.after+cluster.chromEnd)/2)
   }
-  newprob.list[[cluster.name]] <-
-    data.frame(cluster.name, cluster.num,
-               chromStart=problem.chromStart,
-               chromEnd=problem.chromEnd)
+  stopifnot(problemStart < cluster.chromStart)
+  stopifnot(cluster.chromEnd < problemEnd)
+  
+  problem.i <- cluster.num+1
+  newprob.list[[cluster.name]] <- newprob <- 
+    data.table(problem.i, cluster.name, cluster.num,
+               problemStart,
+               problemEnd)
+
+  setkey(newprob, problemStart, problemEnd)
+  problem.counts <- foverlaps(count.dt, newprob, nomatch=0L)
+  problem.regions <- foverlaps(regions.dt, newprob, nomatch=0L)
+  regions.by.sample <- split(problem.regions, problem.regions$sample.id)
+  problem.count.list <- ProfileList(problem.counts)
+  seconds <- system.time({
+    fit <- PeakSegJointHeuristic(problem.count.list)
+    converted <- ConvertModelList(fit)
+  })[["elapsed"]]
+
+  peaks.by.peaks <- if(!is.null(converted$peaks$peaks)){
+    with(converted, split(peaks, peaks$peaks))
+  }else{
+    list()
+  }
+  peaks.by.peaks[["0"]] <- Peaks()
+  problem.stats.list <- list()
+  for(peaks.str in names(peaks.by.peaks)){
+    peaks.all.samples <- peaks.by.peaks[[peaks.str]]
+    peaks.by.sample <-
+      split(peaks.all.samples, peaks.all.samples$sample.id, drop=TRUE)
+    peaks.stats.list <- list()
+    for(sample.id in names(regions.by.sample)){
+      regions <- regions.by.sample[[sample.id]]
+      peaks <- if(sample.id %in% names(peaks.by.sample)){
+        peaks.by.sample[[sample.id]]
+      }else{
+        Peaks()
+      }
+      error <- PeakErrorChrom(peaks, regions)
+      error$weight <- regions$weight
+      error$errors <- with(error, fp+fn)
+      peaks.stats.list[[sample.id]] <-
+        data.frame(sample.id, errors=sum(error$errors),
+                   regions=nrow(error))
+    }
+    peaks.stats <- do.call(rbind, peaks.stats.list)
+    problem.stats.list[[peaks.str]] <-
+      data.frame(peaks=as.numeric(peaks.str),
+                 errors=sum(peaks.stats$errors),
+                 regions=sum(peaks.stats$regions))
+  }
+  problem.stats <- do.call(rbind, problem.stats.list)
+  sorted.stats <- problem.stats[order(problem.stats$peaks),]
+  problem.param <- sorted.stats[which.min(sorted.stats$errors), "peaks"]
+  refined.list[[cluster.name]] <-
+    data.frame(problem.i, peaks.by.peaks[[problem.param]])
 }
 newprobs <- do.call(rbind, newprob.list)
-newprobs$problem.i <- 1:nrow(newprobs)
+refined <- do.call(rbind, refined.list)
+refined.below <-
+  data.frame(unique(refined[, c("problem.i", "chromStart", "chromEnd")]),
+             sample.id="step 2")
 
 problemsPlot <- 
 ggplot()+
@@ -393,7 +449,7 @@ ggplot()+
                    color=model,
                    xend=chromEnd/1e3, yend=0),
                size=2,
-               data=data.frame(best.peaks, model="PeakSegJoint"))+
+               data=data.frame(refined, model="PeakSegJoint"))+
   scale_fill_manual(values=ann.colors)+
   geom_step(aes(chromStart/1e3, count),
             data=H3K36me3.TDH.other.chunk1$counts,
@@ -404,16 +460,21 @@ ggplot()+
                    xend=chromEnd/1e3, yend=problem.i),
                size=2,
                data=data.frame(prob.peaks, model="PeakSegJoint"))+
+  geom_segment(aes(chromStart/1e3, problem.i,
+                   color=model,
+                   xend=chromEnd/1e3, yend=problem.i),
+               size=2,
+               data=data.frame(refined.below, model="PeakSegJoint"))+
   geom_segment(aes(problemStart/1e3, problem.i,
                    xend=problemEnd/1e3, yend=problem.i),
-               data=data.frame(sample.id="problems", best.problems))+
-  geom_segment(aes(chromStart/1e3, problem.i,
-                   xend=chromEnd/1e3, yend=problem.i),
-               data=data.frame(sample.id="refined", newprobs))+
+               data=data.frame(sample.id="step 1", best.problems))+
+  geom_segment(aes(problemStart/1e3, problem.i,
+                   xend=problemEnd/1e3, yend=problem.i),
+               data=data.frame(sample.id="step 2", newprobs))+
   geom_text(aes(max(best.problems$problemStart)/1e3, 1,
                 label=paste(bases.per.problem, "bases/problem")),
             vjust=0, 
-            data=data.frame(sample.id="problems", best.res))+
+            data=data.frame(sample.id="step 1", best.res))+
   theme(panel.margin=grid::unit(0, "cm"))+
   coord_cartesian(xlim=(chrom.range+c(-1,1)*chrom.bases/3)/1e3)+
   facet_grid(sample.id ~ ., scales="free", labeller=function(var, val){
