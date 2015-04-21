@@ -319,6 +319,45 @@ ggplot()+
                data=all.problems)+
   scale_y_log10()
 
+uniq.peaks <- unique(best.peaks[, c("chromStart", "chromEnd")])
+clustered.peaks <- clusterPeaks(uniq.peaks)
+cluster.list <- split(clustered.peaks, clustered.peaks$cluster)
+newprob.list <- list()
+for(cluster.name in names(cluster.list)){
+  cluster <- cluster.list[[cluster.name]]
+  cluster.chromStart <- min(cluster$chromStart)
+  cluster.chromEnd <- max(cluster$chromEnd)
+  cluster.mid <- as.integer((cluster.chromEnd + cluster.chromStart)/2)
+  half.bases <- as.integer(best.res$bases.per.problem/2)
+  cluster.num <- as.numeric(cluster.name)
+  before.name <- paste(cluster.num-1)
+  chromEnd.before <- if(before.name %in% names(cluster.list)){
+    max(cluster.list[[before.name]]$chromEnd)
+  }else{
+    0
+  }
+  after.name <- paste(cluster.num+1)
+  chromStart.after <- if(after.name %in% names(cluster.list)){
+    min(cluster.list[[after.name]]$chromStart)
+  }else{
+    Inf
+  }
+  problem.chromStart <- cluster.mid - half.bases
+  if(problem.chromStart < chromEnd.before){
+    problem.chromStart <- as.integer((chromEnd.before+cluster.chromStart)/2)
+  }
+  problem.chromEnd <- cluster.mid + half.bases
+  if(chromStart.after < problem.chromEnd){
+    problem.chromEnd <- as.integer((chromStart.after+cluster.chromEnd)/2)
+  }
+  newprob.list[[cluster.name]] <-
+    data.frame(cluster.name, cluster.num,
+               chromStart=problem.chromStart,
+               chromEnd=problem.chromEnd)
+}
+newprobs <- do.call(rbind, newprob.list)
+newprobs$problem.i <- 1:nrow(newprobs)
+
 problemsPlot <- 
 ggplot()+
   scale_y_continuous("aligned read coverage",
@@ -368,12 +407,15 @@ ggplot()+
   geom_segment(aes(problemStart/1e3, problem.i,
                    xend=problemEnd/1e3, yend=problem.i),
                data=data.frame(sample.id="problems", best.problems))+
+  geom_segment(aes(chromStart/1e3, problem.i,
+                   xend=chromEnd/1e3, yend=problem.i),
+               data=data.frame(sample.id="refined", newprobs))+
   geom_text(aes(max(best.problems$problemStart)/1e3, 1,
                 label=paste(bases.per.problem, "bases/problem")),
             vjust=0, 
             data=data.frame(sample.id="problems", best.res))+
   theme(panel.margin=grid::unit(0, "cm"))+
-  coord_cartesian(xlim=(chrom.range+c(-1,1)*chrom.bases/7)/1e3)+
+  coord_cartesian(xlim=(chrom.range+c(-1,1)*chrom.bases/3)/1e3)+
   facet_grid(sample.id ~ ., scales="free", labeller=function(var, val){
     sub("McGill0", "", val)
   })
