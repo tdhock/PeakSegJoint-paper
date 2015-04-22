@@ -25,3 +25,5 @@ table-H3K27ac.tex: table-H3K27ac.R H3K27ac_TDH_control.RData
 	R --no-save < $<
 figure-heuristic-loss.pdf: figure-heuristic-loss.R
 	R --no-save < $<
+chunk.problems.RData: chunk.problems.R
+	R --no-save < $<
