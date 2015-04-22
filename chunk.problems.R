@@ -52,6 +52,7 @@ for(set.dir.i in seq_along(set.dirs)){
     max.chromEnd <- max(counts$chromEnd)
     min.chromStart <- min(counts$chromStart)
     for(bases.per.problem in bases.per.problem.vec){
+      res.str <- paste(bases.per.problem)
       RData.file <-
         sprintf("chunk.problems/%s/%s/%s.RData",
                 set.name, chunk.id, bases.per.problem)
@@ -59,7 +60,6 @@ for(set.dir.i in seq_along(set.dirs)){
         load(RData.file)
       }else{
         cat(sprintf("%s %s\n", chunk.name, bases.per.problem))
-        res.str <- paste(bases.per.problem)
         problemSeq <- seq(0, max.chromEnd, by=bases.per.problem)
         problemStart <-
           as.integer(sort(c(problemSeq,
@@ -117,8 +117,12 @@ for(set.dir.i in seq_along(set.dirs)){
             counts.dt[! (chromEnd < problem$problemStart |
                            problem$problemEnd < chromStart), ]
           profile.list <- ProfileList(problem.counts)
-          fit <- PeakSegJointHeuristic(profile.list)
-          converted <- ConvertModelList(fit)
+          converted <- tryCatch({
+            fit <- PeakSegJointHeuristic(profile.list)
+            ConvertModelList(fit)
+          }, error=function(e){
+            list(loss=data.frame(peaks=0, loss=0))
+          })
           peaks.by.peaks <- list("0"=Peaks())
           if(!is.null(converted$peaks)){
             peaks.list <- with(converted, split(peaks, peaks$peaks))
@@ -178,7 +182,7 @@ for(set.dir.i in seq_along(set.dirs)){
         }#problem.i
         problem.stats <- do.call(rbind, problem.stats.list)
         total.weight <- sum(problem.stats$total.weight)
-        stopifnot(nrow(regions) == total.weight)
+        stopifnot(all.equal(nrow(regions), total.weight))
         error.row <- 
           data.frame(set.name, chunk.name, bases.per.problem,
                      weighted.error=sum(problem.stats$weighted.error),

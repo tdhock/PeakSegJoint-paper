@@ -229,7 +229,7 @@ It is easy to see that the \ref{Unconstrained} solution in $p$ peaks
 can be written in terms of the \ref{PeakSeg} solutions in 0 or 1 peaks:
 \begin{equation}
   \label{eq:unconstrained_PeakSeg}
-  \mathbf{\tilde M}^p = \left[
+  \mathbf{\tilde M}^p(\mathbf Z) = \left[
     \begin{array}{ccc}
       \mathbf{\tilde m}^{p_1}(\mathbf z_1) & 
       \cdots &
@@ -369,7 +369,7 @@ learning problem:
 \end{equation}
 
 To predict on test data $\mathbf Z$ with features $\mathbf
-X$, we compute the the predicted penalty $\hat \lambda = \exp
+X$, we compute the predicted penalty $\hat \lambda = \exp
 f_{\mathbf{\hat w}}(\mathbf X)$, the predicted number of
 peaks $\hat p = p^*(\hat \lambda, \mathbf Z)$, and finally the
 predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
