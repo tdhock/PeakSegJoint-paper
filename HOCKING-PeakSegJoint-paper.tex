@@ -128,19 +128,30 @@ More specifically, we suppose that the training data and the test data
 exhibit the same pattern type.
 \section{Related work}
 
-\citet{hierarchical-joint} describe an HMM. TODO describe.
+\citet{hierarchical-joint} proposed the ChIPmeta HMM, but it is for a
+different kind of data: one sample with both ChIP-seq and ChIP-cip
+data.
 
-\citet{jmosaics} is another model. TODO describe.
+Several unsupervised models have been proposed for joint analysis of
+several different ChIP-seq experiments
+\citep{jmosaics,segway,chromhmm}. In these models, the input is one
+sample (e.g. brain cells) with different experiments such as H3K4me3
+and H3K36me3 profiles. In contrast, our proposed PeakSegJoint model
+takes as input several samples (e.g. brain and kidney cells) for one
+experiment such as H3K4me3.
 
 \citet{JAMM} describe JAMM a joint method for analyzing replicates. It
 says that it and DFilter are both ``universal'' for broad and narrow
 peaks. They used TF bindings sites as positive controls. They say that
 it is better to analyze replicates independantly than to pool
-replicates.
+replicates. TODO: run and compare.
+
+% TODO: run DFilter.
 
 \citet{PePr} describe PePr a method for identifying consistent or
 differential peaks across replicates. They applied it to TF data sets,
-and used visual inspection to test (but not train).
+and used visual inspection to test (but not train). TODO: run and
+compare.
 
 \begin{figure}[b!]
   \centering
@@ -346,8 +357,7 @@ $\phi(x)=(x-1)^2 I(x\leq 1)$ to define the surrogate loss
     \big],
 \end{equation}
 for a predicted penalty value $\hat \lambda\in\RR_+$. For a weight parameter
-$\mathbf w\in\RR^d$, the average surrogate loss over the entire data
-set is
+$\mathbf w\in\RR^d$, the convex average surrogate loss is
 \begin{equation}
   \label{eq:average_surrogate}
   \mathcal L(\mathbf w) =
