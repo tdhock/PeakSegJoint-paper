@@ -178,6 +178,7 @@ B$, the PeakSeg model with $p\in\{0, \dots, p_{\text{max}}\}$ peaks is
 \\
     \text{such that} &\ \  \Peaks(\mathbf m)=p,  \\
      \forall j\in\{1, \dots, B\}, &\ \ P_j(\mathbf m) \in\{0, 1\},
+    \label{eq:peak_constraint}
 \end{align}
 where the Poisson loss function is
 \begin{equation}\label{eq:rho}
@@ -196,7 +197,12 @@ and the peak indicator at base $j$ is
   \label{eq:peaks}
   P_j(\mathbf m) = \sum_{k=2}^j \sign( m_{k} - m_{k-1} ),
 \end{equation}
-with $P_1(\mathbf m)=0$ by convention.
+with $P_1(\mathbf m)=0$ by convention. Note that the constraint
+(\ref{eq:peak_constraint}) means that the peak indicator $P_j(\mathbf
+m)\in\{0, 1\}$ can be used to classify each base $j\in\{1,\dots B\}$
+as either background noise $P_j(\mathbf m)=0$ or a peak $P_j(\mathbf
+m)=1$.
+
 
 \subsection{PeakSegJoint: finding the best common peak in $0,\dots, S$
   samples}
