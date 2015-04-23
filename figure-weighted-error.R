@@ -21,8 +21,19 @@ set.res.stats <- all.error %>%
   group_by(set.name, bases.per.problem) %>%
   summarise(weighted.error=sum(weighted.error),
             total.weight=sum(total.weight))
+set.res.min <- set.res.stats %>%
+  group_by(set.name) %>%
+  filter(weighted.error==min(weighted.error))
+
+set.res.lims <- set.res.stats %>%
+  group_by(set.name) %>%
+  summarise(min=min(total.weight),
+            max=max(total.weight))
+stopifnot(with(set.res.lims, min == max))
 
 ggplot()+
+  geom_point(aes(bases.per.problem, weighted.error),
+             data=set.res.min)+
   geom_line(aes(bases.per.problem, weighted.error),
              data=set.res.stats)+
   theme_bw()+
