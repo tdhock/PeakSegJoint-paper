@@ -16,9 +16,9 @@ ann.colors <-
 target.sizes <-
   c(H3K36me3=294912,
     H3K4me3=18432,
-    nrsf=576,
-    srf=576,
-    max=576)
+    nrsf=1152,
+    srf=1152,
+    max=1152)
 
 bases.per.problem.all <- 4.5 * 2^(5:20)
 
@@ -32,7 +32,7 @@ for(set.dir.i in seq_along(set.dirs)){
   target.bases <- target.sizes[[experiment]]
   target.i <- which(bases.per.problem.all==target.bases)
   stopifnot(length(target.i) == 1)
-  target.i.vec <- (target.i-2):(target.i+2)
+  target.i.vec <- (target.i-3):(target.i+3)
   bases.per.problem.vec <- bases.per.problem.all[target.i.vec]
   chunk.ids <- dir(set.dir)
   for(chunk.id in chunk.ids){
