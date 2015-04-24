@@ -13,7 +13,7 @@ ann.colors <-
     peakEnd="#ff4c4c",
     peaks="#a445ee")
 
-tf.size <- 73728
+tf.size <- 2304
 
 target.sizes <-
   c(H3K36me3=294912,
