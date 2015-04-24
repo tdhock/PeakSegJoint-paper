@@ -2,22 +2,42 @@ works_with_R("3.2.0",
              dplyr="0.4.0",
              ggplot2="1.0")
 
-error.list <- list()
-for(set.name in dir("chunk.problems")){
-  set.path <- file.path("chunk.problems", set.name)
-  for(chunk.id in dir(set.path)){
-    chunk.path <- file.path(set.path, chunk.id)
-    RData.files <- dir(chunk.path)
-    for(RData.file in RData.files){
-      RData.path <- file.path(chunk.path, RData.file)
-      load(RData.path)
-      error.list[[RData.path]] <- error.row
+load("chunk.problems.RData")
+
+all.error.list <- list()
+for(set.name in names(weighted.error.list)){
+  one.set <- weighted.error.list[[set.name]]
+  for(chunk.name in names(one.set)){
+    one.chunk <- one.set[[chunk.name]]
+    for(res.str in names(one.chunk)){
+      all.error.list[[paste(set.name, chunk.name, res.str)]] <-
+        one.chunk[[res.str]]
     }
   }
 }
+all.error <- do.call(rbind, all.error.list)
 
-all.error <- do.call(rbind, error.list)
-set.res.stats <- all.error %>%
+with(all.error, table(set.name, total.weight))
+
+chunk.err <- all.error %>%
+  group_by(set.name, chunk.name, bases.per.problem) %>%
+  summarise(weighted.error=sum(weighted.error),
+            total.weight=sum(total.weight))
+with(chunk.err, table(set.name, total.weight))
+
+chunk.lims <- chunk.err %>%
+  group_by(set.name, chunk.name) %>%
+  summarise(min=min(total.weight),
+            max=max(total.weight)) %>%
+  group_by(set.name) %>%
+  mutate(set.min=min(min))
+stopifnot(with(chunk.lims, abs(min-max) < 1e-6))
+
+small.chunks <- chunk.lims %>%
+  filter(abs(min-set.min) < 1e-6)
+
+set.res.stats <- chunk.err %>%
+  ##filter(!chunk.name %in% small.chunks$chunk.name) %>%
   group_by(set.name, bases.per.problem) %>%
   summarise(weighted.error=sum(weighted.error),
             total.weight=sum(total.weight))
@@ -31,6 +51,7 @@ set.res.lims <- set.res.stats %>%
             max=max(total.weight))
 stopifnot(with(set.res.lims, min == max))
 
+err.plot <- 
 ggplot()+
   geom_point(aes(bases.per.problem, weighted.error),
              data=set.res.min)+
@@ -40,3 +61,7 @@ ggplot()+
   scale_x_log10()+
   theme(panel.margin=grid::unit(0, "cm"))+
   facet_grid(set.name ~ ., scales="free")
+
+pdf("figure-weighted-error.pdf", h=5)
+print(err.plot)
+dev.off()

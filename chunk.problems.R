@@ -13,14 +13,21 @@ ann.colors <-
     peakEnd="#ff4c4c",
     peaks="#a445ee")
 
+tf.size <- 73728
+
 target.sizes <-
   c(H3K36me3=294912,
     H3K4me3=18432,
-    nrsf=1152,
-    srf=1152,
-    max=1152)
+    nrsf=tf.size,
+    srf=tf.size,
+    max=tf.size)
 
 bases.per.problem.all <- 4.5 * 2^(5:20)
+
+set.dir.i <- 10
+chunk.id <- "9"
+bases.per.problem <- 144
+bases.per.problem <- 36864
 
 weighted.error.list <- list()
 chunk.problems <- list()
