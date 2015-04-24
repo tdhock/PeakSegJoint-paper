@@ -29,3 +29,7 @@ chunk.problems.RData: chunk.problems.R
 	R --no-save < $<
 figure-weighted-error.pdf: figure-weighted-error.R chunk.problems.RData
 	R --no-save < $<
+histone.sets.RData: histone.sets.R
+	R --no-save < $<
+train.sets.RData: train.sets.R histone.sets.RData chunk.problems.RData
+	R --no-save < $<
