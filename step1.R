@@ -10,7 +10,9 @@ IntervalRegressionProblems <- function
 ### (numeric vector of length 2).
  initial.regularization=0.001,
  factor.regularization=1.5,
+ verbose=1,
  ...
+### Other parameters to pass to IntervalRegressionMatrix.
  ){
   stopifnot(is.list(problem.list))
   stopifnot(is.numeric(initial.regularization))
@@ -85,14 +87,42 @@ IntervalRegressionProblems <- function
   n.nonzero <- n.features
   
   weight.vec.list <- list()
+  regularization.vec.list <- list()
   while(n.nonzero > 1){
     weight.vec <-
       IntervalRegressionMatrix(norm.featureSum.mat, targets.mat,
                                weight.vec,
-                               regularization)
+                               regularization,
+                               verbose=verbose,
+                               ...)
+    n.zero <- sum(weight.vec == 0)
+    n.nonzero <- sum(weight.vec != 0)
+    l1.norm <- sum(abs(weight.vec[-1]))
+    if(verbose >= 1){
+      cat(sprintf("regularization=%8.4f L1norm=%8.4f zeros=%d\n",
+                  regularization, l1.norm, n.zero))
+    }
     weight.vec.list[[paste(regularization)]] <- weight.vec
+    regularization.vec.list[[paste(regularization)]] <- regularization
     regularization <- regularization * factor.regularization
   }
+  weight.mat <- do.call(cbind, weight.vec.list)
+  list(weight.mat=weight.mat,
+       regularization.vec=do.call(c, regularization.vec.list),
+       mean.vec=mean.vec,
+       sd.vec=sd.vec,
+       train.feature.names=train.feature.names,
+       predict=function(mat){
+         stopifnot(is.matrix(mat))
+         stopifnot(is.numeric(mat))
+         stopifnot(train.feature.names %in% colnames(mat))
+         raw.mat <- mat[, train.feature.names, drop=FALSE]
+         mean.mat <- matrix(mean.vec, nrow(raw.mat), ncol(raw.mat), byrow=TRUE)
+         sd.mat <- matrix(sd.vec, nrow(raw.mat), ncol(raw.mat), byrow=TRUE)
+         norm.mat <- (raw.mat-mean.mat)/sd.mat
+         intercept.mat <- cbind("(Intercept)"=1, norm.mat)
+         colSums(intercept.mat %*% weight.mat)
+       })
 }
 
 IntervalRegressionMatrix <- function
@@ -104,8 +134,19 @@ IntervalRegressionMatrix <- function
 ### Numeric target matrix (problems x 2).
  initial.weight.vec,
 ### initial guess for weight vector (features).
- regularization
-### Degree of L1-regularization. 
+ regularization,
+### Degree of L1-regularization.
+ threshold=1e-2,
+### When the stopping criterion gets below this threshold, the
+### algorithm stops and declares the solution as optimal.
+ max.iterations=1e4,
+### Error if the algorithm has not found an optimal solution after
+### this many iterations.
+ Lipschitz=NULL,
+### A numeric scalar or NULL, which means to compute Lipschitz as the
+### mean of the squared L2-norms of the rows of the feature matrix.
+ verbose=2
+### Print messages if > 0.
  ){
   stopifnot(is.matrix(features))
   stopifnot(is.numeric(features))
@@ -116,14 +157,102 @@ IntervalRegressionMatrix <- function
   stopifnot(nrow(targets) == n.problems)
   stopifnot(ncol(targets) == 2)
 
+  if(is.null(Lipschitz)){
+    Lipschitz <- mean(rowSums(features * features))
+  }
+  stopifnot(is.numeric(Lipschitz))
+  stopifnot(length(Lipschitz) == 1)
+
+  stopifnot(is.numeric(max.iterations))
+  stopifnot(length(max.iterations) == 1)
+
+  stopifnot(is.numeric(threshold))
+  stopifnot(length(threshold) == 1)
+
   stopifnot(is.numeric(initial.weight.vec))
   stopifnot(length(initial.weight.vec) == n.features)
 
-  weight.vec <- initial.weight.vec
+  ## Return 0 for a negative number and the same value otherwise.
+  positive.part <- function(x){
+    ifelse(x<0, 0, x)
+  }
+  squared.hinge <- function(x){
+    ifelse(x<1,(x-1)^2,0)
+  }
+  squared.hinge.deriv <- function(x){
+    ifelse(x<1,2*(x-1),0)
+  }  
+  calc.loss <- function(x){
+    linear.predictor <- as.numeric(features %*% x)
+    left.term <- squared.hinge(linear.predictor-targets[,1])
+    right.term <- squared.hinge(targets[,2]-linear.predictor)
+    mean(left.term+right.term)
+  }
+  calc.grad <- function(x){
+    linear.predictor <- as.numeric(features %*% x)
+    left.term <- squared.hinge.deriv(linear.predictor-targets[,1])
+    right.term <- squared.hinge.deriv(targets[,2]-linear.predictor)
+    full.grad <- features * (left.term-right.term)
+    colSums(full.grad)/nrow(full.grad)
+  }    
+  calc.penalty <- function(x){
+    regularization * sum(abs(x[-1]))
+  }
+  calc.cost <- function(x){
+    calc.loss(x) + calc.penalty(x)
+  }
+  soft.threshold <- function(x,thresh){
+    ifelse(abs(x) < thresh, 0, x-thresh*sign(x))
+  }
+  ## do not threshold the intercept.
+  prox <- function(x,thresh){
+    x[-1] <- soft.threshold(x[-1],thresh)
+    x
+  }
+  ## p_L from the fista paper.
+  pL <- function(x,L){
+    grad <- calc.grad(x)
+    prox(x - grad/L, regularization/L)
+  }
+  dist2subdiff.opt <- function(w,g){
+    ifelse(w==0,positive.part(abs(g)-regularization),
+           ifelse(w<0,abs(-regularization+g),abs(regularization+g)))
+  }
 
-  stop("optimization while loop")
+  iterate.count <- 1
+  stopping.crit <- threshold
+  last.iterate <- this.iterate <- y <- initial.weight.vec
+  this.t <- 1
+  while(stopping.crit >= threshold){
+    ## here we implement the FISTA method with constant step size, as
+    ## described by in the Beck and Tebolle paper.
+    last.iterate <- this.iterate
+    this.iterate <- pL(y, Lipschitz)
+    last.t <- this.t
+    this.t <- (1+sqrt(1+4*last.t^2))/2
+    y <- this.iterate + (last.t - 1)/this.t*(this.iterate-last.iterate)
+    ## here we calculate the subgradient optimality condition, which
+    ## requires 1 more gradient evaluation per iteration.
+    after.grad <- calc.grad(this.iterate)
+    w.dist <- dist2subdiff.opt(this.iterate[-1],after.grad[-1])
+    zero.at.optimum <- c(abs(after.grad[1]),w.dist)
+    stopping.crit <- max(zero.at.optimum)
 
-  weight.vec
+    if(verbose >= 2){
+      cost <- calc.cost(this.iterate)
+      cat(sprintf("%10d cost %10f crit %10.7f\n",
+                  iterate.count,
+                  cost,
+                  stopping.crit))
+    }
+    iterate.count <- iterate.count + 1
+    if(iterate.count > max.iterations){
+      Lipschitz <- Lipschitz * 1.5
+      iterate.count <- 1
+      cat(max.iterations," iterations, increasing Lipschitz.\n")
+    }
+  }
+  this.iterate
 }
 
 set.seed(1)
@@ -148,6 +277,8 @@ for(set.name in names(train.sets)){
         }
       }
       fit <- IntervalRegressionProblems(train.data.list)
+      fit$predict(train.data.list[[1]]$features)
+      stop("compute train/validation error curves")
     }
   }
 }
