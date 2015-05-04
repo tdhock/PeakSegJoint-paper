@@ -4,7 +4,7 @@ HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoi
 	bibtex HOCKING-PeakSegJoint-paper
 	pdflatex HOCKING-PeakSegJoint-paper
 	pdflatex HOCKING-PeakSegJoint-paper
-HOCKING-PeakSegJoint-slides.pdf: HOCKING-PeakSegJoint-slides.tex figure-profiles.tex table-H3K36me3.tex table-H3K4me3.tex figure-bin-factor.pdf table-nrsf.tex table-H3K27ac.tex figure-heuristic-loss.pdf figure-weighted-error.pdf
+HOCKING-PeakSegJoint-slides.pdf: HOCKING-PeakSegJoint-slides.tex figure-profiles.tex table-H3K36me3.tex table-H3K4me3.tex figure-bin-factor.pdf table-nrsf.tex table-H3K27ac.tex figure-heuristic-loss.pdf figure-weighted-error.pdf figure-label-problem-size.pdf
 	rm -f *.aux *.bbl
 	pdflatex HOCKING-PeakSegJoint-slides
 figure-profiles.tex: figure-profiles.R
@@ -32,4 +32,6 @@ figure-weighted-error.pdf: figure-weighted-error.R chunk.problems.RData
 histone.sets.RData: histone.sets.R
 	R --no-save < $<
 train.sets.RData: train.sets.R histone.sets.RData chunk.problems.RData
+	R --no-save < $<
+figure-label-problem-size.pdf: figure-label-problem-size.R
 	R --no-save < $<

@@ -1,6 +1,6 @@
 works_with_R("3.2.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@58a0014e9446996fb967c21826b196d5e9a3935e",
+             "tdhock/PeakSegJoint@c68c566a606aea75d646e81087d168e5e2f0531a",
              data.table="1.9.4",
              ggplot2="1.0")
 
@@ -13,16 +13,16 @@ ann.colors <-
     peakEnd="#ff4c4c",
     peaks="#a445ee")
 
-tf.size <- 2304
+tf.size <- 4.5 * 2^(4:13)
 
 target.sizes <-
-  c(H3K36me3=294912,
-    H3K4me3=18432,
-    nrsf=tf.size,
-    srf=tf.size,
-    max=tf.size)
+  list(H3K36me3=4.5 * 2^(13:19),
+       H3K4me3=4.5 * 2^(8:16),
+       nrsf=tf.size,
+       srf=tf.size,
+       max=tf.size)
 
-bases.per.problem.all <- 4.5 * 2^(5:20)
+bases.per.problem.all <- 4.5 * 2^(4:20)
 
 set.dir.i <- 10
 chunk.id <- "9"
@@ -36,11 +36,7 @@ for(set.dir.i in seq_along(set.dirs)){
   set.dir <- set.dirs[[set.dir.i]]
   set.name <- basename(set.dir)
   experiment <- sub("_.*", "", set.name)
-  target.bases <- target.sizes[[experiment]]
-  target.i <- which(bases.per.problem.all==target.bases)
-  stopifnot(length(target.i) == 1)
-  target.i.vec <- (target.i-3):(target.i+3)
-  bases.per.problem.vec <- bases.per.problem.all[target.i.vec]
+  bases.per.problem.vec <- target.sizes[[experiment]]
   chunk.ids <- dir(set.dir)
   for(chunk.id in chunk.ids){
     chunk.path <- file.path(set.dir, chunk.id)
@@ -64,8 +60,14 @@ for(set.dir.i in seq_along(set.dirs)){
         sprintf("chunk.problems/%s/%s/%s.RData",
                 set.name, chunk.id, bases.per.problem)
       if(file.exists(RData.file)){
-        load(RData.file)
-      }else{
+        obj.names <- load(RData.file)
+        for(problem in problem.list){
+          if(length(problem$target) != 2){
+            unlink(RData.file)
+          }
+        }
+      }
+      if(!file.exists(RData.file)){
         cat(sprintf("%s %s\n", chunk.name, bases.per.problem))
         problemSeq <- seq(0, max.chromEnd, by=bases.per.problem)
         problemStart <-
@@ -156,6 +158,7 @@ for(set.dir.i in seq_along(set.dirs)){
             error.by.peaks[[peaks.str]] <- do.call(rbind, error.by.sample)
           }#peaks.str
           loss.df <- converted$loss
+          rownames(loss.df) <- loss.df$peaks
           if(length(regions.by.sample)){
             loss.df[names(error.by.peaks), "weighted.error"] <-
               sapply(error.by.peaks, with, sum(weighted.error))
@@ -170,6 +173,7 @@ for(set.dir.i in seq_along(set.dirs)){
           exact <-
             with(some.loss, exactModelSelection(loss, peaks, peaks))
           exact$weighted.error <- loss.df[paste(exact$peaks), "weighted.error"]
+          stopifnot(!is.na(exact$weighted.error))
           indices <- with(exact, {
             largestContinuousMinimum(weighted.error,
                                      max.log.lambda-min.log.lambda)
