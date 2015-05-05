@@ -4,7 +4,8 @@
 \usepackage{url}
 \usepackage{natbib}
 \usepackage{graphicx}
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath,amssymb,amsthm}
+\newtheorem{proposition}{Proposition}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\Lik}{Lik}
 \DeclareMathOperator*{\Peaks}{Peaks}
@@ -241,7 +242,8 @@ or one peak. Finally, the overall constraint (\ref{total_Peaks}) means
 that there is a total of $p$ samples each with exactly 1 peak (not
 necessarily with the same start/end positions across samples).
 
-It is easy to see that the \ref{Unconstrained} solution in $p$ peaks
+\begin{proposition}
+The \ref{Unconstrained} solution in $p$ peaks
 can be written in terms of the \ref{PeakSeg} solutions in 0 or 1 peaks:
 \begin{equation}
   \label{eq:unconstrained_PeakSeg}
@@ -254,6 +256,43 @@ can be written in terms of the \ref{PeakSeg} solutions in 0 or 1 peaks:
   \right],
 \end{equation}
 for some $p_1,\dots, p_S\in\{0, 1\}$ with $p=\sum_{i=s}^S p_s$.
+\end{proposition}
+
+\begin{proof}
+  To begin, consider the trivial case with $p=0$ peaks. Clearly, the
+  PeakSegJoint solution is
+  $\mathbf{\tilde M}^p(\mathbf Z) = \left[
+    \begin{array}{ccc}
+      \mathbf{\bar z}_1 & 
+      \cdots &
+      \mathbf{\bar z}_S 
+    \end{array}
+  \right]$, where $\mathbf{\bar z}_s$ is the constant mean vector for
+  sample $s$. This is also the PeakSeg model with 0 peaks $\mathbf{\tilde
+    m}^0(\mathbf z_s)=\mathbf{\bar z}_s$. 
+  
+  Now consider the case for $p=1$ peak. There are $S$ possible models,
+  one for each sample $s$. The sample with a peak model
+  $\mathbf{\tilde m}^1(\mathbf z_{s^*})$ is $s^*=\argmin_{s\in
+    1,\dots, S} \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^1(\mathbf
+    z_s), \mathbf z_s \right] - \textrm{PoissonLoss}\left[
+    \mathbf{\tilde m}^0(\mathbf z_s), \mathbf z_s \right]$, and all
+  the other samples $s$ have 0 peaks $\mathbf{\tilde m}^0(\mathbf
+  z_{s})$. This model is clearly optimal since the \ref{Unconstrained} cost
+  function is separable on samples.
+
+  Consider the case for $p=2$ peaks. By the constraint of either zero
+  or one peak for each sample (\ref{zero_or_one}), and the constraint
+  on the total number of peaks (\ref{total_Peaks}), it is clear that
+  the optimal solution has $p=2$ samples with exactly 1 peak and $S-2$
+  samples with exactly 0 peaks. The samples with peaks are $s^*$ and
+  $\argmin_{s\neq s^*} \textrm{PoissonLoss}\left[ \mathbf{\tilde
+      m}^1(\mathbf z_s), \mathbf z_s \right] -
+  \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^0(\mathbf z_s), \mathbf
+    z_s \right]$.
+
+  The proof for $p>2$ peaks proceeds by induction.
+\end{proof}
 
 The PeakSegJoint model with $p\in\{0, \dots, S\}$ peaks is defined by
 introducing one more constraint (\ref{joint_constraint}):
@@ -400,7 +439,7 @@ TODO: make figure that explains bin pyramid.
 The convex supervised learning problem (\ref{argmin_w}) can be
 computed using gradient-based methods such as FISTA, a Fast Iterative
 Shinkage-Thresholding Algorithm \citep{fista}. To apply FISTA, we need
-to compute the gradient of the smooth average surrogate loss,
+to compute the gradient of the smooth average surrogate loss
 \begin{equation}
   \label{eq:average_gradient}
   \nabla \mathcal L(\mathbf w) = 
@@ -432,8 +471,11 @@ where the gradient of one observation $i$ is
 \end{equation}
 and the derivative of the squared hinge loss is $\phi'(x)=2(x-1)I(x\leq 1)$.
 
-We used the Lipschitz constant and stopping criterion suggested by
-\citet{HOCKING-penalties}.
+For FISTA with constant step size we also need a Lipschitz constant of
+$\mathcal L(\mathbf w)$. Following the arguments of
+\citet{hingeSquareFISTA}, we derived a Lipschitz constant of
+$\sum_{i=1}^n ||\mathbf X_i||_2^2/n$. Finally, we used the
+subdifferential stopping criterion of \citet{HOCKING-penalties}.
 
 % An optimality condition for (\ref{argmin_w}) is 
 % \begin{equation}

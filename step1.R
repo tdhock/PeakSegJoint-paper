@@ -126,7 +126,7 @@ for(set.name in names(train.sets)){
     pred.peak.list <- list()
     for(res.str in names(data.by.chunk[[1]])){
       RData.file <- sprintf("step1/%s_%s.RData", under.name, res.str)
-      if(n.train == 1)unlink(RData.file)
+      ##if(n.train == 1)unlink(RData.file)
       if(file.exists(RData.file)){
         load(RData.file)
       }else{
@@ -191,9 +191,11 @@ for(set.name in names(train.sets)){
     model.error <- do.call(rbind, model.error.list)
     glob.min.err <- model.error %>%
       filter(tv=="validation") %>%
-      filter(errors == min(errors)) %>%
-      tail(1)
-    hline.min.err <- glob.min.err %>%
+      filter(errors == min(errors))
+    selected.min.err <- glob.min.err %>%
+      arrange(bases.per.problem, -regularization)  %>%
+      head(1)
+    hline.min.err <- selected.min.err %>%
       select(-bases.per.problem)
     resPlot <- 
       ggplot()+
@@ -203,7 +205,7 @@ for(set.name in names(train.sets)){
                        color=tv),
                    size=3,
                    pch=1,
-                   data=glob.min.err)+
+                   data=selected.min.err)+
         geom_line(aes(-log10(regularization), errors,
                       color=tv, group=tv),
                   data=model.error)+
@@ -215,9 +217,12 @@ for(set.name in names(train.sets)){
         theme(panel.margin=grid::unit(0, "cm"))+
         facet_grid(. ~ bases.per.problem)+
         xlab("model complexity -log10(regularization)")
+    dir.create("step1-plots", showWarnings=FALSE)
+    pdf(sprintf("step1-plots/%s.pdf", under.name), w=10, h=5)
     print(resPlot)
-    res.str <- paste(glob.min.err$bases.per.problem)
-    reg.str <- paste(glob.min.err$regularization)
+    dev.off()
+    res.str <- paste(selected.min.err$bases.per.problem)
+    reg.str <- paste(selected.min.err$regularization)
     weight.vec <- fit.list[[res.str]]$weight.mat[, reg.str]
     nonzero.vec <- weight.vec[weight.vec != 0]
     print(nonzero.vec)
@@ -228,7 +233,7 @@ for(set.name in names(train.sets)){
       out.peak.list[[chunk.name]] <- res.peak.list[[chunk.name]][[reg.str]]
     }
     split.data <-
-      list(glob.min.err=glob.min.err,
+      list(glob.min.err=selected.min.err,
            res.str=res.str,
            reg.str=reg.str,
            fit=fit.list[[res.str]],

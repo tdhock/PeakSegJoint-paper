@@ -1,6 +1,6 @@
 works_with_R("3.2.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@c68c566a606aea75d646e81087d168e5e2f0531a",
+             "tdhock/PeakSegJoint@44da28676be225d6207aa3a1d0f0019e456c5b7b",
              data.table="1.9.4",
              ggplot2="1.0")
 
