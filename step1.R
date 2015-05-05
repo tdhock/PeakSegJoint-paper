@@ -1,7 +1,7 @@
 works_with_R("3.2.0",
              dplyr="0.4.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@c68c566a606aea75d646e81087d168e5e2f0531a")
+             "tdhock/PeakSegJoint@44da28676be225d6207aa3a1d0f0019e456c5b7b")
 
 load("train.sets.RData")
 load("chunk.problems.RData")
@@ -95,8 +95,29 @@ for(set.name in names(train.sets)){
     under.name <- gsub(" ", "_", split.name)
     print(split.name)
     train.validation <- splits[[split.i]]
-    set.seed(1)
-    train.i <- sample(length(train.validation), length(train.validation)/2)
+    n.train <- as.integer(length(train.validation)/2)
+    train.i <- if(n.train == 1){
+      finite.count.list <- list()
+      for(train.i in seq_along(train.validation)){
+        tv <- train.validation[[train.i]]
+        data.by.problem <- data.by.chunk[[tv]]
+        range.mat.list <- list()
+        for(problem.name in names(data.by.problem)){
+          prob.list <- data.by.problem[[problem.name]]
+          target.mat <- sapply(prob.list, "[[", "target")
+          lo <- target.mat[1,]
+          hi <- target.mat[2,]
+          range.mat.list[[problem.name]] <-
+            c(min(lo[is.finite(lo)]), max(hi[is.finite(hi)]))
+        }
+        range.mat <- do.call(rbind, range.mat.list)
+        finite.count.list[[train.i]] <- sum(is.finite(range.mat))
+      }
+      which.max(finite.count.list)
+    }else{
+      set.seed(1)
+      sample(length(train.validation), n.train)
+    }      
     sets <-
       list(train=train.validation[train.i],
            validation=train.validation[-train.i])
@@ -105,6 +126,7 @@ for(set.name in names(train.sets)){
     pred.peak.list <- list()
     for(res.str in names(data.by.chunk[[1]])){
       RData.file <- sprintf("step1/%s_%s.RData", under.name, res.str)
+      if(n.train == 1)unlink(RData.file)
       if(file.exists(RData.file)){
         load(RData.file)
       }else{
@@ -149,6 +171,10 @@ for(set.name in names(train.sets)){
             geom_line(aes(-log10(regularization), errors,
                           color=tv, group=tv),
                       data=tv.reg.err)+
+            geom_point(aes(-log10(regularization), errors,
+                          color=tv, group=tv),
+                       size=1,
+                      data=tv.reg.err)+
             xlab("model complexity -log10(regularization)")
         print(resPlot)
         
@@ -180,6 +206,10 @@ for(set.name in names(train.sets)){
                    data=glob.min.err)+
         geom_line(aes(-log10(regularization), errors,
                       color=tv, group=tv),
+                  data=model.error)+
+        geom_point(aes(-log10(regularization), errors,
+                      color=tv),
+                   size=1,
                   data=model.error)+
         theme_bw()+
         theme(panel.margin=grid::unit(0, "cm"))+
@@ -222,7 +252,7 @@ for(split.name in names(all.split.list)){
 }
 hyper.tall <- do.call(rbind, hyper.list)
 seg.tall <- do.call(rbind, seg.list)
-dcast(hyper.tall, set.name ~ bases.per.problem, fun.aggregate=length)
+##dcast(hyper.tall, set.name ~ bases.per.problem, fun.aggregate=length)
 ggplot()+
   geom_segment(aes(min.bases, set.name,
                    xend=max.bases, yend=set.name),
@@ -232,6 +262,20 @@ ggplot()+
   geom_point(aes(bases.per.problem, set.name),
              color="red",
              data=hyper.tall)
+
+ex.list <- list()
+data.by.chunk <- chunk.problems[["H3K4me3_PGP_immune"]]
+for(chunk.name in names(data.by.chunk)){
+  data.by.problem <- data.by.chunk[[chunk.name]][["4608"]]
+  for(problem.name in names(data.by.problem)){
+    problem <- data.by.problem[[problem.name]]
+    if(any(is.finite(problem$target))){
+      ex.list[[problem.name]] <- problem
+    }
+  }
+}
+H3K4me3.PGP.immune.4608 <- ex.list
+save(H3K4me3.PGP.immune.4608, file="~/R/PeakSegJoint/data/H3K4me3.PGP.immune.4608.RData", compress="xz")
 
 step1 <- all.split.list
 save(step1, file="step1.RData")

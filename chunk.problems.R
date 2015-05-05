@@ -16,8 +16,8 @@ ann.colors <-
 tf.size <- 4.5 * 2^(4:13)
 
 target.sizes <-
-  list(H3K36me3=4.5 * 2^(13:19),
-       H3K4me3=4.5 * 2^(8:16),
+  list(H3K36me3=4.5 * 2^(12:19),
+       H3K4me3=4.5 * 2^(7:17),
        nrsf=tf.size,
        srf=tf.size,
        max=tf.size)
