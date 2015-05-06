@@ -41,5 +41,7 @@ figure-lasso-path.pdf: figure-lasso-path.R
 	R --no-save < $<
 step1.error.RData: step1.error.R step1.RData
 	R --no-save < $<
-figure-test-error-dots.pdf: figure-test-error-dots.R step1.error.RData
+figure-test-error-dots.pdf: figure-test-error-dots.R step1.error.RData cheating.error.RData
+	R --no-save < $<
+cheating.error.RData: cheating.error.R chunk.problems.RData
 	R --no-save < $<
