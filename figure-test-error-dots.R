@@ -2,6 +2,7 @@ works_with_R("3.2.0",
              ggplot2="1.0",
              dplyr="0.4.0")
 
+load("cheating.error.RData")
 load("step1.error.RData")
 PeakSeg.results <- read.csv("PeakSeg-results.csv")
 
@@ -14,7 +15,16 @@ step1.stats <- step1.error %>%
          algo.type="PeakSegJoint",
          learning="interval\nregression")
 
-all.stats <- rbind(PeakSeg.results, step1.stats)
+cheating.stats <- cheating.error %>%
+  mutate(algorithm="cheating") %>%
+  group_by(set.name, split.i, algorithm) %>%
+  summarise(errors=sum(fp+fn),
+            regions=n()) %>%
+  mutate(percent=errors/regions*100,
+         algo.type="PeakSegJoint",
+         learning="cheating")
+
+all.stats <- rbind(PeakSeg.results, step1.stats, cheating.stats)
 
 region.range <- all.stats %>%
   group_by(set.name, split.i) %>%
