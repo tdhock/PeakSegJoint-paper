@@ -1,0 +1,841 @@
+"set.name","split.i","algorithm","errors","regions","percent","algo.type","learning"
+"H3K36me3_AM_immune",1,"oracle.0",162,882,18.3673469387755,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",1,"oracle.1",20,882,2.26757369614512,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",1,"AIC/BIC.1",78,882,8.84353741496599,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",1,"macs.0",296,882,33.5600907029478,"baselines","unsupervised"
+"H3K36me3_AM_immune",1,"hmcan.broad.0",142,882,16.0997732426304,"baselines","unsupervised"
+"H3K36me3_AM_immune",2,"oracle.0",154,819,18.8034188034188,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",2,"oracle.1",49,819,5.98290598290598,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",2,"AIC/BIC.1",73,819,8.91330891330891,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",2,"macs.0",273,819,33.3333333333333,"baselines","unsupervised"
+"H3K36me3_AM_immune",2,"hmcan.broad.0",108,819,13.1868131868132,"baselines","unsupervised"
+"H3K36me3_AM_immune",3,"oracle.0",189,945,20,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",3,"oracle.1",49,945,5.18518518518519,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",3,"AIC/BIC.1",121,945,12.8042328042328,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",3,"macs.0",305,945,32.2751322751323,"baselines","unsupervised"
+"H3K36me3_AM_immune",3,"hmcan.broad.0",192,945,20.3174603174603,"baselines","unsupervised"
+"H3K36me3_AM_immune",4,"oracle.0",199,987,20.1621073961499,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",4,"oracle.1",67,987,6.78824721377913,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",4,"AIC/BIC.1",151,987,15.2988855116515,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",4,"macs.0",409,987,41.4387031408308,"baselines","unsupervised"
+"H3K36me3_AM_immune",4,"hmcan.broad.0",223,987,22.5937183383992,"baselines","unsupervised"
+"H3K36me3_AM_immune",5,"oracle.0",167,840,19.8809523809524,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",5,"oracle.1",32,840,3.80952380952381,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",5,"AIC/BIC.1",84,840,10,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",5,"macs.0",327,840,38.9285714285714,"baselines","unsupervised"
+"H3K36me3_AM_immune",5,"hmcan.broad.0",184,840,21.9047619047619,"baselines","unsupervised"
+"H3K36me3_AM_immune",6,"oracle.0",172,987,17.4265450861196,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",6,"oracle.1",55,987,5.57244174265451,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",6,"AIC/BIC.1",213,987,21.580547112462,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_AM_immune",6,"macs.0",299,987,30.2938196555218,"baselines","unsupervised"
+"H3K36me3_AM_immune",6,"hmcan.broad.0",183,987,18.5410334346505,"baselines","unsupervised"
+"H3K36me3_TDH_immune",1,"oracle.0",73,294,24.8299319727891,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",1,"oracle.1",8,294,2.72108843537415,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",1,"AIC/BIC.1",22,294,7.48299319727891,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",1,"macs.0",169,294,57.4829931972789,"baselines","unsupervised"
+"H3K36me3_TDH_immune",1,"hmcan.broad.0",146,294,49.6598639455782,"baselines","unsupervised"
+"H3K36me3_TDH_immune",2,"oracle.0",49,378,12.962962962963,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",2,"oracle.1",17,378,4.4973544973545,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",2,"AIC/BIC.1",1,378,0.264550264550265,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",2,"macs.0",237,378,62.6984126984127,"baselines","unsupervised"
+"H3K36me3_TDH_immune",2,"hmcan.broad.0",150,378,39.6825396825397,"baselines","unsupervised"
+"H3K36me3_TDH_immune",3,"oracle.0",58,378,15.3439153439153,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",3,"oracle.1",9,378,2.38095238095238,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",3,"AIC/BIC.1",27,378,7.14285714285714,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",3,"macs.0",266,378,70.3703703703704,"baselines","unsupervised"
+"H3K36me3_TDH_immune",3,"hmcan.broad.0",192,378,50.7936507936508,"baselines","unsupervised"
+"H3K36me3_TDH_immune",4,"oracle.0",64,252,25.3968253968254,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",4,"oracle.1",3,252,1.19047619047619,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",4,"AIC/BIC.1",15,252,5.95238095238095,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",4,"macs.0",151,252,59.9206349206349,"baselines","unsupervised"
+"H3K36me3_TDH_immune",4,"hmcan.broad.0",103,252,40.8730158730159,"baselines","unsupervised"
+"H3K36me3_TDH_immune",5,"oracle.0",73,252,28.968253968254,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",5,"oracle.1",26,252,10.3174603174603,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",5,"AIC/BIC.1",56,252,22.2222222222222,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",5,"macs.0",180,252,71.4285714285714,"baselines","unsupervised"
+"H3K36me3_TDH_immune",5,"hmcan.broad.0",145,252,57.5396825396825,"baselines","unsupervised"
+"H3K36me3_TDH_immune",6,"oracle.0",49,336,14.5833333333333,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",6,"oracle.1",13,336,3.86904761904762,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",6,"AIC/BIC.1",5,336,1.48809523809524,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_immune",6,"macs.0",248,336,73.8095238095238,"baselines","unsupervised"
+"H3K36me3_TDH_immune",6,"hmcan.broad.0",149,336,44.3452380952381,"baselines","unsupervised"
+"H3K36me3_TDH_other",1,"oracle.0",9,96,9.375,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",1,"oracle.1",12,96,12.5,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",1,"AIC/BIC.1",31,96,32.2916666666667,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",1,"macs.0",63,96,65.625,"baselines","unsupervised"
+"H3K36me3_TDH_other",1,"hmcan.broad.0",32,96,33.3333333333333,"baselines","unsupervised"
+"H3K36me3_TDH_other",2,"oracle.0",11,96,11.4583333333333,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",2,"oracle.1",13,96,13.5416666666667,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",2,"AIC/BIC.1",43,96,44.7916666666667,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",2,"macs.0",59,96,61.4583333333333,"baselines","unsupervised"
+"H3K36me3_TDH_other",2,"hmcan.broad.0",29,96,30.2083333333333,"baselines","unsupervised"
+"H3K36me3_TDH_other",3,"oracle.0",10,112,8.92857142857143,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",3,"oracle.1",4,112,3.57142857142857,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",3,"AIC/BIC.1",23,112,20.5357142857143,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",3,"macs.0",66,112,58.9285714285714,"baselines","unsupervised"
+"H3K36me3_TDH_other",3,"hmcan.broad.0",31,112,27.6785714285714,"baselines","unsupervised"
+"H3K36me3_TDH_other",4,"oracle.0",5,88,5.68181818181818,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",4,"oracle.1",12,88,13.6363636363636,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",4,"AIC/BIC.1",16,88,18.1818181818182,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",4,"macs.0",49,88,55.6818181818182,"baselines","unsupervised"
+"H3K36me3_TDH_other",4,"hmcan.broad.0",21,88,23.8636363636364,"baselines","unsupervised"
+"H3K36me3_TDH_other",5,"oracle.0",4,104,3.84615384615385,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",5,"oracle.1",14,104,13.4615384615385,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",5,"AIC/BIC.1",0,104,0,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",5,"macs.0",56,104,53.8461538461538,"baselines","unsupervised"
+"H3K36me3_TDH_other",5,"hmcan.broad.0",23,104,22.1153846153846,"baselines","unsupervised"
+"H3K36me3_TDH_other",6,"oracle.0",6,104,5.76923076923077,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",6,"oracle.1",16,104,15.3846153846154,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",6,"AIC/BIC.1",2,104,1.92307692307692,"PeakSeg (cDPA)","grid
+search"
+"H3K36me3_TDH_other",6,"macs.0",52,104,50,"baselines","unsupervised"
+"H3K36me3_TDH_other",6,"hmcan.broad.0",20,104,19.2307692307692,"baselines","unsupervised"
+"H3K4me3_PGP_immune",1,"oracle.0",402,1890,21.2698412698413,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",1,"oracle.1",415,1890,21.957671957672,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",1,"AIC/BIC.1",802,1890,42.4338624338624,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",1,"macs.0",434,1890,22.962962962963,"baselines","unsupervised"
+"H3K4me3_PGP_immune",1,"hmcan.broad.0",663,1890,35.0793650793651,"baselines","unsupervised"
+"H3K4me3_PGP_immune",2,"oracle.0",447,2025,22.0740740740741,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",2,"oracle.1",445,2025,21.9753086419753,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",2,"AIC/BIC.1",960,2025,47.4074074074074,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",2,"macs.0",449,2025,22.1728395061728,"baselines","unsupervised"
+"H3K4me3_PGP_immune",2,"hmcan.broad.0",717,2025,35.4074074074074,"baselines","unsupervised"
+"H3K4me3_PGP_immune",3,"oracle.0",442,1917,23.056859676578,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",3,"oracle.1",403,1917,21.0224308815858,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",3,"AIC/BIC.1",911,1917,47.5221700573813,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",3,"macs.0",370,1917,19.300991131977,"baselines","unsupervised"
+"H3K4me3_PGP_immune",3,"hmcan.broad.0",706,1917,36.8283776734481,"baselines","unsupervised"
+"H3K4me3_PGP_immune",4,"oracle.0",500,2025,24.6913580246914,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",4,"oracle.1",416,2025,20.5432098765432,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",4,"AIC/BIC.1",942,2025,46.5185185185185,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",4,"macs.0",362,2025,17.8765432098765,"baselines","unsupervised"
+"H3K4me3_PGP_immune",4,"hmcan.broad.0",700,2025,34.5679012345679,"baselines","unsupervised"
+"H3K4me3_PGP_immune",5,"oracle.0",405,1971,20.5479452054795,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",5,"oracle.1",379,1971,19.2288178589548,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",5,"AIC/BIC.1",913,1971,46.3216641298833,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",5,"macs.0",360,1971,18.2648401826484,"baselines","unsupervised"
+"H3K4me3_PGP_immune",5,"hmcan.broad.0",667,1971,33.8406900050736,"baselines","unsupervised"
+"H3K4me3_PGP_immune",6,"oracle.0",451,1944,23.1995884773663,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",6,"oracle.1",459,1944,23.6111111111111,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",6,"AIC/BIC.1",915,1944,47.0679012345679,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_PGP_immune",6,"macs.0",427,1944,21.9650205761317,"baselines","unsupervised"
+"H3K4me3_PGP_immune",6,"hmcan.broad.0",723,1944,37.1913580246914,"baselines","unsupervised"
+"H3K4me3_TDH_immune",1,"oracle.0",409,1971,20.7508878741755,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",1,"oracle.1",376,1971,19.0766108574328,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",1,"AIC/BIC.1",593,1971,30.0862506341958,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",1,"macs.0",358,1971,18.1633688483004,"baselines","unsupervised"
+"H3K4me3_TDH_immune",1,"hmcan.broad.0",591,1971,29.9847792998478,"baselines","unsupervised"
+"H3K4me3_TDH_immune",2,"oracle.0",278,1809,15.3676064123825,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",2,"oracle.1",275,1809,15.2017689331122,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",2,"AIC/BIC.1",503,1809,27.8054173576562,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",2,"macs.0",269,1809,14.8700939745716,"baselines","unsupervised"
+"H3K4me3_TDH_immune",2,"hmcan.broad.0",408,1809,22.5538971807629,"baselines","unsupervised"
+"H3K4me3_TDH_immune",3,"oracle.0",378,1701,22.2222222222222,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",3,"oracle.1",311,1701,18.2833627278072,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",3,"AIC/BIC.1",674,1701,39.6237507348618,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",3,"macs.0",307,1701,18.0482069370958,"baselines","unsupervised"
+"H3K4me3_TDH_immune",3,"hmcan.broad.0",486,1701,28.5714285714286,"baselines","unsupervised"
+"H3K4me3_TDH_immune",4,"oracle.0",356,1998,17.8178178178178,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",4,"oracle.1",286,1998,14.3143143143143,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",4,"AIC/BIC.1",661,1998,33.0830830830831,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",4,"macs.0",306,1998,15.3153153153153,"baselines","unsupervised"
+"H3K4me3_TDH_immune",4,"hmcan.broad.0",426,1998,21.3213213213213,"baselines","unsupervised"
+"H3K4me3_TDH_immune",5,"oracle.0",266,1701,15.6378600823045,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",5,"oracle.1",296,1701,17.4015285126396,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",5,"AIC/BIC.1",572,1701,33.6272780717225,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",5,"macs.0",280,1701,16.4609053497942,"baselines","unsupervised"
+"H3K4me3_TDH_immune",5,"hmcan.broad.0",372,1701,21.8694885361552,"baselines","unsupervised"
+"H3K4me3_TDH_immune",6,"oracle.0",411,2025,20.2962962962963,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",6,"oracle.1",367,2025,18.1234567901235,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",6,"AIC/BIC.1",701,2025,34.6172839506173,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_immune",6,"macs.0",337,2025,16.641975308642,"baselines","unsupervised"
+"H3K4me3_TDH_immune",6,"hmcan.broad.0",493,2025,24.3456790123457,"baselines","unsupervised"
+"H3K4me3_TDH_other",1,"oracle.0",89,780,11.4102564102564,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",1,"oracle.1",66,780,8.46153846153846,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",1,"AIC/BIC.1",121,780,15.5128205128205,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",1,"macs.0",144,780,18.4615384615385,"baselines","unsupervised"
+"H3K4me3_TDH_other",1,"hmcan.broad.0",297,780,38.0769230769231,"baselines","unsupervised"
+"H3K4me3_TDH_other",2,"oracle.0",81,740,10.9459459459459,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",2,"oracle.1",66,740,8.91891891891892,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",2,"AIC/BIC.1",125,740,16.8918918918919,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",2,"macs.0",118,740,15.9459459459459,"baselines","unsupervised"
+"H3K4me3_TDH_other",2,"hmcan.broad.0",265,740,35.8108108108108,"baselines","unsupervised"
+"H3K4me3_TDH_other",3,"oracle.0",83,750,11.0666666666667,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",3,"oracle.1",70,750,9.33333333333333,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",3,"AIC/BIC.1",176,750,23.4666666666667,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",3,"macs.0",115,750,15.3333333333333,"baselines","unsupervised"
+"H3K4me3_TDH_other",3,"hmcan.broad.0",258,750,34.4,"baselines","unsupervised"
+"H3K4me3_TDH_other",4,"oracle.0",76,810,9.38271604938272,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",4,"oracle.1",57,810,7.03703703703704,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",4,"AIC/BIC.1",108,810,13.3333333333333,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",4,"macs.0",114,810,14.0740740740741,"baselines","unsupervised"
+"H3K4me3_TDH_other",4,"hmcan.broad.0",299,810,36.9135802469136,"baselines","unsupervised"
+"H3K4me3_TDH_other",5,"oracle.0",92,780,11.7948717948718,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",5,"oracle.1",61,780,7.82051282051282,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",5,"AIC/BIC.1",120,780,15.3846153846154,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",5,"macs.0",129,780,16.5384615384615,"baselines","unsupervised"
+"H3K4me3_TDH_other",5,"hmcan.broad.0",296,780,37.9487179487179,"baselines","unsupervised"
+"H3K4me3_TDH_other",6,"oracle.0",78,650,12,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",6,"oracle.1",56,650,8.61538461538461,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",6,"AIC/BIC.1",169,650,26,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_TDH_other",6,"macs.0",116,650,17.8461538461538,"baselines","unsupervised"
+"H3K4me3_TDH_other",6,"hmcan.broad.0",209,650,32.1538461538462,"baselines","unsupervised"
+"H3K4me3_XJ_immune",1,"oracle.0",273,621,43.9613526570048,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",1,"oracle.1",158,621,25.4428341384863,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",1,"AIC/BIC.1",403,621,64.8953301127214,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",1,"macs.0",134,621,21.5780998389694,"baselines","unsupervised"
+"H3K4me3_XJ_immune",1,"hmcan.broad.0",304,621,48.9533011272142,"baselines","unsupervised"
+"H3K4me3_XJ_immune",2,"oracle.0",254,702,36.1823361823362,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",2,"oracle.1",136,702,19.3732193732194,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",2,"AIC/BIC.1",378,702,53.8461538461538,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",2,"macs.0",157,702,22.3646723646724,"baselines","unsupervised"
+"H3K4me3_XJ_immune",2,"hmcan.broad.0",324,702,46.1538461538462,"baselines","unsupervised"
+"H3K4me3_XJ_immune",3,"oracle.0",281,702,40.02849002849,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",3,"oracle.1",152,702,21.6524216524217,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",3,"AIC/BIC.1",373,702,53.1339031339031,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",3,"macs.0",183,702,26.0683760683761,"baselines","unsupervised"
+"H3K4me3_XJ_immune",3,"hmcan.broad.0",354,702,50.4273504273504,"baselines","unsupervised"
+"H3K4me3_XJ_immune",4,"oracle.0",238,756,31.4814814814815,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",4,"oracle.1",133,756,17.5925925925926,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",4,"AIC/BIC.1",295,756,39.021164021164,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",4,"macs.0",160,756,21.1640211640212,"baselines","unsupervised"
+"H3K4me3_XJ_immune",4,"hmcan.broad.0",403,756,53.3068783068783,"baselines","unsupervised"
+"H3K4me3_XJ_immune",5,"oracle.0",258,702,36.7521367521368,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",5,"oracle.1",185,702,26.3532763532764,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",5,"AIC/BIC.1",379,702,53.988603988604,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",5,"macs.0",183,702,26.0683760683761,"baselines","unsupervised"
+"H3K4me3_XJ_immune",5,"hmcan.broad.0",371,702,52.8490028490028,"baselines","unsupervised"
+"H3K4me3_XJ_immune",6,"oracle.0",260,756,34.3915343915344,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",6,"oracle.1",186,756,24.6031746031746,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",6,"AIC/BIC.1",370,756,48.9417989417989,"PeakSeg (cDPA)","grid
+search"
+"H3K4me3_XJ_immune",6,"macs.0",189,756,25,"baselines","unsupervised"
+"H3K4me3_XJ_immune",6,"hmcan.broad.0",384,756,50.7936507936508,"baselines","unsupervised"
+"H3K36me3_AM_immune",1,"AIC/BIC.0",434,882,49.2063492063492,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",2,"AIC/BIC.0",394,819,48.1074481074481,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",3,"AIC/BIC.0",421,945,44.5502645502646,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",4,"AIC/BIC.0",506,987,51.2664640324215,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",5,"AIC/BIC.0",384,840,45.7142857142857,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",6,"AIC/BIC.0",428,987,43.3637284701115,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",1,"AIC/BIC.0",120,294,40.8163265306122,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",2,"AIC/BIC.0",101,378,26.7195767195767,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",3,"AIC/BIC.0",121,378,32.010582010582,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",4,"AIC/BIC.0",112,252,44.4444444444444,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",5,"AIC/BIC.0",132,252,52.3809523809524,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_immune",6,"AIC/BIC.0",113,336,33.6309523809524,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",1,"AIC/BIC.0",32,96,33.3333333333333,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",2,"AIC/BIC.0",44,96,45.8333333333333,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",3,"AIC/BIC.0",46,112,41.0714285714286,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",4,"AIC/BIC.0",17,88,19.3181818181818,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",5,"AIC/BIC.0",19,104,18.2692307692308,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_TDH_other",6,"AIC/BIC.0",31,104,29.8076923076923,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",1,"AIC/BIC.0",807,1890,42.6984126984127,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",2,"AIC/BIC.0",962,2025,47.5061728395062,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",3,"AIC/BIC.0",919,1917,47.9394887845592,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",4,"AIC/BIC.0",945,2025,46.6666666666667,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",5,"AIC/BIC.0",930,1971,47.1841704718417,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_PGP_immune",6,"AIC/BIC.0",916,1944,47.119341563786,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",1,"AIC/BIC.0",706,1971,35.8193810248605,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",2,"AIC/BIC.0",531,1809,29.3532338308458,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",3,"AIC/BIC.0",693,1701,40.7407407407407,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",4,"AIC/BIC.0",684,1998,34.2342342342342,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",5,"AIC/BIC.0",572,1701,33.6272780717225,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_immune",6,"AIC/BIC.0",732,2025,36.1481481481481,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",1,"AIC/BIC.0",189,780,24.2307692307692,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",2,"AIC/BIC.0",184,740,24.8648648648649,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",3,"AIC/BIC.0",204,750,27.2,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",4,"AIC/BIC.0",167,810,20.6172839506173,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",5,"AIC/BIC.0",186,780,23.8461538461538,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_TDH_other",6,"AIC/BIC.0",190,650,29.2307692307692,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",1,"AIC/BIC.0",408,621,65.7004830917874,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",2,"AIC/BIC.0",384,702,54.7008547008547,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",3,"AIC/BIC.0",378,702,53.8461538461538,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",4,"AIC/BIC.0",363,756,48.015873015873,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",5,"AIC/BIC.0",379,702,53.988603988604,"PeakSeg (cDPA)","unsupervised"
+"H3K4me3_XJ_immune",6,"AIC/BIC.0",374,756,49.4708994708995,"PeakSeg (cDPA)","unsupervised"
+"H3K36me3_AM_immune",1,"AIC/BIC.41",32,882,3.6281179138322,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",1,"AIC/BIC.3",25,882,2.83446712018141,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",2,"AIC/BIC.41",48,819,5.86080586080586,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",2,"AIC/BIC.3",49,819,5.98290598290598,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",3,"AIC/BIC.41",48,945,5.07936507936508,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",3,"AIC/BIC.3",74,945,7.83068783068783,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",4,"AIC/BIC.41",63,987,6.38297872340426,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",4,"AIC/BIC.3",60,987,6.0790273556231,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",5,"AIC/BIC.41",30,840,3.57142857142857,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",5,"AIC/BIC.3",37,840,4.40476190476191,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",6,"AIC/BIC.41",88,987,8.91590678824721,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",6,"AIC/BIC.3",89,987,9.01722391084093,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",1,"AIC/BIC.41",9,294,3.06122448979592,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",1,"AIC/BIC.3",13,294,4.42176870748299,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",2,"AIC/BIC.41",27,378,7.14285714285714,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",2,"AIC/BIC.3",24,378,6.34920634920635,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",3,"AIC/BIC.41",101,378,26.7195767195767,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",3,"AIC/BIC.3",121,378,32.010582010582,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",4,"AIC/BIC.41",30,252,11.9047619047619,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",4,"AIC/BIC.3",112,252,44.4444444444444,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",5,"AIC/BIC.41",12,252,4.76190476190476,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",5,"AIC/BIC.3",13,252,5.15873015873016,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",6,"AIC/BIC.41",19,336,5.65476190476191,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",6,"AIC/BIC.3",30,336,8.92857142857143,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",1,"AIC/BIC.41",12,96,12.5,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",1,"AIC/BIC.3",32,96,33.3333333333333,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",2,"AIC/BIC.41",12,96,12.5,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",2,"AIC/BIC.3",29,96,30.2083333333333,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",3,"AIC/BIC.41",0,112,0,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",3,"AIC/BIC.3",1,112,0.892857142857143,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",4,"AIC/BIC.41",12,88,13.6363636363636,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",4,"AIC/BIC.3",15,88,17.0454545454545,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",5,"AIC/BIC.41",2,104,1.92307692307692,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",5,"AIC/BIC.3",2,104,1.92307692307692,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",6,"AIC/BIC.41",6,104,5.76923076923077,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",6,"AIC/BIC.3",0,104,0,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",1,"AIC/BIC.41",365,1890,19.3121693121693,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",1,"AIC/BIC.3",411,1890,21.7460317460317,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",2,"AIC/BIC.41",386,2025,19.0617283950617,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",2,"AIC/BIC.3",359,2025,17.7283950617284,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",3,"AIC/BIC.41",413,1917,21.5440792905582,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",3,"AIC/BIC.3",399,1917,20.8137715179969,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",4,"AIC/BIC.41",372,2025,18.3703703703704,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",4,"AIC/BIC.3",411,2025,20.2962962962963,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",5,"AIC/BIC.41",336,1971,17.0471841704718,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",5,"AIC/BIC.3",388,1971,19.6854388635211,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",6,"AIC/BIC.41",389,1944,20.0102880658436,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",6,"AIC/BIC.3",391,1944,20.1131687242798,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",1,"AIC/BIC.41",308,1971,15.6265854895992,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",1,"AIC/BIC.3",297,1971,15.0684931506849,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",2,"AIC/BIC.41",214,1809,11.8297401879491,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",2,"AIC/BIC.3",209,1809,11.5533443891653,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",3,"AIC/BIC.41",264,1701,15.5202821869489,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",3,"AIC/BIC.3",270,1701,15.8730158730159,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",4,"AIC/BIC.41",245,1998,12.2622622622623,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",4,"AIC/BIC.3",256,1998,12.8128128128128,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",5,"AIC/BIC.41",218,1701,12.8159905937684,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",5,"AIC/BIC.3",193,1701,11.3462669018225,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",6,"AIC/BIC.41",301,2025,14.8641975308642,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",6,"AIC/BIC.3",274,2025,13.5308641975309,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",1,"AIC/BIC.41",55,780,7.05128205128205,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",1,"AIC/BIC.3",54,780,6.92307692307692,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",2,"AIC/BIC.41",65,740,8.78378378378378,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",2,"AIC/BIC.3",59,740,7.97297297297297,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",3,"AIC/BIC.41",57,750,7.6,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",3,"AIC/BIC.3",39,750,5.2,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",4,"AIC/BIC.41",58,810,7.16049382716049,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",4,"AIC/BIC.3",61,810,7.53086419753086,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",5,"AIC/BIC.41",60,780,7.69230769230769,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",5,"AIC/BIC.3",58,780,7.43589743589744,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",6,"AIC/BIC.41",58,650,8.92307692307692,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",6,"AIC/BIC.3",37,650,5.69230769230769,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",1,"AIC/BIC.41",132,621,21.256038647343,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",1,"AIC/BIC.3",137,621,22.061191626409,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",2,"AIC/BIC.41",117,702,16.6666666666667,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",2,"AIC/BIC.3",113,702,16.0968660968661,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",3,"AIC/BIC.41",140,702,19.9430199430199,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",3,"AIC/BIC.3",159,702,22.6495726495727,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",4,"AIC/BIC.41",119,756,15.7407407407407,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",4,"AIC/BIC.3",123,756,16.2698412698413,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",5,"AIC/BIC.41",145,702,20.6552706552707,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",5,"AIC/BIC.3",159,702,22.6495726495727,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",6,"AIC/BIC.41",167,756,22.0899470899471,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",6,"AIC/BIC.3",169,756,22.3544973544974,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",1,"oracle.41",23,882,2.60770975056689,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",1,"oracle.3",24,882,2.72108843537415,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",2,"oracle.41",47,819,5.73870573870574,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",2,"oracle.3",45,819,5.49450549450549,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",3,"oracle.41",54,945,5.71428571428571,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",3,"oracle.3",68,945,7.1957671957672,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",4,"oracle.41",59,987,5.97771023302938,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",4,"oracle.3",56,987,5.67375886524823,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",5,"oracle.41",32,840,3.80952380952381,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",5,"oracle.3",34,840,4.04761904761905,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",6,"oracle.41",75,987,7.59878419452887,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",6,"oracle.3",83,987,8.40932117527862,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",1,"oracle.41",6,294,2.04081632653061,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",1,"oracle.3",12,294,4.08163265306122,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",2,"oracle.41",24,378,6.34920634920635,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",2,"oracle.3",22,378,5.82010582010582,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",3,"oracle.41",110,378,29.1005291005291,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",3,"oracle.3",121,378,32.010582010582,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",4,"oracle.41",16,252,6.34920634920635,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",4,"oracle.3",112,252,44.4444444444444,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",5,"oracle.41",13,252,5.15873015873016,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",5,"oracle.3",13,252,5.15873015873016,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",6,"oracle.41",17,336,5.05952380952381,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_immune",6,"oracle.3",28,336,8.33333333333333,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",1,"oracle.41",12,96,12.5,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",1,"oracle.3",32,96,33.3333333333333,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",2,"oracle.41",12,96,12.5,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",2,"oracle.3",27,96,28.125,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",3,"oracle.41",2,112,1.78571428571429,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",3,"oracle.3",2,112,1.78571428571429,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",4,"oracle.41",9,88,10.2272727272727,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",4,"oracle.3",15,88,17.0454545454545,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",5,"oracle.41",2,104,1.92307692307692,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",5,"oracle.3",2,104,1.92307692307692,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",6,"oracle.41",6,104,5.76923076923077,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_TDH_other",6,"oracle.3",0,104,0,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",1,"oracle.41",367,1890,19.4179894179894,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",1,"oracle.3",411,1890,21.7460317460317,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",2,"oracle.41",387,2025,19.1111111111111,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",2,"oracle.3",363,2025,17.9259259259259,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",3,"oracle.41",415,1917,21.6484089723526,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",3,"oracle.3",396,1917,20.6572769953052,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",4,"oracle.41",374,2025,18.4691358024691,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",4,"oracle.3",400,2025,19.7530864197531,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",5,"oracle.41",340,1971,17.2501268391679,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",5,"oracle.3",374,1971,18.9751395230847,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",6,"oracle.41",385,1944,19.8045267489712,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_PGP_immune",6,"oracle.3",394,1944,20.2674897119342,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",1,"oracle.41",310,1971,15.7280568239472,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",1,"oracle.3",307,1971,15.5758498224252,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",2,"oracle.41",221,1809,12.2166943062465,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",2,"oracle.3",211,1809,11.6639027086788,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",3,"oracle.41",265,1701,15.5790711346267,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",3,"oracle.3",270,1701,15.8730158730159,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",4,"oracle.41",235,1998,11.7617617617618,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",4,"oracle.3",258,1998,12.9129129129129,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",5,"oracle.41",219,1701,12.8747795414462,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",5,"oracle.3",195,1701,11.4638447971781,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",6,"oracle.41",303,2025,14.962962962963,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_immune",6,"oracle.3",277,2025,13.679012345679,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",1,"oracle.41",58,780,7.43589743589744,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",1,"oracle.3",55,780,7.05128205128205,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",2,"oracle.41",57,740,7.7027027027027,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",2,"oracle.3",59,740,7.97297297297297,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",3,"oracle.41",55,750,7.33333333333333,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",3,"oracle.3",39,750,5.2,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",4,"oracle.41",54,810,6.66666666666667,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",4,"oracle.3",61,810,7.53086419753086,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",5,"oracle.41",61,780,7.82051282051282,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",5,"oracle.3",59,780,7.56410256410256,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",6,"oracle.41",44,650,6.76923076923077,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_TDH_other",6,"oracle.3",37,650,5.69230769230769,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",1,"oracle.41",131,621,21.0950080515298,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",1,"oracle.3",135,621,21.7391304347826,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",2,"oracle.41",110,702,15.6695156695157,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",2,"oracle.3",112,702,15.954415954416,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",3,"oracle.41",142,702,20.2279202279202,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",3,"oracle.3",159,702,22.6495726495727,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",4,"oracle.41",118,756,15.6084656084656,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",4,"oracle.3",155,756,20.5026455026455,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",5,"oracle.41",150,702,21.3675213675214,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",5,"oracle.3",159,702,22.6495726495727,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",6,"oracle.41",156,756,20.6349206349206,"PeakSeg (cDPA)","interval
+regression"
+"H3K4me3_XJ_immune",6,"oracle.3",170,756,22.4867724867725,"PeakSeg (cDPA)","interval
+regression"
+"H3K36me3_AM_immune",1,"hmcan.broad.1",50,882,5.66893424036281,"baselines","grid
+search"
+"H3K36me3_AM_immune",1,"macs.1",269,882,30.4988662131519,"baselines","grid
+search"
+"H3K36me3_AM_immune",2,"hmcan.broad.1",66,819,8.05860805860806,"baselines","grid
+search"
+"H3K36me3_AM_immune",2,"macs.1",275,819,33.5775335775336,"baselines","grid
+search"
+"H3K36me3_AM_immune",3,"hmcan.broad.1",69,945,7.3015873015873,"baselines","grid
+search"
+"H3K36me3_AM_immune",3,"macs.1",264,945,27.9365079365079,"baselines","grid
+search"
+"H3K36me3_AM_immune",4,"hmcan.broad.1",105,987,10.6382978723404,"baselines","grid
+search"
+"H3K36me3_AM_immune",4,"macs.1",375,987,37.9939209726444,"baselines","grid
+search"
+"H3K36me3_AM_immune",5,"hmcan.broad.1",97,840,11.547619047619,"baselines","grid
+search"
+"H3K36me3_AM_immune",5,"macs.1",297,840,35.3571428571429,"baselines","grid
+search"
+"H3K36me3_AM_immune",6,"hmcan.broad.1",72,987,7.29483282674772,"baselines","grid
+search"
+"H3K36me3_AM_immune",6,"macs.1",291,987,29.483282674772,"baselines","grid
+search"
+"H3K36me3_TDH_immune",1,"hmcan.broad.1",83,294,28.2312925170068,"baselines","grid
+search"
+"H3K36me3_TDH_immune",1,"macs.1",141,294,47.9591836734694,"baselines","grid
+search"
+"H3K36me3_TDH_immune",2,"hmcan.broad.1",74,378,19.5767195767196,"baselines","grid
+search"
+"H3K36me3_TDH_immune",2,"macs.1",199,378,52.6455026455027,"baselines","grid
+search"
+"H3K36me3_TDH_immune",3,"hmcan.broad.1",103,378,27.2486772486773,"baselines","grid
+search"
+"H3K36me3_TDH_immune",3,"macs.1",226,378,59.7883597883598,"baselines","grid
+search"
+"H3K36me3_TDH_immune",4,"hmcan.broad.1",28,252,11.1111111111111,"baselines","grid
+search"
+"H3K36me3_TDH_immune",4,"macs.1",120,252,47.6190476190476,"baselines","grid
+search"
+"H3K36me3_TDH_immune",5,"hmcan.broad.1",85,252,33.7301587301587,"baselines","grid
+search"
+"H3K36me3_TDH_immune",5,"macs.1",147,252,58.3333333333333,"baselines","grid
+search"
+"H3K36me3_TDH_immune",6,"hmcan.broad.1",56,336,16.6666666666667,"baselines","grid
+search"
+"H3K36me3_TDH_immune",6,"macs.1",207,336,61.6071428571429,"baselines","grid
+search"
+"H3K36me3_TDH_other",1,"hmcan.broad.1",16,96,16.6666666666667,"baselines","grid
+search"
+"H3K36me3_TDH_other",1,"macs.1",61,96,63.5416666666667,"baselines","grid
+search"
+"H3K36me3_TDH_other",2,"hmcan.broad.1",11,96,11.4583333333333,"baselines","grid
+search"
+"H3K36me3_TDH_other",2,"macs.1",58,96,60.4166666666667,"baselines","grid
+search"
+"H3K36me3_TDH_other",3,"hmcan.broad.1",5,112,4.46428571428571,"baselines","grid
+search"
+"H3K36me3_TDH_other",3,"macs.1",61,112,54.4642857142857,"baselines","grid
+search"
+"H3K36me3_TDH_other",4,"hmcan.broad.1",11,88,12.5,"baselines","grid
+search"
+"H3K36me3_TDH_other",4,"macs.1",46,88,52.2727272727273,"baselines","grid
+search"
+"H3K36me3_TDH_other",5,"hmcan.broad.1",12,104,11.5384615384615,"baselines","grid
+search"
+"H3K36me3_TDH_other",5,"macs.1",57,104,54.8076923076923,"baselines","grid
+search"
+"H3K36me3_TDH_other",6,"hmcan.broad.1",12,104,11.5384615384615,"baselines","grid
+search"
+"H3K36me3_TDH_other",6,"macs.1",53,104,50.9615384615385,"baselines","grid
+search"
+"H3K4me3_PGP_immune",1,"hmcan.broad.1",681,1890,36.031746031746,"baselines","grid
+search"
+"H3K4me3_PGP_immune",1,"macs.1",434,1890,22.962962962963,"baselines","grid
+search"
+"H3K4me3_PGP_immune",2,"hmcan.broad.1",724,2025,35.7530864197531,"baselines","grid
+search"
+"H3K4me3_PGP_immune",2,"macs.1",454,2025,22.4197530864198,"baselines","grid
+search"
+"H3K4me3_PGP_immune",3,"hmcan.broad.1",701,1917,36.5675534689619,"baselines","grid
+search"
+"H3K4me3_PGP_immune",3,"macs.1",377,1917,19.6661450182577,"baselines","grid
+search"
+"H3K4me3_PGP_immune",4,"hmcan.broad.1",701,2025,34.6172839506173,"baselines","grid
+search"
+"H3K4me3_PGP_immune",4,"macs.1",363,2025,17.9259259259259,"baselines","grid
+search"
+"H3K4me3_PGP_immune",5,"hmcan.broad.1",669,1971,33.9421613394216,"baselines","grid
+search"
+"H3K4me3_PGP_immune",5,"macs.1",360,1971,18.2648401826484,"baselines","grid
+search"
+"H3K4me3_PGP_immune",6,"hmcan.broad.1",711,1944,36.5740740740741,"baselines","grid
+search"
+"H3K4me3_PGP_immune",6,"macs.1",430,1944,22.119341563786,"baselines","grid
+search"
+"H3K4me3_TDH_immune",1,"hmcan.broad.1",582,1971,29.5281582952816,"baselines","grid
+search"
+"H3K4me3_TDH_immune",1,"macs.1",363,1971,18.4170471841705,"baselines","grid
+search"
+"H3K4me3_TDH_immune",2,"hmcan.broad.1",410,1809,22.6644555002764,"baselines","grid
+search"
+"H3K4me3_TDH_immune",2,"macs.1",266,1809,14.7042564953013,"baselines","grid
+search"
+"H3K4me3_TDH_immune",3,"hmcan.broad.1",466,1701,27.3956496178718,"baselines","grid
+search"
+"H3K4me3_TDH_immune",3,"macs.1",305,1701,17.9306290417402,"baselines","grid
+search"
+"H3K4me3_TDH_immune",4,"hmcan.broad.1",407,1998,20.3703703703704,"baselines","grid
+search"
+"H3K4me3_TDH_immune",4,"macs.1",306,1998,15.3153153153153,"baselines","grid
+search"
+"H3K4me3_TDH_immune",5,"hmcan.broad.1",350,1701,20.5761316872428,"baselines","grid
+search"
+"H3K4me3_TDH_immune",5,"macs.1",281,1701,16.5196942974721,"baselines","grid
+search"
+"H3K4me3_TDH_immune",6,"hmcan.broad.1",510,2025,25.1851851851852,"baselines","grid
+search"
+"H3K4me3_TDH_immune",6,"macs.1",337,2025,16.641975308642,"baselines","grid
+search"
+"H3K4me3_TDH_other",1,"hmcan.broad.1",259,780,33.2051282051282,"baselines","grid
+search"
+"H3K4me3_TDH_other",1,"macs.1",68,780,8.71794871794872,"baselines","grid
+search"
+"H3K4me3_TDH_other",2,"hmcan.broad.1",238,740,32.1621621621622,"baselines","grid
+search"
+"H3K4me3_TDH_other",2,"macs.1",77,740,10.4054054054054,"baselines","grid
+search"
+"H3K4me3_TDH_other",3,"hmcan.broad.1",231,750,30.8,"baselines","grid
+search"
+"H3K4me3_TDH_other",3,"macs.1",61,750,8.13333333333333,"baselines","grid
+search"
+"H3K4me3_TDH_other",4,"hmcan.broad.1",273,810,33.7037037037037,"baselines","grid
+search"
+"H3K4me3_TDH_other",4,"macs.1",64,810,7.90123456790123,"baselines","grid
+search"
+"H3K4me3_TDH_other",5,"hmcan.broad.1",263,780,33.7179487179487,"baselines","grid
+search"
+"H3K4me3_TDH_other",5,"macs.1",71,780,9.1025641025641,"baselines","grid
+search"
+"H3K4me3_TDH_other",6,"hmcan.broad.1",174,650,26.7692307692308,"baselines","grid
+search"
+"H3K4me3_TDH_other",6,"macs.1",65,650,10,"baselines","grid
+search"
+"H3K4me3_XJ_immune",1,"hmcan.broad.1",301,621,48.4702093397746,"baselines","grid
+search"
+"H3K4me3_XJ_immune",1,"macs.1",119,621,19.1626409017713,"baselines","grid
+search"
+"H3K4me3_XJ_immune",2,"hmcan.broad.1",351,702,50,"baselines","grid
+search"
+"H3K4me3_XJ_immune",2,"macs.1",169,702,24.0740740740741,"baselines","grid
+search"
+"H3K4me3_XJ_immune",3,"hmcan.broad.1",378,702,53.8461538461538,"baselines","grid
+search"
+"H3K4me3_XJ_immune",3,"macs.1",183,702,26.0683760683761,"baselines","grid
+search"
+"H3K4me3_XJ_immune",4,"hmcan.broad.1",415,756,54.8941798941799,"baselines","grid
+search"
+"H3K4me3_XJ_immune",4,"macs.1",168,756,22.2222222222222,"baselines","grid
+search"
+"H3K4me3_XJ_immune",5,"hmcan.broad.1",382,702,54.4159544159544,"baselines","grid
+search"
+"H3K4me3_XJ_immune",5,"macs.1",174,702,24.7863247863248,"baselines","grid
+search"
+"H3K4me3_XJ_immune",6,"hmcan.broad.1",405,756,53.5714285714286,"baselines","grid
+search"
+"H3K4me3_XJ_immune",6,"macs.1",189,756,25,"baselines","grid
+search"
