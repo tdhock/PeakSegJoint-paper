@@ -10,7 +10,11 @@ sets <-
   list(train=chrom.vec %in% train.chroms,
        validation=! chrom.vec %in% train.chroms)
 train.problems <- H3K4me3.PGP.immune.4608[sets$train]
-fit <- IntervalRegressionProblems(train.problems, threshold=1e-3)
+fit <-
+  IntervalRegressionProblems(train.problems,
+                             initial.regularization=0.01,
+                             factor.regularization=1.1,
+                             threshold=1e-3)
 set.error.list <- list()
 for(set.name in names(sets)){
   in.set <- sets[[set.name]]
@@ -38,6 +42,10 @@ best.models <- fit$weight.mat[, rownames(min.validation)]
 best.nonzero <- best.models[apply(best.models!=0, 1, any), ]
 print(best.nonzero)
 
+regularization.range <- with(min.validation, {
+  data.frame(min=min(regularization), max=max(regularization))
+})
+
 weight.list <- list()
 for(regularization.i in seq_along(fit$regularization.vec)){
   regularization <- fit$regularization.vec[[regularization.i]]
@@ -50,6 +58,7 @@ weight.df <- do.call(rbind, weight.list)
 set.error <- do.call(rbind, set.error.list)
 error.lines <- data.frame(set.error, what="percent incorrect targets")
 learned.weights <- data.frame(weight.df, what="learned weights")
+nonzero.weights <- subset(learned.weights, weight != 0)
 selected.vars <- subset(learned.weights, variable %in% rownames(best.nonzero))
 
 pathPlot <- 
@@ -59,18 +68,24 @@ ggplot()+
   geom_line(aes(-log10(regularization), weight,
                 group=variable, color=variable),
             data=learned.weights)+
+  geom_point(aes(-log10(regularization), weight,
+                color=variable),
+            data=nonzero.weights)+
   geom_dl(aes(-log10(regularization), weight,
               color=variable, label=variable),
           data=selected.vars, method="last.polygons")+
   ylab("")+
   scale_x_continuous("model complexity -log10(regularization)",
                      limits=c(min(-log10(learned.weights$regularization)),
-                       4))+
+                       2.5))+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "cm"))+
   facet_grid(what ~ ., scales="free")+
-  geom_point(aes(-log10(regularization), percent.error),
-             data=data.frame(min.validation, what="percent incorrect targets"))+
+  ## geom_point(aes(-log10(regularization), percent.error),
+  ##            data=data.frame(min.validation, what="percent incorrect targets"))+
+  geom_tallrect(aes(xmin=-log10(min), xmax=-log10(max)),
+                alpha=0.2,
+                data=regularization.range)+
   geom_dl(aes(-log10(regularization), percent.error, label=set.name),
           data=error.lines, method="last.qp")+
   geom_line(aes(-log10(regularization), percent.error,
