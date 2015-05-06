@@ -2,7 +2,7 @@ works_with_R("3.2.0",
              ggplot2="1.0",
              microbenchmark="1.3.0",
              "tdhock/PeakSegDP@fe06a5b91d68c5d1ec471cb15c3ec3935dc2624d",
-             "tdhock/PeakSegJoint@e6bc386c555e203cc80343814939d51785c03af1")
+             "tdhock/PeakSegJoint@44da28676be225d6207aa3a1d0f0019e456c5b7b")
 
 data(H3K36me3.TDH.other.chunk1)
 
@@ -89,6 +89,9 @@ for(sample.i in seq_along(profile.list)){
     all.peaks$loss[model.i] <- sum(unlist(seg.loss.list))
   }
   all.peaks$status <- with(all.peaks, ifelse(loss == min(loss), "best", "not"))
+  best.peak <- subset(all.peaks, loss == min(loss))[1, ]
+  all.peaks$chromStart.diff <- all.peaks$chromStart - best.peak$chromStart
+  all.peaks$chromEnd.diff <- all.peaks$chromEnd - best.peak$chromEnd
 
   loss.list[[sample.id]] <- data.frame(sample.id, all.peaks)
   
@@ -157,10 +160,19 @@ ggplot()+
   scale_size_manual(values=c(best=3, not=1))+
   geom_point(aes(param.fac, loss, color=algorithm, size=status),
              data=data.frame(loss, what="loss"))+
-  geom_segment(aes(param.fac, chromStart/1e3,
-                   xend=param.fac, yend=chromEnd/1e3,
+  geom_segment(aes(param.fac, chromStart,
+                   xend=param.fac, yend=chromEnd,
                    color=algorithm, size=status),
-               data=data.frame(loss, what="peak"))
+               data=data.frame(loss, what="peak"))+
+  geom_text(aes(param.fac, chromStart,
+                label=chromStart.diff),
+            vjust=0,
+            data=data.frame(loss, what="peak"))+
+  geom_text(aes(param.fac, chromEnd,
+                label=chromEnd.diff),
+            vjust=1,
+            data=data.frame(loss, what="peak"))+
+  ggtitle("distance to best peak in bases")
 
 pdf("figure-heuristic-loss.pdf", h=6)
 print(h.loss)
