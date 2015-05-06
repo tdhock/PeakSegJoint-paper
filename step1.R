@@ -1,7 +1,7 @@
 works_with_R("3.2.0",
              dplyr="0.4.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@44da28676be225d6207aa3a1d0f0019e456c5b7b")
+             "tdhock/PeakSegJoint@ff5a7c58e297b54b328047f4e02285f0cb5d2838")
 
 load("train.sets.RData")
 load("chunk.problems.RData")
@@ -222,11 +222,22 @@ for(set.name in names(train.sets)){
     print(resPlot)
     dev.off()
     res.str <- paste(selected.min.err$bases.per.problem)
-    reg.str <- paste(selected.min.err$regularization)
+    reg.num <- selected.min.err$regularization
+    reg.str <- paste(reg.num)
     weight.vec <- fit.list[[res.str]]$weight.mat[, reg.str]
     nonzero.vec <- weight.vec[weight.vec != 0]
     print(nonzero.vec)
 
+    train.data.list <- list()
+    for(chunk.name in train.validation){
+      data.by.problem <- data.by.chunk[[chunk.name]][[res.str]]
+      for(problem.name in names(data.by.problem)){
+        problem <- data.by.problem[[problem.name]]
+        train.data.list[[paste(chunk.name, problem.name)]] <- problem
+      }
+    }
+    fit <- IntervalRegressionProblems(train.data.list)
+    
     out.peak.list <- list()
     res.peak.list <- pred.peak.list[[res.str]]
     for(chunk.name in names(res.peak.list)){
@@ -236,7 +247,7 @@ for(set.name in names(train.sets)){
       list(glob.min.err=selected.min.err,
            res.str=res.str,
            reg.str=reg.str,
-           fit=fit.list[[res.str]],
+           fit=fit,
            peak.list=out.peak.list)
     all.split.list[[split.name]] <- split.data
   }#split.i
