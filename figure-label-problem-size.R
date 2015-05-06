@@ -1,6 +1,7 @@
 works_with_R("3.2.0",
+             ggplot2="1.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@c68c566a606aea75d646e81087d168e5e2f0531a")
+             "tdhock/PeakSegJoint@ff5a7c58e297b54b328047f4e02285f0cb5d2838")
 
 load("step1.RData")
 load("chunk.problems.RData")
@@ -27,7 +28,7 @@ for(split.name in names(step1)){
   }
   bases.vec <- do.call(c, bases.list)
   med <- quantile(bases.vec, 0.25)
-  guess.list[[set.name]] <- data.frame(set.name, min=med, max=med*1000)
+  guess.list[[set.name]] <- data.frame(set.name, min=med, max=med*100)
   peak.size.list[[set.name]] <- data.frame(set.name, bases.per.problem=bases.vec)
   data.by.chunk <- chunk.problems[[set.name]]
   set.name <- sub(" .*", "", split.name)
@@ -39,7 +40,7 @@ guess <- do.call(rbind, guess.list)
 
 psize <- 
 ggplot()+
-  ggtitle("25% quantile * 1000 bases")+
+  ggtitle("25% quantile * 100 bases")+
   ylab("")+
   geom_tallrect(aes(xmin=min, xmax=max),
                 alpha=0.5,

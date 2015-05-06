@@ -2,7 +2,7 @@ works_with_R("3.2.0",
              ggplot2="1.0",
              microbenchmark="1.3.0",
              "tdhock/PeakSegDP@fe06a5b91d68c5d1ec471cb15c3ec3935dc2624d",
-             "tdhock/PeakSegJoint@44da28676be225d6207aa3a1d0f0019e456c5b7b")
+             "tdhock/PeakSegJoint@ff5a7c58e297b54b328047f4e02285f0cb5d2838")
 
 data(H3K36me3.TDH.other.chunk1)
 
@@ -167,10 +167,12 @@ ggplot()+
   geom_text(aes(param.fac, chromStart,
                 label=chromStart.diff),
             vjust=0,
+            size=2,
             data=data.frame(loss, what="peak"))+
   geom_text(aes(param.fac, chromEnd,
                 label=chromEnd.diff),
             vjust=1,
+            size=2,
             data=data.frame(loss, what="peak"))+
   ggtitle("distance to best peak in bases")
 

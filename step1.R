@@ -268,19 +268,21 @@ ggplot()+
              color="red",
              data=hyper.tall)
 
-ex.list <- list()
-data.by.chunk <- chunk.problems[["H3K4me3_PGP_immune"]]
-for(chunk.name in names(data.by.chunk)){
-  data.by.problem <- data.by.chunk[[chunk.name]][["4608"]]
-  for(problem.name in names(data.by.problem)){
-    problem <- data.by.problem[[problem.name]]
-    if(any(is.finite(problem$target))){
-      ex.list[[problem.name]] <- problem
+if(FALSE){
+  ex.list <- list()
+  data.by.chunk <- chunk.problems[["H3K4me3_PGP_immune"]]
+  for(chunk.name in names(data.by.chunk)){
+    data.by.problem <- data.by.chunk[[chunk.name]][["4608"]]
+    for(problem.name in names(data.by.problem)){
+      problem <- data.by.problem[[problem.name]]
+      if(any(is.finite(problem$target))){
+        ex.list[[problem.name]] <- problem
+      }
     }
   }
+  H3K4me3.PGP.immune.4608 <- ex.list
+  save(H3K4me3.PGP.immune.4608, file="~/R/PeakSegJoint/data/H3K4me3.PGP.immune.4608.RData", compress="xz")
 }
-H3K4me3.PGP.immune.4608 <- ex.list
-save(H3K4me3.PGP.immune.4608, file="~/R/PeakSegJoint/data/H3K4me3.PGP.immune.4608.RData", compress="xz")
 
 step1 <- all.split.list
 save(step1, file="step1.RData")

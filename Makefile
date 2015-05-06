@@ -33,7 +33,9 @@ histone.sets.RData: histone.sets.R
 	R --no-save < $<
 train.sets.RData: train.sets.R histone.sets.RData chunk.problems.RData
 	R --no-save < $<
-figure-label-problem-size.pdf: figure-label-problem-size.R
+step1.RData: step1.R chunk.problems.RData
+	R --no-save < $<
+figure-label-problem-size.pdf: figure-label-problem-size.R step1.RData
 	R --no-save < $<
 figure-lasso-path.pdf: figure-lasso-path.R
 	R --no-save < $<

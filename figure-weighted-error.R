@@ -60,8 +60,10 @@ ggplot()+
   theme_bw()+
   scale_x_log10()+
   theme(panel.margin=grid::unit(0, "cm"))+
-  facet_grid(set.name ~ ., scales="free")
+  facet_grid(set.name ~ ., scales="free", labeller=function(var, val){
+    gsub("_", "\n", val)
+  })
 
-pdf("figure-weighted-error.pdf", h=5)
+pdf("figure-weighted-error.pdf", h=10, w=14)
 print(err.plot)
 dev.off()

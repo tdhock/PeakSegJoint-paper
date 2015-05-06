@@ -1,6 +1,7 @@
 works_with_R("3.2.0",
+             ggplot2="1.0",
              directlabels="2014.6.13",
-             "tdhock/PeakSegJoint@44da28676be225d6207aa3a1d0f0019e456c5b7b")
+             "tdhock/PeakSegJoint@ff5a7c58e297b54b328047f4e02285f0cb5d2838")
 
 data(H3K4me3.PGP.immune.4608)
 chrom.vec <- sub(":.*", "", names(H3K4me3.PGP.immune.4608))
@@ -70,7 +71,8 @@ ggplot()+
             data=learned.weights)+
   geom_point(aes(-log10(regularization), weight,
                 color=variable),
-            data=nonzero.weights)+
+             pch=1,
+             data=nonzero.weights)+
   geom_dl(aes(-log10(regularization), weight,
               color=variable, label=variable),
           data=selected.vars, method="last.polygons")+
