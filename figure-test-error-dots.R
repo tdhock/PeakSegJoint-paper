@@ -35,7 +35,7 @@ cheating.stats <- cheating.error %>%
 
 all.stats <-
   rbind(PeakSeg.results,
-        step1.best.stats, cheating.stats, #comment to hide cheaters.
+        cheating.stats, step1.best.stats, #comment to hide cheaters.
         step1.stats)
 
 region.range <- all.stats %>%
