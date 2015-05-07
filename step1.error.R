@@ -30,19 +30,11 @@ for(set.name in names(chunk.problems)){
       peaks.by.problem <- list()
       for(problem.name in names(data.by.problem)){
         problem <- data.by.problem[[problem.name]]
-        ## log.lambda.vec <- model.info$fit$predict(problem$features)
-        ## log.lambda <- log.lambda.vec[[model.info$reg.str]]
-        ## selected <- 
-        ##   subset(problem$modelSelection,
-        ##          min.log.lambda < log.lambda & log.lambda < max.log.lambda)
-        error.range <- range(problem$modelSelection$weighted.error)
-        selected <- if(diff(error.range) == 0){
-          subset(problem$modelSelection, peaks==0)
-        }else{
-          min.err <-
-            subset(problem$modelSelection, weighted.error==min(weighted.error))
-          subset(min.err, peaks == min(peaks))
-        }
+        log.lambda.vec <- model.info$fit$predict(problem$features)
+        log.lambda <- log.lambda.vec[[model.info$reg.str]]
+        selected <- 
+          subset(problem$modelSelection,
+                 min.log.lambda < log.lambda & log.lambda < max.log.lambda)
         stopifnot(nrow(selected) == 1)
         peaks.by.problem[[problem.name]] <-
           problem$peaks[[paste(selected$peaks)]]

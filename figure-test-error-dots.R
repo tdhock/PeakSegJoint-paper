@@ -15,8 +15,8 @@ step1.stats <- step1.error %>%
          algo.type="PeakSegJoint",
          learning="interval\nregression")
 
-cheating.stats <- cheating.error %>%
-  mutate(algorithm="cheating") %>%
+step1.best.stats <- step1.best %>%
+  mutate(algorithm="step1.best") %>%
   group_by(set.name, split.i, algorithm) %>%
   summarise(errors=sum(fp+fn),
             regions=n()) %>%
@@ -24,7 +24,19 @@ cheating.stats <- cheating.error %>%
          algo.type="PeakSegJoint",
          learning="cheating")
 
-all.stats <- rbind(PeakSeg.results, step1.stats, cheating.stats)
+cheating.stats <- cheating.error %>%
+  mutate(algorithm="test.best") %>%
+  group_by(set.name, split.i, algorithm) %>%
+  summarise(errors=sum(fp+fn),
+            regions=n()) %>%
+  mutate(percent=errors/regions*100,
+         algo.type="PeakSegJoint",
+         learning="cheating")
+
+all.stats <-
+  rbind(PeakSeg.results,
+        step1.best.stats, cheating.stats, #comment to hide cheaters.
+        step1.stats)
 
 region.range <- all.stats %>%
   group_by(set.name, split.i) %>%

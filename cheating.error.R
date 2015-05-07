@@ -4,6 +4,7 @@ works_with_R("3.2.0",
 
 load("chunk.problems.RData")
 load("train.sets.RData")
+load("step1.RData")
 
 regions.file.list <- list()
 regions.file.vec <- Sys.glob("../chip-seq-paper/chunks/*/*/regions.RData")
@@ -14,6 +15,7 @@ for(regions.file in regions.file.vec){
 
 cheating.error.list <- list()
 best.res.list <- list()
+step1.best.list <- list()
 for(set.name in names(chunk.problems)){
   data.by.chunk <- chunk.problems[[set.name]]
   set.chunks <- names(data.by.chunk)
@@ -22,6 +24,7 @@ for(set.name in names(chunk.problems)){
     is.train <- set.chunks %in% train.chunks
     test.chunks <- set.chunks[!is.train]
     split.name <- paste(set.name, "split", split.i)
+    step1.res <- step1[[split.name]]$res.str
     print(split.name)
     err.by.res <- list()
     for(chunk.name in test.chunks){
@@ -96,6 +99,9 @@ for(set.name in names(chunk.problems)){
     bases.per.problem <- as.numeric(res.str)
     best.res.list[[split.name]] <-
       data.frame(set.name, split.i, bases.per.problem)
+    step1.err <- do.call(rbind, err.by.res[[step1.res]])
+    step1.best.list[[split.name]] <-
+      data.frame(set.name, split.i, step1.err)
     chunk.err <- do.call(rbind, err.by.res[[res.str]])
     cheating.error.list[[split.name]] <-
       data.frame(set.name, split.i, chunk.err)
@@ -103,5 +109,7 @@ for(set.name in names(chunk.problems)){
 }#set.name
 
 cheating.error <- do.call(rbind, cheating.error.list)
+step1.best <- do.call(rbind, step1.best.list)
 
-save(cheating.error, best.res.list, file="cheating.error.RData")
+save(cheating.error, best.res.list, step1.best,
+     file="cheating.error.RData")
