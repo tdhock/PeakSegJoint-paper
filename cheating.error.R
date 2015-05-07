@@ -13,6 +13,7 @@ for(regions.file in regions.file.vec){
 }
 
 cheating.error.list <- list()
+best.res.list <- list()
 for(set.name in names(chunk.problems)){
   data.by.chunk <- chunk.problems[[set.name]]
   set.chunks <- names(data.by.chunk)
@@ -92,6 +93,9 @@ for(set.name in names(chunk.problems)){
     res.stats <- do.call(rbind, stats.by.res)
     best.res <- res.stats[which.min(res.stats$errors), ]
     res.str <- paste(best.res$res.str)
+    bases.per.problem <- as.numeric(res.str)
+    best.res.list[[split.name]] <-
+      data.frame(set.name, split.i, bases.per.problem)
     chunk.err <- do.call(rbind, err.by.res[[res.str]])
     cheating.error.list[[split.name]] <-
       data.frame(set.name, split.i, chunk.err)
@@ -100,4 +104,4 @@ for(set.name in names(chunk.problems)){
 
 cheating.error <- do.call(rbind, cheating.error.list)
 
-save(cheating.error, file="cheating.error.RData")
+save(cheating.error, best.res.list, file="cheating.error.RData")
