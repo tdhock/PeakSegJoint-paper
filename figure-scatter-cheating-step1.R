@@ -37,6 +37,6 @@ ggplot()+
   ggtitle("resolution in bases per problem (6 train/test splits plotted)")+
   facet_wrap("set.name")
 
-pdf("figure-scatter-cheating-step1.pdf", h=5)
+pdf("figure-scatter-cheating-step1.pdf", h=7, w=10)
 print(resPlot)
 dev.off()

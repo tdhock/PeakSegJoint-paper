@@ -7,7 +7,7 @@ load("step1.error.RData")
 PeakSeg.results <- read.csv("PeakSeg-results.csv")
 
 step1.stats <- step1.error %>%
-  mutate(algorithm="PeakSegJoint") %>%
+  mutate(algorithm="step1") %>%
   group_by(set.name, split.i, algorithm) %>%
   summarise(errors=sum(fp+fn),
             regions=n()) %>%
