@@ -1,7 +1,7 @@
 works_with_R("3.2.0",
              data.table="1.9.4",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@d7867c03acfbdbb2f19b358bae67bdc374d2432b")
+             "tdhock/PeakSegJoint@73ef55d75ba229e3cfac88b2d7c3d954cb1c0f84")
 
 load("step1.RData")
 load("chunk.problems.RData")
@@ -38,6 +38,10 @@ genome.pos.pattern <-
          "(?<chromStart>[0-9]+)",
          "-",
          "(?<chromEnd>[0-9]+)")
+
+set.name <- "H3K36me3_TDH_other"
+chunk.name <- paste0(set.name, "/4")
+split.i <- 6
 
 step2 <- list()
 for(set.name in names(chunk.problems)){
@@ -225,7 +229,7 @@ for(set.name in names(chunk.problems)){
         facet_grid(sample.id ~ ., scales="free", labeller=function(var, val){
           sub("McGill0", "", sub(" ", "\n", val))
         })+
-        ggtitle(paste(split.name, chunk.name))
+        ggtitle(paste(chunk.name, "split", split.i))
       chunk.png <- sprintf("step2/%s_split%d.png", chunk.name, split.i)
       png.dir <- dirname(chunk.png)
       dir.create(png.dir, showWarnings=FALSE, recursive=TRUE)
@@ -233,7 +237,7 @@ for(set.name in names(chunk.problems)){
       png(chunk.png, width=9, h=7, res=200, units="in")
       print(chunkPlot)
       dev.off()
-      
+
       problems.dt <- data.table(step2.problems)
       setkey(problems.dt, problemStart, problemEnd)
       over.regions <- foverlaps(regions, problems.dt, nomatch=0L)
@@ -247,7 +251,55 @@ for(set.name in names(chunk.problems)){
         fit <- PeakSegJointHeuristic(problem.counts)
         converted <- ConvertModelList(fit)
         prob.err.list <- PeakSegJointError(converted, problem.regions)
-      }
+        best.models <- subset(prob.err.list$modelSelection, errors==min(errors))
+        peaks.num <- min(best.models$peaks)
+        show.peaks <- subset(converted$peaks, peaks == peaks.num)
+        problemPlot <- 
+          ggplot()+
+            scale_y_continuous("aligned read coverage",
+                               breaks=function(limits){
+                                 floor(limits[2])
+                               })+
+            scale_linetype_manual("error type",
+                                  limits=c("correct", 
+                                    "false negative",
+                                    "false positive"
+                                           ),
+                                  values=c(correct=0,
+                                    "false negative"=3,
+                                    "false positive"=1))+
+            xlab("position on chromosome (kilo bases = kb)")+
+            geom_tallrect(aes(xmin=chromStart/1e3, xmax=chromEnd/1e3,
+                              fill=annotation),
+                          alpha=0.5,
+                          color="grey",
+                          data=problem.regions)+
+            scale_fill_manual(values=ann.colors)+
+            theme_bw()+
+            theme(panel.margin=grid::unit(0, "cm"))+
+            facet_grid(sample.id ~ ., labeller=function(var, val){
+              sub("McGill0", "", sub(" ", "\n", val))
+            }, scales="free")+
+            ggtitle(paste(chunk.name, "split", split.i, problem.name,
+                          paste(best.models$peaks, collapse=",")))+
+            geom_step(aes(chromStart/1e3, coverage),
+                      data=problem.counts,
+                      color="grey50")
+        if(nrow(show.peaks) > 0){
+          problemPlot <- problemPlot+
+            geom_segment(aes(chromStart/1e3, 0,
+                             xend=chromEnd/1e3, yend=0),
+                         size=2,
+                         data=show.peaks)
+        }
+        problem.under <- gsub("[-:]", "_", problem.name)
+        problem.png <-
+          sprintf("step2/%s_split%d_%s.png", chunk.name, split.i, problem.under)
+        print(problem.png)
+        png(problem.png, width=9, h=7, res=200, units="in")
+        print(problemPlot)
+        dev.off()
+      }#problem.name
     }#chunk.name
   }#split.i
 }#set.name
