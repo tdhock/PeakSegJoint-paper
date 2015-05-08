@@ -3,10 +3,9 @@ works_with_R("3.2.0",
              ggplot2="1.0",
              dplyr="0.4.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@73ef55d75ba229e3cfac88b2d7c3d954cb1c0f84")
+             "tdhock/PeakSegJoint@c91c0deafc39321023307926a289c6acf5d0ced4")
 
 load("train.sets.RData")
-load("chunk.problems.RData")
 
 regions.file.list <- list()
 regions.file.vec <- Sys.glob("../chip-seq-paper/chunks/*/*/regions.RData")

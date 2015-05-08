@@ -1,6 +1,6 @@
 works_with_R("3.2.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@d7867c03acfbdbb2f19b358bae67bdc374d2432b",
+             "tdhock/PeakSegJoint@c91c0deafc39321023307926a289c6acf5d0ced4",
              data.table="1.9.4",
              ggplot2="1.0")
 
@@ -61,13 +61,7 @@ for(set.dir.i in seq_along(set.dirs)){
                 set.name, chunk.id, bases.per.problem)
       if(file.exists(RData.file)){
         obj.names <- load(RData.file)
-        for(problem in problem.list){
-          if(length(problem$target) != 2){
-            unlink(RData.file)
-          }
-        }
-      }
-      if(!file.exists(RData.file)){
+      }else{
         cat(sprintf("%s %s\n", chunk.name, bases.per.problem))
         problemSeq <- seq(0, max.chromEnd, by=bases.per.problem)
         problemStart <-
@@ -105,7 +99,7 @@ for(set.dir.i in seq_along(set.dirs)){
         problems.with.regions <- paste(unique(overlap.regions$problem.name))
         setkey(overlap.regions, problem.name)
 
-        problem.list <- list() #[[problem.name]]
+        step1.by.problem <- list() #[[problem.name]]
         problem.stats.list <- list() #[[problem.name]]
         for(problem.i in 1:nrow(all.problems.dt)){
           problem <- all.problems.dt[problem.i, ]
@@ -184,7 +178,7 @@ for(set.dir.i in seq_along(set.dirs)){
             data.frame(problem.name,
                        weighted.error=min(some.loss$weighted.error),
                        total.weight)
-          problem.list[[problem.name]] <- 
+          step1.by.problem[[problem.name]] <- 
             list(features=featureMatrix(profile.list),
                  modelSelection=exact,
                  peaks=peaks.by.peaks,
@@ -198,15 +192,162 @@ for(set.dir.i in seq_along(set.dirs)){
           data.frame(set.name, chunk.name, bases.per.problem,
                      weighted.error=sum(problem.stats$weighted.error),
                      total.weight)
+        ## Also compute step2 data.
+        peaks.by.problem <- list()
+        for(problem.name in names(step1.by.problem)){
+          problem <- step1.by.problem[[problem.name]]
+          selected <- subset(problem$modelSelection, peaks==max(peaks))
+          stopifnot(nrow(selected) == 1)
+          if(selected$peaks > 0){
+            peaks.str <- paste(selected$peaks)
+            peaks.df <- problem$peaks[[peaks.str]]
+            peaks.by.problem[[problem.name]] <- peaks.df[1,]
+          }
+        }#problem.name
+        step1.peaks <- do.call(rbind, peaks.by.problem)
+
+        step2.overlap.list <- list()
+        if(nrow(step1.peaks) > 0){
+          clustered.peaks <- clusterPeaks(step1.peaks)
+          peaks.by.cluster <- split(clustered.peaks, clustered.peaks$cluster)
+          pred.by.cluster <- list()
+          for(cluster.name in names(peaks.by.cluster)){
+            cluster <- peaks.by.cluster[[cluster.name]]
+            merged.peak <- with(cluster, {
+              data.frame(chromStart=min(chromStart),
+                         chromEnd=max(chromEnd))
+            })
+            pred.by.cluster[[cluster.name]] <-
+              data.frame(merged.peak,
+                         sample.id=unique(cluster$sample.id))
+            cluster.chromStart <- min(cluster$chromStart)
+            cluster.chromEnd <- max(cluster$chromEnd)
+            cluster.mid <-
+              as.integer((cluster.chromEnd + cluster.chromStart)/2)
+            half.bases <- as.integer(bases.per.problem/2)
+            cluster.num <- as.numeric(cluster.name)
+            before.name <- paste(cluster.num-1)
+            chromEnd.before <- if(before.name %in% names(peaks.by.cluster)){
+              max(peaks.by.cluster[[before.name]]$chromEnd)
+            }else{
+              0
+            }
+            after.name <- paste(cluster.num+1)
+            chromStart.after <- if(after.name %in% names(peaks.by.cluster)){
+              min(peaks.by.cluster[[after.name]]$chromStart)
+            }else{
+              Inf
+            }
+            problemStart <- as.integer(cluster.chromStart - half.bases)
+            if(problemStart < chromEnd.before){
+              problemStart <-
+                as.integer((chromEnd.before+cluster.chromStart)/2)
+            }
+            problemEnd <- as.integer(cluster.chromEnd + half.bases)
+            if(chromStart.after < problemEnd){
+              problemEnd <- as.integer((chromStart.after+cluster.chromEnd)/2)
+            }
+            stopifnot(problemStart <= cluster.chromStart)
+            stopifnot(cluster.chromEnd <= problemEnd)
+            problem.i <- as.numeric(cluster.name)+1
+            step2.overlap.list[[problem.i]] <-
+              data.frame(problem.i,
+                         problem.name=sprintf("%s:%d-%d",
+                           chrom, problemStart, problemEnd),
+                         problemStart, problemEnd,
+                         peakStart=merged.peak$chromStart,
+                         peakEnd=merged.peak$chromEnd)
+          }
+        }
+        step2.overlap <- do.call(rbind, step2.overlap.list)
+        step2.problems <- with(step2.overlap, {
+          prev.problemEnd <- problemEnd[-length(problemEnd)]
+          next.problemStart <- problemStart[-1]
+          overlaps.next <- which(next.problemStart <= prev.problemEnd)
+          mid <- as.integer((prev.problemEnd+next.problemStart)/2)
+          problemEnd[overlaps.next] <- mid[overlaps.next]
+          problemStart[overlaps.next+1] <- mid[overlaps.next]+1L
+          data.frame(problem.i=seq_along(problemStart),
+                     problem.name=sprintf("%s:%d-%d",
+                       chrom, problemStart, problemEnd),
+                     problemStart, problemEnd)
+        })
+        stopifnot(with(step2.problems, {
+          problemEnd[-length(problemEnd)] < problemStart[-1]
+        }))
+        
+        ggplot()+
+          geom_segment(aes(problemStart/1e3, problem.i,
+                           color=what,
+                           xend=problemEnd/1e3, yend=problem.i),
+                       data=data.frame(step2.overlap, what="overlap"))+
+          geom_segment(aes(problemStart/1e3, problem.i,
+                           color=what,
+                           xend=problemEnd/1e3, yend=problem.i),
+                       data=data.frame(step2.problems, what="corrected"))
+
+        problems.dt <- data.table(step2.problems)
+        setkey(problems.dt, problemStart, problemEnd)
+        over.regions <- foverlaps(regions.dt, problems.dt, nomatch=0L)
+        regions.by.problem <-
+          split(over.regions, over.regions$problem.name, drop=TRUE)
+        peaks.by.problem <- list()
+        step2.by.problem <- list()
+        for(problem.name in names(regions.by.problem)){
+          problem.regions <- regions.by.problem[[problem.name]]
+          problem.i <- problem.regions$problem.i[1]
+          problem <- problems.dt[problem.i, ]
+          problem.counts <-
+            foverlaps(counts.dt, problem, nomatch=0L, type="within")
+          
+          tryCatch({
+            profile.list <- ProfileList(problem.counts)
+            fit <- PeakSegJointHeuristic(profile.list)
+            converted <- ConvertModelList(fit)
+            prob.err.list <- PeakSegJointError(converted, problem.regions)
+            step2.by.problem[[problem.name]] <-
+              list(converted=converted,
+                   error=prob.err.list,
+                   features=featureMatrix(profile.list))
+            best.models <-
+              subset(prob.err.list$modelSelection, errors==min(errors))
+            peaks.num <- min(best.models$peaks)
+            if(peaks.num > 0){
+              show.peaks <- subset(converted$peaks, peaks == peaks.num)
+              peaks.by.problem[[problem.name]] <- show.peaks
+            }
+          }, error=function(e){
+            print(e)
+          })
+        }#problem.name
+        pred.peaks <- do.call(rbind, peaks.by.problem)
+        ggplot()+
+          geom_point(aes(chromStart/1e3, sample.id),
+                     data=pred.peaks,
+                     pch=1)+
+          geom_segment(aes(chromStart/1e3, sample.id,
+                           xend=chromEnd/1e3, yend=sample.id),
+                       data=pred.peaks)
+        error.regions <- PeakErrorSamples(pred.peaks, regions.dt)
+        best.step2.error <- 
+          with(error.regions, {
+            data.frame(set.name,
+                       chunk.name,
+                       bases.per.problem,
+                       fp=sum(fp),
+                       fn=sum(fn),
+                       errors=sum(fp+fn),
+                       regions=length(fp))
+          })
+        ## Save results for this chunk/resolution.
         RData.dir <- dirname(RData.file)
         dir.create(RData.dir, showWarnings=FALSE, recursive=TRUE)
-        save(problem.list, error.row, file=RData.file)
+        save(step1.by.problem, error.row,
+             step2.by.problem, best.step2.error,
+             file=RData.file)
       }
-      
-      chunk.problems[[set.name]][[chunk.name]][[res.str]] <- problem.list
-      weighted.error.list[[set.name]][[chunk.name]][[res.str]] <- error.row
     }#bases.per.problem
   }#chunk.id
 }#set.dir.i
 
-save(chunk.problems, weighted.error.list, file="chunk.problems.RData")
+
