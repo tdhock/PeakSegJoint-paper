@@ -1,7 +1,7 @@
 works_with_R("3.2.0",
              ggplot2="1.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@ff5a7c58e297b54b328047f4e02285f0cb5d2838")
+             "tdhock/PeakSegJoint@f1682b7e9a3d11c410c208325610ea1ede13edfa")
 
 load("step1.RData")
 load("cheating.error.RData")

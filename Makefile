@@ -33,17 +33,17 @@ histone.sets.RData: histone.sets.R
 	R --no-save < $<
 train.sets.RData: train.sets.R histone.sets.RData chunk.problems.RData
 	R --no-save < $<
-step1.RData: step1.R chunk.problems.RData
+selected.by.set.RData: selected.by.set.R 
 	R --no-save < $<
-figure-label-problem-size.pdf: figure-label-problem-size.R step1.RData
+figure-label-problem-size.pdf: figure-label-problem-size.R selected.by.set.RData
 	R --no-save < $<
 figure-lasso-path.pdf: figure-lasso-path.R
 	R --no-save < $<
-step1.error.RData: step1.error.R step1.RData
+step1.error.RData: step1.error.R selected.by.set.RData
 	R --no-save < $<
 figure-test-error-dots.pdf: figure-test-error-dots.R step1.error.RData cheating.error.RData
 	R --no-save < $<
-cheating.error.RData: cheating.error.R chunk.problems.RData step1.RData
+cheating.error.RData: cheating.error.R chunk.problems.RData selected.by.set.RData
 	R --no-save < $<
-figure-scatter-cheating-step1.pdf: figure-scatter-cheating-step1.R cheating.error.RData step1.RData
+figure-scatter-cheating-step1.pdf: figure-scatter-cheating-step1.R cheating.error.RData selected.by.set.RData
 	R --no-save < $<

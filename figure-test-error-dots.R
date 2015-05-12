@@ -15,38 +15,34 @@ step1.stats <- step1.error %>%
          algo.type="PeakSegJoint",
          learning="interval\nregression")
 
-step1.best.stats <- step1.best %>%
-  mutate(algorithm="step1.best") %>%
-  group_by(set.name, split.i, algorithm) %>%
-  summarise(errors=sum(fp+fn),
-            regions=n()) %>%
-  mutate(percent=errors/regions*100,
+step1.best.stats <- data.frame(best.for.train.res) %>%
+  mutate(algorithm="train.res",
+         percent=errors/regions*100,
          algo.type="PeakSegJoint",
          learning="cheating")
 
-cheating.stats <- cheating.error %>%
-  mutate(algorithm="test.best") %>%
-  group_by(set.name, split.i, algorithm) %>%
-  summarise(errors=sum(fp+fn),
-            regions=n()) %>%
-  mutate(percent=errors/regions*100,
+cheating.stats <- data.frame(cheating.error) %>%
+  mutate(algorithm="test.res",
+         percent=errors/regions*100,
          algo.type="PeakSegJoint",
          learning="cheating")
 
+common.names <- names(PeakSeg.results)
 all.stats <-
   rbind(PeakSeg.results,
-        cheating.stats, step1.best.stats, #comment to hide cheaters.
+        cheating.stats[, common.names], #comment to hide cheaters.
+        step1.best.stats[, common.names], #comment to hide cheaters.
         step1.stats)
-
-region.range <- all.stats %>%
-  group_by(set.name, split.i) %>%
-  summarise(min=min(regions),
-            max=max(regions))
-stopifnot(with(region.range, min == max))
 
 show.stats <- all.stats %>%
   filter(!grepl("AIC/BIC", algorithm),
          !grepl("NTNU", set.name))
+
+region.range <- show.stats %>%
+  group_by(set.name, split.i) %>%
+  summarise(min=min(regions),
+            max=max(regions))
+stopifnot(with(region.range, min == max))
 
 show.means <- show.stats %>%
   group_by(set.name, algorithm, learning, algo.type) %>%
