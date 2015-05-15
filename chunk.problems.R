@@ -378,8 +378,8 @@ for(set.dir.i in seq_along(set.dirs)){
             split(assigned.regions, assigned.regions$problem.name, drop=TRUE)
           setkey(problems.dt, problem.name)
           peaks.by.problem <- list()
-          step2.peak.list <- list()
           step2.by.problem <- list()
+          step2.peak.list <- list()
           saved.problem.list <- list()
           for(problem.name in names(regions.by.problem)){
             problem.regions <- regions.by.problem[[problem.name]]
