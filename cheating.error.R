@@ -1,23 +1,23 @@
 works_with_R("3.2.0",
              dplyr="0.4.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@f1682b7e9a3d11c410c208325610ea1ede13edfa")
+             "tdhock/PeakSegJoint@9d1a4fc6751334513f2abb07689a187e04e4db76")
 
 load("train.sets.RData")
 load("selected.by.set.RData")
 
 regions.file.list <- list()
-regions.file.vec <- Sys.glob("../chip-seq-paper/chunks/*/*/regions.RData")
+regions.file.vec <- Sys.glob("PeakSegJoint-chunks/*/*/regions.RData")
 for(regions.file in regions.file.vec){
   load(regions.file)
   regions.file.list[[regions.file]] <- regions
 }
 
-RData.vec <- Sys.glob("chunk.problems/*/*/*.RData")
+RData.vec <- Sys.glob("PeakSegJoint-chunks/*/*/problems.RData")
 chunk.list <- list()
 for(RData in RData.vec){
   objs <- load(RData)
-  chunk.list[[RData]] <- best.step2.error
+  chunk.list[[RData]] <- step2.error
 }
 
 cheating.error.list <- list()
@@ -38,7 +38,9 @@ for(set.name in names(train.sets)){
     print(split.name)
     error.list <- list()
     for(chunk.name in test.chunks){
-      RData.vec <- Sys.glob(sprintf("chunk.problems/%s/*.RData", chunk.name))
+      RData.glob <-
+        sprintf("PeakSegJoint-chunks/%s/problems.RData", chunk.name)
+      RData.vec <- Sys.glob(RData.glob)
       for(RData in RData.vec){
         error.list[[RData]] <- chunk.list[[RData]]
       }
