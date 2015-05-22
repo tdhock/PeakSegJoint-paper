@@ -1,6 +1,7 @@
 works_with_R("3.2.0",
+             data.table="1.9.4",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@9d1a4fc6751334513f2abb07689a187e04e4db76")
+             "tdhock/PeakSegJoint@b127ca0b27885f8058665284fd276c958e39f386")
 
 load("selected.by.set.RData")
 load("train.sets.RData")
@@ -15,108 +16,138 @@ for(regions.file in regions.file.vec){
 RData.vec <- Sys.glob("PeakSegJoint-chunks/*/*/problems.RData")
 chunk.list <- list()
 for(RData in RData.vec){
-  objs <- load(RData)
-  chunk.list[[RData]] <- step2.by.res
+  e <- new.env()
+  objs <- load(RData, e)
+  chunk.list[[RData]] <- e
 }
 
-step1.error.list <- list()
-for(set.name in names(chunk.problems)){
+problemData <- function(chunk.name.vec, FUN){
+  data.by.problem <- list()
+  for(chunk.name in chunk.name.vec){
+    problems.RData <-
+      paste0("PeakSegJoint-chunks/", chunk.name, "/problems.RData")
+    chunk.env <- chunk.list[[problems.RData]]
+    problems.dt <- chunk.env$step2.data.list[[res.str]]$problems
+    for(problem.name in paste(problems.dt$problem.name)){
+      problem <- chunk.env$step2.model.list[[problem.name]]
+      if(problem.name %in% names(chunk.env$step2.error.list)){
+        plist <- chunk.env$step2.error.list[[problem.name]]$problem
+        problem[names(plist)] <- plist
+      }
+      data.by.problem[[problem.name]] <- FUN(problem)
+    }
+  }
+  data.by.problem
+}
+
+labeledProblems <- function(chunk.name.vec, FUN){
+  problemData(chunk.name.vec, function(problem){
+    if("error.totals" %in% names(problem)){
+      FUN(problem)
+    }
+  })
+}
+
+getTrain <- function(problem){
+  if(is.numeric(problem$target)){
+    list(features=problem$features,
+         target=problem$target)
+  }
+}
+
+estimate.regularization <- function(train.validation){
+  n.folds <- if(length(train.validation)==2) 2 else 3
+  set.seed(1)
+  fold.id <- sample(rep(1:n.folds, l=length(train.validation)))
+  picked.by.fold <- list()
+  for(validation.fold in 1:n.folds){
+    is.validation <- fold.id == validation.fold
+    sets <- list(validation=train.validation[is.validation],
+                 train=train.validation[!is.validation])
+    train.list <- labeledProblems(sets$train, getTrain)
+    fit <-
+      IntervalRegressionProblems(train.list,
+                                 initial.regularization=0.005,
+                                 factor.regularization=1.1,
+                                 verbose=0)
+    error.by.tv <- list()
+    for(tv in names(sets)){
+      error.vec.list <- labeledProblems(sets[[tv]], function(problem){
+        log.lambda.vec <- fit$predict(problem$features)
+        error.vec <- rep(NA, length(log.lambda.vec))
+        for(log.lambda.i in seq_along(log.lambda.vec)){
+          log.lambda <- log.lambda.vec[[log.lambda.i]]
+          selected <- 
+            subset(problem$modelSelection,
+                   min.log.lambda < log.lambda &
+                     log.lambda < max.log.lambda)
+          stopifnot(nrow(selected) == 1)
+          error.vec[[log.lambda.i]] <- selected$error
+        }#log.lambda
+        error.vec
+      })
+      error.mat <- do.call(rbind, error.vec.list)
+      error.by.tv[[tv]] <- 
+        data.frame(tv,
+                   errors=colSums(error.mat),
+                   regularization=fit$regularization)
+    }#tv
+    tv.error <- do.call(rbind, error.by.tv)
+    picked.i <- pick.best.index(error.by.tv$validation$errors)
+    picked.error <- error.by.tv$validation[picked.i, ]
+    tvPlot <- 
+      ggplot()+
+        ggtitle(paste(split.name, "validation fold", validation.fold))+
+        geom_point(aes(-log10(regularization), errors, color=tv),
+                   pch=1,
+                   data=picked.error)+
+        geom_line(aes(-log10(regularization), errors, color=tv),
+                  data=tv.error)
+    print(tvPlot)
+    picked.by.fold[[validation.fold]] <- picked.error
+  }#validation.fold
+  picked <- do.call(rbind, picked.by.fold)
+  mean(picked$regularization)
+}  
+
+step2.error.list <- list()
+for(set.name in names(selected.by.set)){
   regions.RData.vec <-
     Sys.glob(file.path("PeakSegJoint-chunks", set.name, "*", "regions.RData"))
   chunk.ids <- basename(dirname(regions.RData.vec))
   set.chunks <- paste0(set.name, "/", chunk.ids)
   set.error.df <- selected.by.set[[set.name]]
   for(split.i in 1:6){
-    bases.per.problem <- set.error.df[split.i, "bases.per.problem"]
-    res.str <- paste(bases.per.problem)
-    train.validation <- train.sets[[set.name]][[split.i]]
-    n.folds <- if(length(train.validation)==2) 2 else 3
-    set.seed(1)
-    fold.id <- sample(rep(1:n.folds, l=length(train.validation)))
-    for(validation.fold in 1:n.folds){
-      is.validation <- fold.id == validation.fold
-      sets <- list(validation=train.validation[is.validation],
-                   train=train.validation[!is.validation])
-      train.list <- list()
-      for(chunk.name in sets$train){
-        problems.RData <-
-          paste0("PeakSegJoint-chunks/", chunk.name, "/problems.RData")
-        step2.by.res <- chunk.list[[problems.RData]]
-        step2.by.problem <- step2.by.res[[res.str]]
-        for(problem.name in names(step2.by.problem)){
-          problem <- step2.by.problem[[problem.name]]
-          train.list[[problem.name]] <-
-            list(features=problem$features,
-                 target=problem$error$target)
-        }
-      }
-      fit <- IntervalRegressionProblems(train.list)
-      stop("compute train/validation error curves")
-    }
-    is.train <- set.chunks %in% train.chunks
-    test.chunks <- set.chunks[!is.train]
     split.name <- paste(set.name, "split", split.i)
     print(split.name)
-    model.info <- step1[[split.name]]
-    chunk.err.list <- list()
-    for(chunk.name in test.chunks){
-      data.by.problem <- data.by.chunk[[chunk.name]][[model.info$res.str]]
-      peaks.by.problem <- list()
-      for(problem.name in names(data.by.problem)){
-        problem <- data.by.problem[[problem.name]]
-        log.lambda.vec <- model.info$fit$predict(problem$features)
-        log.lambda <- log.lambda.vec[[model.info$reg.str]]
-        selected <- 
-          subset(problem$modelSelection,
-                 min.log.lambda < log.lambda & log.lambda < max.log.lambda)
-        stopifnot(nrow(selected) == 1)
-        peaks.by.problem[[problem.name]] <-
-          problem$peaks[[paste(selected$peaks)]]
-      }#problem.name
-      chunk.peaks <- do.call(rbind, peaks.by.problem)
-      pred.peaks <- if(nrow(chunk.peaks) == 0){
-        Peaks()
-      }else{
-        clustered.peaks <- clusterPeaks(chunk.peaks)
-        peaks.by.cluster <- split(clustered.peaks, clustered.peaks$cluster)
-        pred.by.cluster <- list()
-        for(cluster.name in names(peaks.by.cluster)){
-          one.cluster <- peaks.by.cluster[[cluster.name]]
-          pred.by.cluster[[cluster.name]] <- with(one.cluster, {
-            data.frame(chromStart=min(chromStart),
-                       chromEnd=max(chromEnd),
-                       sample.id=unique(sample.id))
-          })
-        }
-        do.call(rbind, pred.by.cluster)
-      }
-      regions.file <-
-        sprintf("../chip-seq-paper/chunks/%s/regions.RData",
-                chunk.name)
-      regions <- regions.file.list[[regions.file]]
-      stopifnot(is.data.frame(regions))
-      stopifnot(nrow(regions) > 0)
-      regions.by.sample <- split(regions, regions$sample.id)
-      peaks.by.sample <-
-        split(pred.peaks, pred.peaks$sample.id, drop=TRUE)
-      for(sample.id in names(regions.by.sample)){
-        sample.peaks <- if(sample.id %in% names(peaks.by.sample)){
-          peaks.by.sample[[sample.id]]
-        }else{
-          Peaks()
-        }
-        sample.regions <- regions.by.sample[[sample.id]]
-        error.regions <- PeakErrorChrom(sample.peaks, sample.regions)
-        chunk.err.list[[paste(chunk.name, sample.id)]] <- 
-          data.frame(chunk.name, sample.id, error.regions)
-      }#sample.id  
-    }#chunk.name
-    chunk.err <- do.call(rbind, chunk.err.list)
-    step1.error.list[[split.name]] <-
-      data.frame(set.name, split.i, chunk.err)
+    bases.per.problem <- set.error.df[split.i, "bases.per.problem"]
+    res.str <- paste(bases.per.problem)
+    train.chunk.vec <- train.sets[[set.name]][[split.i]]
+    reg.est <- estimate.regularization(train.chunk.vec)
+    train.list <- labeledProblems(train.chunk.vec, getTrain)
+    fit <- IntervalRegressionProblems(train.list,
+                                      initial.regularization=reg.est)
+    
+    is.train <- set.chunks %in% train.chunk.vec
+    test.chunks <- set.chunks[!is.train]
+
+    error.by.problem <- labeledProblems(test.chunks, function(problem){
+      log.lambda <- fit$predict(problem$features)[1]
+      selected <- 
+        subset(problem$modelSelection,
+               min.log.lambda < log.lambda &
+                 log.lambda < max.log.lambda)
+      stopifnot(nrow(selected) == 1)
+      selected
+    })
+
+    split.error <- do.call(rbind, error.by.problem)
+    
+    step2.error.list[[split.name]] <-
+      data.frame(set.name, split.i, split.error)
   }#split.i
 }#set.name
 
-step1.error <- do.call(rbind, step1.error.list)
+step2.error <- do.call(rbind, step2.error.list)
 
-save(step1.error, file="step1.error.RData")
+save(step2.error, file="step2.error.RData")

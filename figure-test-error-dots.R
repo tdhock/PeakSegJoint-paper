@@ -4,7 +4,17 @@ works_with_R("3.2.0",
 
 load("cheating.error.RData")
 load("step1.error.RData")
+load("step2.error.RData")
 PeakSeg.results <- read.csv("PeakSeg-results.csv")
+
+step2.stats <- step2.error %>%
+  mutate(algorithm="step2") %>%
+  group_by(set.name, split.i, algorithm) %>%
+  summarise(errors=sum(errors))
+step2.stats$regions <- cheating.error$regions
+step2.stats$percent <- with(step2.stats, errors/regions*100)
+step2.stats$algo.type <- "PeakSegJoint"
+step2.stats$learning <- "interval\nregression"
 
 step1.stats <- step1.error %>%
   mutate(algorithm="step1") %>%
@@ -30,9 +40,10 @@ cheating.stats <- data.frame(cheating.error) %>%
 common.names <- names(PeakSeg.results)
 all.stats <-
   rbind(PeakSeg.results,
-        cheating.stats[, common.names], #comment to hide cheaters.
-        step1.best.stats[, common.names], #comment to hide cheaters.
-        step1.stats)
+        ##cheating.stats[, common.names], #comment to hide cheaters.
+        ##step1.best.stats[, common.names], #comment to hide cheaters.
+        ##step1.stats,
+        step2.stats)
 
 show.stats <- all.stats %>%
   filter(!grepl("AIC/BIC", algorithm),
