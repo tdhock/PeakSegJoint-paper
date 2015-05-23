@@ -30,11 +30,15 @@ problemData <- function(chunk.name.vec, FUN){
     problems.dt <- chunk.env$step2.data.list[[res.str]]$problems
     for(problem.name in paste(problems.dt$problem.name)){
       problem <- chunk.env$step2.model.list[[problem.name]]
-      if(problem.name %in% names(chunk.env$step2.error.list)){
-        plist <- chunk.env$step2.error.list[[problem.name]]$problem
-        problem[names(plist)] <- plist
-      }
-      data.by.problem[[problem.name]] <- FUN(problem)
+      if(!is.null(problem)){
+        if(problem.name %in% names(chunk.env$step2.error.list)){
+          plist <- chunk.env$step2.error.list[[problem.name]]$problem
+          not.null <- !sapply(plist, is.null)
+          data.names <- names(plist)[not.null]
+          problem[data.names] <- plist
+        }
+        data.by.problem[[problem.name]] <- FUN(problem)
+      }#!is.null(problem.name
     }
   }
   data.by.problem
@@ -110,6 +114,7 @@ estimate.regularization <- function(train.validation){
   mean(picked$regularization)
 }  
 
+step2.error.all.list <- list()
 step2.error.list <- list()
 for(set.name in names(selected.by.set)){
   regions.RData.vec <-
@@ -131,6 +136,9 @@ for(set.name in names(selected.by.set)){
     is.train <- set.chunks %in% train.chunk.vec
     test.chunks <- set.chunks[!is.train]
 
+    ## This method of computing the error under-estimates the false
+    ## positive rate, since it does not include any of the unlabeled
+    ## problems.
     error.by.problem <- labeledProblems(test.chunks, function(problem){
       log.lambda <- fit$predict(problem$features)[1]
       selected <- 
@@ -140,8 +148,32 @@ for(set.name in names(selected.by.set)){
       stopifnot(nrow(selected) == 1)
       selected
     })
-
     split.error <- do.call(rbind, error.by.problem)
+
+    ## Compute the error on all the problems.
+    for(test.chunk in test.chunks){
+      peaks.by.problem <- problemData(test.chunk, function(problem){
+        if(is.null(problem$peaks))return(NULL)
+        log.lambda <- fit$predict(problem$features)[1]
+        selected <- 
+          subset(problem$modelSelection,
+                 min.log.lambda < log.lambda &
+                   log.lambda < max.log.lambda)
+        stopifnot(nrow(selected) == 1)
+        subset(problem$peaks, peaks == selected$peaks)
+      })
+      pred.peaks <- if(length(peaks.by.problem)==0){
+        Peaks()
+      }else{
+        do.call(rbind, peaks.by.problem)
+      }
+      regions.RData <-
+        sprintf("PeakSegJoint-chunks/%s/regions.RData", test.chunk)
+      test.regions <- regions.file.list[[regions.RData]]
+      chunk.error <- PeakErrorSamples(pred.peaks, test.regions)
+      step2.error.all.list[[paste(split.name, test.chunk)]] <- 
+        data.frame(set.name, split.i, test.chunk, chunk.error)
+    }
     
     step2.error.list[[split.name]] <-
       data.frame(set.name, split.i, split.error)
@@ -149,5 +181,8 @@ for(set.name in names(selected.by.set)){
 }#set.name
 
 step2.error <- do.call(rbind, step2.error.list)
+step2.error.all <- do.call(rbind, step2.error.all.list)
 
-save(step2.error, file="step2.error.RData")
+save(step2.error,
+     step2.error.all,
+     file="step2.error.RData")

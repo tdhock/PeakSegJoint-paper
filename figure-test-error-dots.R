@@ -16,6 +16,15 @@ step2.stats$percent <- with(step2.stats, errors/regions*100)
 step2.stats$algo.type <- "PeakSegJoint"
 step2.stats$learning <- "interval\nregression"
 
+step2.all.stats <- step2.error.all %>%
+  mutate(algorithm="PeakSegJoint") %>%
+  group_by(set.name, split.i, algorithm) %>%
+  summarise(errors=sum(fn+fp),
+            regions=n()) %>%
+  mutate(percent=errors/regions*100,
+         algo.type="PeakSegJoint",
+         learning="interval\nregression")
+
 step1.stats <- step1.error %>%
   mutate(algorithm="step1") %>%
   group_by(set.name, split.i, algorithm) %>%
@@ -39,11 +48,13 @@ cheating.stats <- data.frame(cheating.error) %>%
 
 common.names <- names(PeakSeg.results)
 all.stats <-
-  rbind(PeakSeg.results,
-        ##cheating.stats[, common.names], #comment to hide cheaters.
-        ##step1.best.stats[, common.names], #comment to hide cheaters.
-        ##step1.stats,
-        step2.stats)
+  rbind(
+    PeakSeg.results,
+    ##cheating.stats[, common.names], #comment to hide cheaters.
+    ##step1.best.stats[, common.names], #comment to hide cheaters.
+    ##step1.stats,
+    ##step2.stats,
+    step2.all.stats)
 
 show.stats <- all.stats %>%
   filter(!grepl("AIC/BIC", algorithm),
@@ -52,8 +63,10 @@ show.stats <- all.stats %>%
 region.range <- show.stats %>%
   group_by(set.name, split.i) %>%
   summarise(min=min(regions),
-            max=max(regions))
+            max=max(regions)) %>%
+  mutate(diff=max-min)
 stopifnot(with(region.range, min == max))
+data.frame(region.range)
 
 show.means <- show.stats %>%
   group_by(set.name, algorithm, learning, algo.type) %>%
@@ -62,6 +75,10 @@ show.means <- show.stats %>%
 show.vlines <- show.means %>%
   group_by(set.name) %>%
   filter(seq_along(percent) == which.min(percent)) %>%
+  select(-algo.type)
+show.vlines <- show.means %>%
+  group_by(set.name) %>%
+  filter(algorithm=="PeakSegJoint") %>%
   select(-algo.type)
 
 algo.colors <-
