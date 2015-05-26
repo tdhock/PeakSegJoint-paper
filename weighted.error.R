@@ -1,7 +1,7 @@
 works_with_R("3.2.0",
              data.table="1.9.4",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@c3d18bec6414fdf1213a310bd9bc5af40c262a8f")
+             "tdhock/PeakSegJoint@a1ea491f49e9bdb347f1caadebe7b750de807ac4")
 
 load("selected.by.set.RData")
 load("train.sets.RData")
@@ -26,6 +26,7 @@ problemData <- function(chunk.name.vec, FUN){
   for(chunk.name in chunk.name.vec){
     problems.RData <-
       paste0("PeakSegJoint-chunks/", chunk.name, "/problems.RData")
+    stopifnot(problems.RData %in% names(chunk.list))
     chunk.env <- chunk.list[[problems.RData]]
     problems.dt <- chunk.env$step2.data.list[[res.str]]$problems
     for(problem.name in paste(problems.dt$problem.name)){
@@ -55,7 +56,8 @@ labeledProblems <- function(chunk.name.vec, FUN){
 getTrain <- function(problem){
   if(is.numeric(problem$target)){
     list(features=problem$features,
-         target=problem$target)
+         target=problem$target,
+         weight=nrow(problem$error.regions[[1]]))
   }
 }
 
@@ -114,8 +116,8 @@ estimate.regularization <- function(train.validation){
   mean(picked$regularization)
 }  
 
-step2.error.all.list <- list()
-step2.error.list <- list()
+weighted.error.all.list <- list()
+weighted.error.list <- list()
 for(set.name in names(selected.by.set)){
   regions.RData.vec <-
     Sys.glob(file.path("PeakSegJoint-chunks", set.name, "*", "regions.RData"))
@@ -171,18 +173,18 @@ for(set.name in names(selected.by.set)){
         sprintf("PeakSegJoint-chunks/%s/regions.RData", test.chunk)
       test.regions <- regions.file.list[[regions.RData]]
       chunk.error <- PeakErrorSamples(pred.peaks, test.regions)
-      step2.error.all.list[[paste(split.name, test.chunk)]] <- 
+      weighted.error.all.list[[paste(split.name, test.chunk)]] <- 
         data.frame(set.name, split.i, test.chunk, chunk.error)
     }
     
-    step2.error.list[[split.name]] <-
+    weighted.error.list[[split.name]] <-
       data.frame(set.name, split.i, split.error)
   }#split.i
 }#set.name
 
-step2.error <- do.call(rbind, step2.error.list)
-step2.error.all <- do.call(rbind, step2.error.all.list)
+weighted.error <- do.call(rbind, weighted.error.list)
+weighted.error.all <- do.call(rbind, weighted.error.all.list)
 
-save(step2.error,
-     step2.error.all,
-     file="step2.error.RData")
+save(weighted.error,
+     weighted.error.all,
+     file="weighted.error.RData")

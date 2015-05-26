@@ -5,6 +5,7 @@ works_with_R("3.2.0",
 load("cheating.error.RData")
 load("step1.error.RData")
 load("step2.error.RData")
+load("weighted.error.RData")
 PeakSeg.results <- read.csv("PeakSeg-results.csv")
 
 step2.stats <- step2.error %>%
@@ -25,6 +26,15 @@ step2.all.stats <- step2.error.all %>%
          algo.type="PeakSegJoint",
          learning="interval\nregression")
 
+weighted.all.stats <- weighted.error.all %>%
+  mutate(algorithm="weighted") %>%
+  group_by(set.name, split.i, algorithm) %>%
+  summarise(errors=sum(fn+fp),
+            regions=n()) %>%
+  mutate(percent=errors/regions*100,
+         algo.type="PeakSegJoint",
+         learning="interval\nregression")
+
 step1.stats <- step1.error %>%
   mutate(algorithm="step1") %>%
   group_by(set.name, split.i, algorithm) %>%
@@ -35,7 +45,7 @@ step1.stats <- step1.error %>%
          learning="interval\nregression")
 
 step1.best.stats <- data.frame(best.for.train.res) %>%
-  mutate(algorithm="train.res",
+  mutate(algorithm="best.for\nselected\nresolution",
          percent=errors/regions*100,
          algo.type="PeakSegJoint",
          learning="cheating")
@@ -51,9 +61,10 @@ all.stats <-
   rbind(
     PeakSeg.results,
     ##cheating.stats[, common.names], #comment to hide cheaters.
-    ##step1.best.stats[, common.names], #comment to hide cheaters.
+    step1.best.stats[, common.names], #comment to hide cheaters.
     ##step1.stats,
     ##step2.stats,
+    weighted.all.stats,
     step2.all.stats)
 
 show.stats <- all.stats %>%
