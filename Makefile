@@ -1,4 +1,4 @@
-HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoint.png refs.bib figure-test-error-dots.pdf
+HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoint.png refs.bib figure-test-error-dots.pdf figure-timings.tex
 	rm -f *.aux *.bbl
 	pdflatex HOCKING-PeakSegJoint-paper
 	bibtex HOCKING-PeakSegJoint-paper
@@ -41,9 +41,11 @@ figure-lasso-path.pdf: figure-lasso-path.R
 	R --no-save < $<
 step1.error.RData: step1.error.R selected.by.set.RData
 	R --no-save < $<
-figure-test-error-dots.pdf: figure-test-error-dots.R step1.error.RData cheating.error.RData
+figure-test-error-dots.pdf: figure-test-error-dots.R step2.error.RData 
 	R --no-save < $<
-cheating.error.RData: cheating.error.R chunk.problems.RData selected.by.set.RData
+cheating.error.RData: cheating.error.R selected.by.set.RData
 	R --no-save < $<
 figure-scatter-cheating-step1.pdf: figure-scatter-cheating-step1.R cheating.error.RData selected.by.set.RData
+	R --no-save < $<
+figure-timings.tex: figure-timings.R
 	R --no-save < $<
