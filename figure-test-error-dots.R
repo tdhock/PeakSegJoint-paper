@@ -6,7 +6,12 @@ load("cheating.error.RData")
 load("step1.error.RData")
 load("step2.error.RData")
 load("weighted.error.RData")
-PeakSeg.results <- read.csv("PeakSeg-results.csv")
+PeakSeg.results <- read.csv("PeakSeg-results.csv") %>%
+  filter(learning != "unsupervised") %>%
+  filter(!grepl("oracle.[13]", algorithm)) %>%
+  mutate(algorithm=ifelse(algorithm=="oracle.41", "PeakSeg.41",
+           paste(algorithm))) %>%
+  mutate(algorithm=sub("[.][0-9]*$", "", algorithm))
 
 step2.stats <- step2.error %>%
   mutate(algorithm="step2") %>%
@@ -61,10 +66,10 @@ all.stats <-
   rbind(
     PeakSeg.results,
     ##cheating.stats[, common.names], #comment to hide cheaters.
-    step1.best.stats[, common.names], #comment to hide cheaters.
+    ##step1.best.stats[, common.names], #comment to hide cheaters.
     ##step1.stats,
     ##step2.stats,
-    weighted.all.stats,
+    ##weighted.all.stats,
     step2.all.stats)
 
 show.stats <- all.stats %>%
@@ -108,10 +113,10 @@ ggplot()+
              size=3)+
   geom_point(aes(percent, algorithm, color=learning),
              data=show.stats, pch=1)+
-  facet_grid(algo.type ~ set.name, labeller=function(var, val){
+  facet_grid(. ~ set.name, labeller=function(var, val){
     gsub("_", "\n", val)
   }, scales="free_y", space="free_y")+
-  scale_y_discrete("model . parameters learned")+
+  scale_y_discrete("model")+
   theme_bw()+
   guides(color=guide_legend())+
   theme(panel.margin=grid::unit(0, "cm"),
@@ -121,8 +126,8 @@ ggplot()+
   scale_fill_manual("learning\nalgorithm", values=algo.colors,
                      breaks=names(algo.colors))+
   scale_x_continuous("percent incorrect peak region labels (test error)",
-                     breaks=seq(0, 100, by=20))
+                     breaks=seq(0, 100, by=25))
 
-pdf("figure-test-error-dots.pdf", h=4.2, w=8)
+pdf("figure-test-error-dots.pdf", h=3, w=7)
 print(dots)
 dev.off()
