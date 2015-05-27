@@ -32,15 +32,15 @@ ggplot()+
   ## geom_vline(aes(xintercept=problemEnd-problemStart),
   ##            data=timings$problems)+
   scale_x_log10("data size to segment $B$")+
-  scale_y_log10("")+
+  scale_y_log10("seconds")+
   geom_point(aes(n.data, time/1e9, color=expr),
              pch=1,
              data=data.frame(timings$seconds, data="seconds"))+
   scale_size_manual(values=c(PeakSegJoint=2, cDPA=2, pDPA=1))+
-  geom_line(aes(n.data, diff, color=algorithm, size=algorithm),
-            data=data.frame(timings$results, data="distance to\ntrue peak"))+
-  geom_line(aes(n.data, 10^mean.loss, color=algorithm, size=algorithm),
-            data=data.frame(timings$results, data="mean\nPoisson loss"))+
+  ## geom_line(aes(n.data, diff, color=algorithm, size=algorithm),
+  ##           data=data.frame(timings$results, data="distance to\ntrue peak"))+
+  ## geom_line(aes(n.data, 10^mean.loss, color=algorithm, size=algorithm),
+  ##           data=data.frame(timings$results, data="mean\nPoisson loss"))+
   theme_bw()+
   guides(size="none", color="none")+
   geom_text(aes(n.data, seconds, label=paste(algorithm, complexity),
@@ -50,11 +50,11 @@ ggplot()+
             vjust=1,
             hjust=0,
             data=label.df)+
-  theme(panel.margin=grid::unit(0, "cm"))+
-  facet_grid(data ~ ., scales="free")
+  ##facet_grid(data ~ ., scales="free")+
+  theme(panel.margin=grid::unit(0, "cm"))
 
 options(tikzMetricsDictionary="tikzMetrics",
-        tikzDocumentDeclaration="\\documentclass{article}")
-tikz("figure-timings.tex", h=3, w=6)
+        tikzDocumentDeclaration="\\documentclass{article}\\usepackage{nips15submit_e,times}")
+tikz("figure-timings.tex", h=2, w=5)
 print(gg)
 dev.off()

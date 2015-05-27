@@ -155,14 +155,6 @@ differential peaks across replicates. They applied it to TF data sets,
 and used visual inspection to test (but not train). TODO: run and
 compare.
 
-\begin{figure}[b!]
-  \centering
-  \includegraphics[width=\textwidth]{figure-PeakSegJoint}
-  \caption{Blue line segments show the sequence of PeakSegJoint models
-    for $S=3$ samples and $p\in\{0, 1, 2, 3\}$ peaks.}
-  \label{fig:PeakSegJoint}
-\end{figure}
-
 \section{Models}
 
 \subsection{PeakSeg: finding the best $0,\dots,p_{\text{max}}$ peaks
@@ -205,8 +197,9 @@ m)\in\{0, 1\}$ can be used to classify each base $j\in\{1,\dots B\}$
 as either background noise $P_j(\mathbf m)=0$ or a peak $P_j(\mathbf
 m)=1$.
 
-\subsection{PeakSegJoint: finding the best common peak in $0,\dots, S$
-  samples}
+\subsection{An multi-sample model 
+  related to the single-sample PeakSeg
+  model}
 
 For $S$ sample profiles $\mathbf z_1, \dots, \mathbf z_S\in\ZZ_+^B$
 defined on the same $B$ bases, we stack the vectors into a matrix
@@ -260,43 +253,59 @@ for some $p_1,\dots, p_S\in\{0, 1\}$ with $p=\sum_{i=s}^S p_s$.
 \end{proposition}
 
 \begin{proof}
-  To begin, consider the trivial case with $p=0$ peaks. Clearly, the
-  PeakSegJoint solution is
-  $\mathbf{\tilde M}^p(\mathbf Z) = \left[
-    \begin{array}{ccc}
-      \mathbf{\bar z}_1 & 
-      \cdots &
-      \mathbf{\bar z}_S 
-    \end{array}
-  \right]$, where $\mathbf{\bar z}_s$ is the constant mean vector for
-  sample $s$. This is also the PeakSeg model with 0 peaks $\mathbf{\tilde
-    m}^0(\mathbf z_s)=\mathbf{\bar z}_s$. 
+  Since the objective function of \ref{Unconstrained} is separable on
+  samples $s$, it can be re-written as $p$ \ref{PeakSeg} sub-problems
+  each with 1 peak, and $S-p$ trivial sub-problems with 0 peaks.
+  % To begin, consider the trivial case with $p=0$ peaks. Clearly, the
+  % PeakSegJoint solution is
+  % $\mathbf{\tilde M}^p(\mathbf Z) = \left[
+  %   \begin{array}{ccc}
+  %     \mathbf{\bar z}_1 & 
+  %     \cdots &
+  %     \mathbf{\bar z}_S 
+  %   \end{array}
+  % \right]$, where $\mathbf{\bar z}_s$ is the constant mean vector for
+  % sample $s$. This is also the PeakSeg model with 0 peaks $\mathbf{\tilde
+  %   m}^0(\mathbf z_s)=\mathbf{\bar z}_s$. 
   
-  Now consider the case for $p=1$ peak. There are $S$ possible models,
-  one for each sample $s$. The sample with a peak model
-  $\mathbf{\tilde m}^1(\mathbf z_{s^*})$ is $s^*=\argmin_{s\in
-    1,\dots, S} \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^1(\mathbf
-    z_s), \mathbf z_s \right] - \textrm{PoissonLoss}\left[
-    \mathbf{\tilde m}^0(\mathbf z_s), \mathbf z_s \right]$, and all
-  the other samples $s$ have 0 peaks $\mathbf{\tilde m}^0(\mathbf
-  z_{s})$. This model is clearly optimal since the \ref{Unconstrained} cost
-  function is separable on samples.
+  % Now consider the case for $p=1$ peak. There are $S$ possible models,
+  % one for each sample $s$. The sample with a peak model
+  % $\mathbf{\tilde m}^1(\mathbf z_{s^*})$ is $s^*=\argmin_{s\in
+  %   1,\dots, S} \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^1(\mathbf
+  %   z_s), \mathbf z_s \right] - \textrm{PoissonLoss}\left[
+  %   \mathbf{\tilde m}^0(\mathbf z_s), \mathbf z_s \right]$, and all
+  % the other samples $s$ have 0 peaks $\mathbf{\tilde m}^0(\mathbf
+  % z_{s})$. This model is clearly optimal since the \ref{Unconstrained} cost
+  % function is separable on samples.
 
-  Consider the case for $p=2$ peaks. By the constraint of either zero
-  or one peak for each sample (\ref{zero_or_one}), and the constraint
-  on the total number of peaks (\ref{total_Peaks}), it is clear that
-  the optimal solution has $p=2$ samples with exactly 1 peak and $S-2$
-  samples with exactly 0 peaks. The samples with peaks are $s^*$ and
-  $\argmin_{s\neq s^*} \textrm{PoissonLoss}\left[ \mathbf{\tilde
-      m}^1(\mathbf z_s), \mathbf z_s \right] -
-  \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^0(\mathbf z_s), \mathbf
-    z_s \right]$.
+  % Consider the case for $p=2$ peaks. By the constraint of either zero
+  % or one peak for each sample (\ref{zero_or_one}), and the constraint
+  % on the total number of peaks (\ref{total_Peaks}), it is clear that
+  % the optimal solution has $p=2$ samples with exactly 1 peak and $S-2$
+  % samples with exactly 0 peaks. The samples with peaks are $s^*$ and
+  % $\argmin_{s\neq s^*} \textrm{PoissonLoss}\left[ \mathbf{\tilde
+  %     m}^1(\mathbf z_s), \mathbf z_s \right] -
+  % \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^0(\mathbf z_s), \mathbf
+  %   z_s \right]$.
 
-  The proof for $p>2$ peaks proceeds by induction.
+  % The proof for $p>2$ peaks proceeds by induction.
 \end{proof}
 
+\subsection{PeakSegJoint: finding the best common peak in $0,\dots, S$
+  samples}
+
+\begin{figure}[b!]
+  \centering
+  \includegraphics[width=\textwidth]{figure-PeakSegJoint}
+  \caption{Blue line segments show the sequence of PeakSegJoint models
+    for $S=3$ samples and $p\in\{0, 1, 2, 3\}$ peaks.}
+  \label{fig:PeakSegJoint}
+\end{figure}
+
 The PeakSegJoint model with $p\in\{0, \dots, S\}$ peaks is defined by
-introducing one more constraint (\ref{joint_constraint}):
+starting with the \ref{Unconstrained} multi-sample model, and adding
+the constraint that peaks should occur in the exact same positions in
+each sample (\ref{joint_constraint}):
 \begin{align}
   \label{PeakSegJoint}
   \mathbf{\hat M}^p(\mathbf Z)  =
@@ -323,7 +332,9 @@ introducing one more constraint (\ref{joint_constraint}):
   &\ \ P_j(\mathbf m_{s_1}) = P_j(\mathbf m_{s_2}).
   \label{joint_constraint}
 \end{align}
-TODO: explain.
+
+The PeakSegJoint model for a data set with $S=3$ samples is shown in
+Figure~\ref{fig:PeakSegJoint}.
 
 \subsection{Supervised penalty learning}
 
@@ -491,25 +502,6 @@ subdifferential stopping criterion of \citet{HOCKING-penalties}.
 
 \section{Results}
 
-\subsection{Speed of heuristic PeakSegJoint algorithm}
-
-Figure~\ref{fig:timings} shows that the PeakSegJoint algorithm is
-orders of magnitude faster than the cDPA of \citet{HOCKING-PeakSeg}
-and the pDPA of \citet{Segmentor}.
-
-\begin{figure}[b!]
-  \centering
-  \input{figure-timings}
-  \vskip -0.8cm
-  \caption{Performance of three segmentation algorithms on simulated
-    data sets of varying size $B$. The grey shaded area represents the
-    range of problem sizes selected in the McGill Histone benchmark
-    data sets. Timings are shown in seconds, and the two measures of
-    segmentation model accuracy are distance to true peak (in units of
-    data points) and mean Poisson loss. }
-  \label{fig:timings}
-\end{figure}
-
 \subsection{Accuracy of PeakSegJoint on benchmark data sets}
 
 \begin{figure}[b!]
@@ -520,6 +512,23 @@ and the pDPA of \citet{Segmentor}.
     one of 6 train/test splits, and the black vertical line marks the
     mean of the PeakSegJoint model.}
   \label{fig:test-error-dots}
+\end{figure}
+
+\subsection{Speed of heuristic PeakSegJoint algorithm}
+
+Figure~\ref{fig:timings} shows that the PeakSegJoint algorithm is
+orders of magnitude faster than the cDPA of \citet{HOCKING-PeakSeg}
+and the pDPA of \citet{Segmentor}.
+
+\begin{figure}[b!]
+  \centering
+  \input{figure-timings}
+  \vskip -0.5cm
+  \caption{Timings of three segmentation algorithms on simulated
+    data sets of varying size $B$. The grey shaded area represents the
+    range of problem sizes selected in the McGill Histone benchmark
+    data sets. }
+  \label{fig:timings}
 \end{figure}
 
 \section{Discussion}
