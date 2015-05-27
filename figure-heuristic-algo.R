@@ -1,7 +1,8 @@
 works_with_R("3.2.0",
              ggplot2="1.0",
+             "tdhock/animint@25e5ccf83cef0cd498d455c589c1bc705e056089",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@a1ea491f49e9bdb347f1caadebe7b750de807ac4")
+             "tdhock/PeakSegJoint@d99652f043f738c25fad22737999eb794c264c54")
 
 ##load("TF.benchmark.corrected.RData")
 
@@ -84,6 +85,7 @@ for(sample.i in seq_along(profile.list)){
   one <- profile.list[[sample.i]]
   max.count <- max(one$count)
   bins <- binSum(one, max.chromStart, bases.per.bin, n.bins)
+  
   stopifnot(n.bins == nrow(bins))
   bins[nrow(bins), "chromEnd"] <- min.chromEnd
   bins$mean <- with(bins, count/(chromEnd-chromStart))
@@ -171,15 +173,15 @@ for(seg1.last in 1:(n.bins-2)){
     ggplot()+
       scale_color_manual(values=c(data="grey50",
                            bins="black", segments="green"))+
-      geom_step(aes(chromStart/1e3, count, color=what),
+      geom_step(aes(chromStart, count, color=what),
                 data=data.frame(norm.df, what="data"))+
-      geom_segment(aes(chromStart/1e3, mean,
-                       xend=chromEnd/1e3, yend=mean,
+      geom_segment(aes(chromStart, mean,
+                       xend=chromEnd, yend=mean,
                        color=what),
                    size=1,
                    data=data.frame(these.segs, what="segments"))+
-      geom_segment(aes(chromStart/1e3, mean,
-                       xend=chromEnd/1e3, yend=mean,
+      geom_segment(aes(chromStart, mean,
+                       xend=chromEnd, yend=mean,
                        color=what),
                    data=data.frame(bin.df, what="bins"))+
       theme_bw()+
@@ -215,7 +217,7 @@ for(seg1.last in 1:(n.bins-2)){
       loss.show.list[[paste(peaks)]][[paste(seg1.last, seg2.last)]] <-
         data.frame(seg1.last, seg2.last, peaks, total.loss,
                    sample.id=bases.per.bin,
-                   feasible=all(with.peaks$peak.feasible),
+                   feasible=all(peak.feasible),
                    chromStart=seg1.last*bases.per.bin+max.chromStart,
                    chromEnd=seg2.last*bases.per.bin+max.chromStart)
     }
@@ -607,59 +609,154 @@ best.breaks <-
          min(chromStart) < chromStart &
           sample.id == sample.id[1],
          -sample.id)
-gg <- 
-ggplot()+
-  scale_x_continuous("data to segment (base position along chromosome)",
-                     breaks=c(1, 10, 20, 24))+
-  scale_color_continuous("Poisson loss")+
-  ## geom_segment(aes(chromStart+0.5, mean,
-  ##                  xend=chromEnd+0.5, yend=mean),
-  ##              data=data.frame(bin.df, what="bins"))+
-  geom_segment(aes(chromStart+0.5, model.i,
-                   xend=chromEnd+0.5, yend=model.i,
-                   linetype=ifelse(feasible, "feasible", "infeasible"),
-                   color=total.loss),
-               size=1,
-               data=loss.show)+
-  scale_y_continuous("", breaks=NULL)+
-  geom_point(aes(chromEnd, count),
-             data=data.frame(sub.norm.df, what="data"),
-             color="black")+
-  geom_segment(aes(chromStart+0.5, mean,
-                   xend=chromEnd+0.5, yend=mean),
-               data=best.segs,
-               color="green")+
-  geom_vline(aes(xintercept=chromStart+0.5),
-             data=best.breaks,
-             color="green",
-             linetype="dotted")+
-  geom_segment(aes(left.chromStart+0.5, y,
-                   color=total.loss,
-                   linetype=ifelse(feasible, "feasible", "infeasible"),
-                   xend=right.chromEnd+0.5, yend=y),
-               data=search.df,
-               size=1)+
-  scale_linetype_discrete("feasible?")+
-  ##guides(linetype=guide_legend(order=2))+
-  geom_text(aes(right.chromEnd+0.5, y,
-                label=" selected"),
-            data=best.df,
-            size=3,
-            hjust=0)+
-  geom_text(aes(chromStart+0.5, model.i,
-                label="selected "),
-            data=loss.show.ord,
-            size=3,
-            hjust=1)+
-  theme_bw()+
-  theme(panel.margin=grid::unit(0, "cm"))+
-  facet_grid(sample.id ~ ., labeller=function(var, val){
-    sub("McGill0", "", val)
-  }, scales="free")
+makePeak <- function(start, end){
+  sprintf("(%d,%d]", start, end)
+}
+best.df$peak <- with(best.df, makePeak(left.chromStart, right.chromEnd))
+loss.show.ord$peak <- with(loss.show.ord, makePeak(chromStart, chromEnd))
+loss.show$peak <- with(loss.show, makePeak(chromStart, chromEnd))
+search.df$peak <- with(search.df, makePeak(left.chromStart, right.chromEnd))
 
-## TODO: 1-plot animint viz where model on the two samples is updated
-## when we click on one of the peaks in the bottom three panels.
+viz.peaks <-
+  data.frame(chromStart=c(loss.show$chromStart, search.df$left.chromStart),
+             chromEnd=c(loss.show$chromEnd, search.df$right.chromEnd))
+viz.segs.list <- list()
+for(peak.i in 1:nrow(viz.peaks)){
+  p <- viz.peaks[peak.i, ]
+  p.vec <- unlist(p)
+  peak <- with(p, makePeak(chromStart, chromEnd))
+  seg.end.vec <- c(p.vec, unfilled.chromEnd)
+  seg.start.vec <- c(0, p.vec)
+  for(sample.id in names(profile.list)){
+    pro <- profile.list[[sample.id]]
+    for(seg.i in seq_along(seg.end.vec)){
+      seg.end <- seg.end.vec[[seg.i]]
+      seg.start <- seg.start.vec[[seg.i]]+1
+      seg.data <- pro$count[seg.start:seg.end]
+      seg.mean <- mean(seg.data)
+      viz.segs.list[[paste(peak.i, sample.id, seg.i)]] <- 
+        data.frame(chromStart=seg.start-1,
+                   chromEnd=seg.end,
+                   sample.id,
+                   peak,
+                   mean=seg.mean)
+    }
+  }
+}
+viz.segs <- unique(do.call(rbind, viz.segs.list))
+viz.breaks <-
+  subset(viz.segs,
+         min(chromStart) < chromStart &
+         sample.id == sample.id[1], select=-sample.id)
+
+viz <-
+  list(panels=ggplot()+
+         scale_x_continuous("data to segment (base position along chromosome)",
+                            breaks=1:24)+
+         scale_color_continuous("Poisson loss")+
+         scale_y_continuous("", breaks=NULL)+
+         geom_point(aes(chromEnd, count),
+                    data=data.frame(sub.norm.df, what="data"),
+                    color="black")+
+         geom_segment(aes(chromStart+0.5, model.i,
+                          clickSelects=peak,
+                          xend=chromEnd+0.5, yend=model.i,
+                          linetype=ifelse(feasible, "feasible", "infeasible"),
+                          color=total.loss),
+                      size=4,
+                      data=loss.show)+
+         geom_segment(aes(left.chromStart+0.5, y,
+                          clickSelects=peak,
+                          color=total.loss,
+                          linetype=ifelse(feasible, "feasible", "infeasible"),
+                          xend=right.chromEnd+0.5, yend=y),
+                      data=search.df,
+                      size=4)+
+         scale_linetype_discrete("feasible?")+
+         ##guides(linetype=guide_legend(order=2))+
+         geom_text(aes(right.chromEnd+0.5, y-0.05,
+                       clickSelects=peak,
+                       label=" selected"),
+                   data=best.df,
+                   ##size=3,
+                   hjust=0)+
+         geom_text(aes(chromStart+0.5, model.i-0.5,
+                       clickSelects=peak,
+                       label="selected "),
+                   data=loss.show.ord,
+                   ##size=3,
+                   hjust=1)+
+         theme_bw()+
+         theme(panel.margin=grid::unit(0, "cm"))+
+         facet_grid(sample.id ~ ., labeller=function(var, val){
+           sub("McGill0", "", val)
+         }, scales="free")+
+         geom_segment(aes(chromStart+0.5, mean,
+                          showSelected=peak,
+                          xend=chromEnd+0.5, yend=mean),
+                      data=viz.segs,
+                      color="green")+
+         geom_vline(aes(xintercept=chromStart+0.5,
+                        showSelected=peak),
+                    data=viz.breaks,
+                    color="green",
+                    linetype="dotted")+
+         ggtitle("click blue models to select peak start/end")+
+         theme_animint(width=1000, height=600),
+
+       first=list(peak=loss.show.ord$peak),
+
+       title="PeakSegJoint fast heuristic segmentation algorithm")
+
+animint2dir(viz, "figure-heuristic-algo")
+
+fig <-
+  ggplot()+
+    scale_x_continuous("data to segment (base position along chromosome)",
+                       breaks=c(1,seq(2, 24, by=2)))+
+    scale_color_continuous("Poisson loss")+
+    geom_segment(aes(chromStart+0.5, model.i,
+                     xend=chromEnd+0.5, yend=model.i,
+                     linetype=ifelse(feasible, "feasible", "infeasible"),
+                     color=total.loss),
+                 size=1,
+                 data=loss.show)+
+    scale_y_continuous("", breaks=NULL)+
+    geom_point(aes(chromEnd, count),
+               data=data.frame(sub.norm.df, what="data"),
+               color="black")+
+    geom_segment(aes(left.chromStart+0.5, y,
+                     color=total.loss,
+                     linetype=ifelse(feasible, "feasible", "infeasible"),
+                     xend=right.chromEnd+0.5, yend=y),
+                 data=search.df,
+                 size=1)+
+    scale_linetype_discrete("feasible?")+
+    ##guides(linetype=guide_legend(order=2))+
+    geom_text(aes(right.chromEnd+0.5, y,
+                  label=" selected"),
+              data=best.df,
+              size=3,
+              hjust=0)+
+    geom_text(aes(chromStart+0.5, model.i,
+                  label="selected "),
+              data=loss.show.ord,
+              size=3,
+              hjust=1)+
+    theme_bw()+
+    theme(panel.margin=grid::unit(0, "cm"))+
+    facet_grid(sample.id ~ ., labeller=function(var, val){
+      sub("McGill0", "", val)
+    }, scales="free")+
+    geom_segment(aes(chromStart+0.5, mean,
+                     xend=chromEnd+0.5, yend=mean),
+                 data=best.segs,
+                 color="green")+
+    geom_vline(aes(xintercept=chromStart+0.5),
+               data=best.breaks,
+               color="green",
+               linetype="dotted")
 
 pdf("figure-heuristic-algo.pdf", h=5)
-print(gg)
+print(fig)
 dev.off()
