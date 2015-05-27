@@ -746,7 +746,7 @@ fig <-
     theme_bw()+
     theme(panel.margin=grid::unit(0, "cm"))+
     facet_grid(sample.id ~ ., labeller=function(var, val){
-      sub("McGill0", "", val)
+      ifelse(grepl("sample", val), paste(val), paste("bin size", val))
     }, scales="free")+
     geom_segment(aes(chromStart+0.5, mean,
                      xend=chromEnd+0.5, yend=mean),

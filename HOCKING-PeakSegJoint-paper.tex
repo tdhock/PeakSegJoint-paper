@@ -447,10 +447,17 @@ predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
 \begin{figure}[b!]
   \centering
   \includegraphics[width=\textwidth]{figure-heuristic-algo}
-  \caption{Demonstration of the PeakSegJoint heuristic segmentation
-    algorithm. For a data set with $S=2$ samples (top 2 panels), and a
-    bin size parameter of $\beta=2$, the algorithm proceeds as
-    follows. First, }
+  \vskip -0.5cm
+  \caption{Demonstration of the PeakSegJoint fast heuristic
+    segmentation algorithm. For a data set with $B=24$ data points and
+    $S=2$ samples (top 2 panels), the algorithm with bin size
+    parameter of $\beta=2$ proceeds as follows. First, the Poisson
+    loss and feasibility is computed for all possible peak starts and
+    ends at bin size 4. The feasible model with minimum Poisson loss
+    is selected, the bin size is decreased to 2, and we consider a new
+    set of models around the selected peak starts and ends. We
+    continue and return the selected model at bin size 1 (shown in
+    green). Interactive figure at \url{http://bit.ly/1d00KzB}}
   \label{fig:heuristic-algo}
 \end{figure}
 
