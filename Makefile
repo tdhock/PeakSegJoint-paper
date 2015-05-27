@@ -1,4 +1,4 @@
-HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoint.png refs.bib figure-test-error-dots.pdf figure-timings.tex
+HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoint.png refs.bib figure-test-error-dots.pdf figure-timings.tex figure-heuristic-algo.pdf
 	rm -f *.aux *.bbl
 	pdflatex HOCKING-PeakSegJoint-paper
 	bibtex HOCKING-PeakSegJoint-paper
@@ -50,4 +50,6 @@ figure-scatter-cheating-step1.pdf: figure-scatter-cheating-step1.R cheating.erro
 figure-timings.tex: figure-timings.R timings.RData
 	R --no-save < $<
 timings.RData: timings.R
+	R --no-save < $<
+figure-heuristic-algo.pdf: figure-heuristic-algo.R
 	R --no-save < $<

@@ -1,15 +1,15 @@
 works_with_R("3.2.0",
              ggplot2="1.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@5757e792f8f7e237e5ad8b260f23bafd7552fbfb")
+             "tdhock/PeakSegJoint@a1ea491f49e9bdb347f1caadebe7b750de807ac4")
 
 ##load("TF.benchmark.corrected.RData")
 
-set.seed(1)
+set.seed(4)
 
 doSim <- function(sample.id){
-  data.vec <- do.call(c, lapply(c(5, 50, 5), function(mean.value){
-    rpois(10, mean.value)
+  data.vec <- do.call(c, lapply(c(8, 4, 15, 12, 5, 7), function(mean.value){
+    rpois(4, mean.value)
   }))
   data.chromEnd <- seq_along(data.vec)
   data.frame(sample.id,
@@ -122,6 +122,7 @@ OptimalPoissonLoss <- function(mean.value, cumsum.value){
   ifelse(mean.value == 0, 0, cumsum.value * (1-log(mean.value)))
 }
 loss.list <- list()
+loss.show.list <- list()
 peak.list <- list()
 seg.list <- list()
 best.loss.list <- list()
@@ -192,11 +193,33 @@ for(seg1.last in 1:(n.bins-2)){
     seg123.loss.vec <- seg1.loss.vec + seg2.loss.vec + seg3.loss.vec
 
     peak.feasible <- seg1.means < seg2.means & seg2.means > seg3.means
+    diff.loss.vec <- flat.loss.vec - seg123.loss.vec
+    possible.df <- 
+      data.frame(flat.loss.vec, seg123.loss.vec,
+                 diff.loss.vec, peak.feasible)
+    ordered.df <- 
+      possible.df[order(possible.df$diff.loss.vec, decreasing = TRUE), ]
+    for(peaks in 1:nrow(ordered.df)){
+      with.peaks <- ordered.df[1:peaks, ]
+      with.segs <-
+        subset(these.segs,
+               sample.id %in% rownames(with.peaks) & segments==3)
+      without.segs <-
+        subset(these.segs,
+               !sample.id %in% rownames(with.peaks) & segments==1)
+      without.peaks <-
+        possible.df[!rownames(possible.df) %in% rownames(with.peaks),]
+      with.loss <- with.peaks$seg123.loss.vec
+      without.loss <- without.peaks$flat.loss.vec
+      total.loss <- sum(with.loss, without.loss)
+      loss.show.list[[paste(peaks)]][[paste(seg1.last, seg2.last)]] <-
+        data.frame(seg1.last, seg2.last, peaks, total.loss,
+                   sample.id=bases.per.bin,
+                   feasible=all(with.peaks$peak.feasible),
+                   chromStart=seg1.last*bases.per.bin+max.chromStart,
+                   chromEnd=seg2.last*bases.per.bin+max.chromStart)
+    }
     if(any(peak.feasible)){
-      diff.loss.vec <- flat.loss.vec - seg123.loss.vec
-      possible.df <- 
-        data.frame(flat.loss.vec, seg123.loss.vec,
-                   diff.loss.vec, peak.feasible)
       feasible.df <- subset(possible.df, peak.feasible)
       ordered.df <- 
         feasible.df[order(feasible.df$diff.loss.vec, decreasing = TRUE), ]
@@ -396,7 +419,7 @@ for(peaks.str in names(best.indices.list)){
     }
     ##print(t(cumsum.mats$left$count[-1,]))
     possible.grid <- 
-      expand.grid(left.cumsum.row=3:n.cumsum, right.cumsum.row=2:n.cumsum)
+      expand.grid(left.cumsum.row=2:n.cumsum, right.cumsum.row=2:n.cumsum)
     possible.grid$left.chromStart <-
       cumsum.mats$left$chromStart[possible.grid$left.cumsum.row-1]
     possible.grid$left.chromEnd <-
@@ -407,8 +430,7 @@ for(peaks.str in names(best.indices.list)){
       cumsum.mats$right$chromEnd[possible.grid$right.cumsum.row-1]
     feasible.grid <-
       subset(possible.grid,
-             left.chromEnd <= right.chromStart &
-               right.chromEnd < last.chromEnd)
+             left.chromStart <= right.chromStart)
     feasible.grid$model.i <- 1:nrow(feasible.grid)
     model.list <- list()
     seg.list <- list()
@@ -424,19 +446,10 @@ for(peaks.str in names(best.indices.list)){
       seg1.means <- seg1.cumsums/seg1.corrected
       seg1.loss <- OptimalPoissonLoss(seg1.means, seg1.cumsums)
       seg.list[[paste(model.i, 1)]] <-
-        data.frame(chromStart=max.chromStart, chromEnd=seg1.chromEnd,
+        data.frame(chromStart=unfilled.chromStart, chromEnd=seg1.chromEnd,
                    mean=seg1.means, sample.id=samples.with.peaks,
                    model.i,
                    row.names=NULL)
-
-      seg1.mat <-
-        small.bins[## TODO: XXX < small.chromEnd
-                   small.chromEnd <= seg1.chromEnd,
-                   samples.with.peaks,
-                   drop=FALSE]
-      stopifnot(nrow(seg1.mat) == seg1.bases)
-      ## stopifnot(all.equal(as.numeric(colMeans(seg1.mat)),
-      ##                     as.numeric(seg1.means)))
 
       cumsum.seg2.end <-
         cumsum.mats$right$count[model.row$right.cumsum.row, ]
@@ -452,36 +465,16 @@ for(peaks.str in names(best.indices.list)){
                    model.i,
                    row.names=NULL)
 
-      is.seg2 <-
-        seg1.chromEnd < small.chromEnd &
-          small.chromEnd <= seg2.chromEnd
-      stopifnot(sum(is.seg2) == seg2.bases)
-      seg2.mat <-
-        small.bins[is.seg2,
-                   samples.with.peaks,
-                   drop=FALSE]
-      
       seg3.cumsums <- last.cumsums$count-cumsum.seg2.end
       seg3.bases <- last.chromEnd-seg2.chromEnd
       seg3.corrected <- seg3.bases - extra.after
       seg3.means <- seg3.cumsums/seg3.corrected
       seg3.loss <- OptimalPoissonLoss(seg3.means, seg3.cumsums)
       seg.list[[paste(model.i, 3)]] <-
-        data.frame(chromStart=seg2.chromEnd, chromEnd=last.chromEnd,
+        data.frame(chromStart=seg2.chromEnd, chromEnd=unfilled.chromEnd,
                    mean=seg3.means, sample.id=samples.with.peaks,
                    model.i,
                    row.names=NULL)
-
-      is.seg3 <-
-        seg2.chromEnd < small.chromEnd &
-          small.chromEnd <= last.chromEnd
-      stopifnot(sum(is.seg3) == seg3.bases)
-      seg3.mat <-
-        small.bins[is.seg3,
-                   samples.with.peaks,
-                   drop=FALSE]
-      ## stopifnot(all.equal(as.numeric(colMeans(seg3.mat)),
-      ##                     as.numeric(seg3.means)))
 
       total.bases <- sum(seg1.bases + seg2.bases + seg3.bases)
       
@@ -571,6 +564,7 @@ for(peaks.str in names(best.indices.list)){
     df <- do.call(rbind, L)
     sample.ids <- unique(norm.df$sample.id)
     bases.num <- sort(unique(df$bases.per.bin.zoom), decreasing=TRUE)
+    bases.num <- c(bases.num[1]*2, bases.num)
     levs <- c(paste(sample.ids), paste(bases.num))
     df$sample.id <- factor(df$bases.per.bin.zoom, levs)
     df
@@ -597,30 +591,75 @@ zoom.loss <- do.call(rbind, zoom.loss.list)
 
 first.loss <- do.call(rbind, loss.list[["2"]])
 first.loss$model.i <- 1:nrow(first.loss)
+first.loss$sample.id <-
+  factor(first.loss$sample.id, c("sample1", "sample2", "4", "2", "1"))
 
+loss.show <- do.call(rbind, loss.show.list[["2"]])
+loss.show$sample.id <- 
+  factor(4, c("sample1", "sample2", "4", "2", "1"))
+loss.show$model.i <- 1:nrow(loss.show)
+loss.show.feas <- subset(loss.show, feasible)
+loss.show.ord <- loss.show.feas[order(loss.show.feas$total.loss), ][1,]
+
+best.segs <- subset(seg.df, model.i == best.model$model.i)
+best.breaks <-
+  subset(best.segs,
+         min(chromStart) < chromStart &
+          sample.id == sample.id[1],
+         -sample.id)
+gg <- 
 ggplot()+
   scale_x_continuous("data to segment (base position along chromosome)",
-                     breaks=c(1, 10.5, 20.5, max(sim$chromEnd)))+
-  ## WTF?
-  ## geom_segment(aes(chromStart+0.5, model.i,
-  ##                  xend=chromEnd+0.5, yend=model.i,
-  ##                  color=total.loss),
-  ##              data=first.loss)+
+                     breaks=c(1, 10, 20, 24))+
+  scale_color_continuous("Poisson loss")+
+  ## geom_segment(aes(chromStart+0.5, mean,
+  ##                  xend=chromEnd+0.5, yend=mean),
+  ##              data=data.frame(bin.df, what="bins"))+
+  geom_segment(aes(chromStart+0.5, model.i,
+                   xend=chromEnd+0.5, yend=model.i,
+                   linetype=ifelse(feasible, "feasible", "infeasible"),
+                   color=total.loss),
+               size=1,
+               data=loss.show)+
   scale_y_continuous("", breaks=NULL)+
-  geom_point(aes(chromEnd, count.norm),
+  geom_point(aes(chromEnd, count),
              data=data.frame(sub.norm.df, what="data"),
              color="black")+
+  geom_segment(aes(chromStart+0.5, mean,
+                   xend=chromEnd+0.5, yend=mean),
+               data=best.segs,
+               color="green")+
+  geom_vline(aes(xintercept=chromStart+0.5),
+             data=best.breaks,
+             color="green",
+             linetype="dotted")+
   geom_segment(aes(left.chromStart+0.5, y,
                    color=total.loss,
+                   linetype=ifelse(feasible, "feasible", "infeasible"),
                    xend=right.chromEnd+0.5, yend=y),
                data=search.df,
                size=1)+
-  geom_text(aes(left.chromStart+0.5, y,
-                label="selected "),
+  scale_linetype_discrete("feasible?")+
+  ##guides(linetype=guide_legend(order=2))+
+  geom_text(aes(right.chromEnd+0.5, y,
+                label=" selected"),
             data=best.df,
+            size=3,
+            hjust=0)+
+  geom_text(aes(chromStart+0.5, model.i,
+                label="selected "),
+            data=loss.show.ord,
+            size=3,
             hjust=1)+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "cm"))+
   facet_grid(sample.id ~ ., labeller=function(var, val){
     sub("McGill0", "", val)
-  })
+  }, scales="free")
+
+## TODO: 1-plot animint viz where model on the two samples is updated
+## when we click on one of the peaks in the bottom three panels.
+
+pdf("figure-heuristic-algo.pdf", h=5)
+print(gg)
+dev.off()
