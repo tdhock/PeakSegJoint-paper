@@ -4,6 +4,8 @@ works_with_R("3.2.0",
 
 load("timings.RData")
 
+## TODO: load(selected problem sizes!)
+
 by.expr <- split(timings$seconds, timings$seconds$expr)
 last <- function(algo){
   df <- by.expr[[algo]]
@@ -15,8 +17,8 @@ label.df <-
   data.frame(data="seconds",
              algorithm=c("cDPA", "pDPA", "PeakSegJoint"),
              complexity=c("$O(B^2)$", "$O(B\\log B)$", ""),
-             n.data=4000,
-             seconds=c(last("cDPA"), last("pDPA"), 0.01))
+             n.data=c(8000, 8000, 4000),
+             seconds=c(last("cDPA"), last("pDPA"), 0.05))
 gg <- 
 ggplot()+
   scale_x_log10("data size to segment $B$")+
@@ -26,13 +28,16 @@ ggplot()+
              data=data.frame(timings$seconds, data="seconds"))+
   scale_size_manual(values=c(PeakSegJoint=2, cDPA=2, pDPA=1))+
   geom_line(aes(n.data, diff, color=algorithm, size=algorithm),
-            data=data.frame(timings$results, data="distance to true peak"))+
+            data=data.frame(timings$results, data="distance to\ntrue peak"))+
+  geom_line(aes(n.data, 10^mean.loss, color=algorithm, size=algorithm),
+            data=data.frame(timings$results, data="mean\nPoisson loss"))+
   theme_bw()+
   guides(size="none", color="none")+
   geom_text(aes(n.data, seconds, label=paste(algorithm, complexity),
                 color=algorithm),
             show_guide=FALSE,
             size=3,
+            vjust=1,
             hjust=0,
             data=label.df)+
   theme(panel.margin=grid::unit(0, "cm"))+

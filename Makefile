@@ -47,5 +47,7 @@ cheating.error.RData: cheating.error.R selected.by.set.RData
 	R --no-save < $<
 figure-scatter-cheating-step1.pdf: figure-scatter-cheating-step1.R cheating.error.RData selected.by.set.RData
 	R --no-save < $<
-figure-timings.tex: figure-timings.R
+figure-timings.tex: figure-timings.R timings.RData
+	R --no-save < $<
+timings.RData: timings.R
 	R --no-save < $<

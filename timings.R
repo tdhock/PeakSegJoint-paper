@@ -40,7 +40,8 @@ seg.funs <-
     for(sample.i in seq_along(data.list)){
       one <- data.list[[sample.i]]
       fit <- cDPA(one$count, maxSegments=3)
-      end.i <- fit$ends[3, 1:2]
+      end.mat <- getPath(fit)
+      end.i <- end.mat[3, 1:2]
       result.list[[sample.i]] <- one$chromEnd[end.i]
     }
     as.integer(colMeans(do.call(rbind, result.list)))
@@ -55,41 +56,43 @@ seg.funs <-
 set.seed(1)
 time.list <- list()
 result.list <- list()
-for(N in as.integer(10^seq(1, 3.5, by=0.25))){
+for(N in as.integer(10^seq(1, 6, by=0.25))){
   print(N)
   some <- simSamples(1, N)
+  one <- some[[1]]
   target <- c(1000 + N, 1000 + N * 2)
   m.args <- list()
-  for(algorithm in names(seg.funs)){
+  algo.vec <- if(10^4 <= N)"PeakSegJoint" else names(seg.funs)
+  N.result.list <- list()
+  for(algorithm in algo.vec){
     m.args[[algorithm]] <- substitute({
       seg.fun <- seg.funs[[ALGO]]
-      peak <- seg.fun(some)
-      diff <- sum(abs(peak - target))
-      result.list[[paste(ALGO, N)]] <-
-        data.frame(algorithm=ALGO, n.data=N, diff)
+      N.result.list[[ALGO]] <- seg.fun(some)
     }, list(ALGO=algorithm))
   }
   times <- microbenchmark(list=m.args, times=3)
   time.list[[paste(N)]] <- 
     data.frame(n.data=N, times)
-}
-for(N in as.integer(10^seq(3.75, 6, by=0.25))){
-  print(N)
-  some <- simSamples(1, N)
-  target <- c(1000 + N, 1000 + N * 2)
-  m.args <- list()
-  for(algorithm in "PeakSegJoint"){
-    m.args[[algorithm]] <- substitute({
-      seg.fun <- seg.funs[[ALGO]]
-      peak <- seg.fun(some)
-      diff <- sum(abs(peak - target))
-      result.list[[paste(ALGO, N)]] <-
-        data.frame(algorithm=ALGO, n.data=N, diff)
-    }, list(ALGO=algorithm))
+  for(algorithm in names(N.result.list)){
+    peak <- N.result.list[[algorithm]]
+    seg.end.vec <- c(peak, max(one$chromEnd))
+    seg.start.vec <- c(min(one$chromStart), peak)
+    loss.list <- list()
+    for(seg.i in seq_along(seg.end.vec)){
+      seg.start <- seg.start.vec[[seg.i]]
+      seg.end <- seg.end.vec[[seg.i]]
+      i.end <- seg.end - 1000L
+      i.start <- seg.start - 999L
+      seg.count.vec <- one$count[i.start:i.end]
+      seg.mean <- mean(seg.count.vec)
+      loss.list[[seg.i]] <- PoissonLoss(seg.count.vec, seg.mean)
+    }
+    total.loss <- sum(unlist(loss.list))
+    mean.loss <- total.loss/nrow(one)
+    diff <- sum(abs(peak - target))
+    result.list[[paste(algorithm, N)]] <-
+      data.frame(algorithm=algorithm, n.data=N, diff, total.loss, mean.loss)
   }
-  times <- microbenchmark(list=m.args, times=3)
-  time.list[[paste(N)]] <- 
-    data.frame(n.data=N, times)
 }
 one.sample.times <- do.call(rbind, time.list)
 results <- do.call(rbind, result.list)
