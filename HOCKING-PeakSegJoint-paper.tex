@@ -19,8 +19,8 @@
 \newcommand{\ZZ}{\mathbb Z}
 \newcommand{\NN}{\mathbb N}
 
-\title{PeakSegJoint: supervised detection of the same peaks jointly
-  across several ChIP-seq samples}
+\title{PeakSegJoint: fast supervised peak detection via joint
+  segmentation of multiple count data samples}
 
 
 \author{
@@ -82,10 +82,10 @@ Address \\
   segmentation, we propose a new supervised penalty learning model. To
   infer the parameters of these two models, we propose to use a
   discrete optimization heuristic for the segmentation, and convex
-  optimization for the penalty learning. We show that this method
-  achieves state-of-the-art peak detection, and results in
-  interpretable peaks that occur in exactly the same positions across
-  samples.
+  optimization for the penalty learning. In comparisons with
+  state-of-the-art peak detection algorithms, PeakSegJoint achieves
+  comparable accuracy, faster speeds, and a more interpretable model
+  with peaks that occur in exactly the same positions across samples.
 \end{abstract}
 
 \section{Introduction}
@@ -433,7 +433,12 @@ predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
 
 \subsection{Heuristic discrete optimization for joint segmentation}
 
-TODO: make figure that explains bin pyramid.
+\begin{figure}[b!]
+  \centering
+  FIGURE
+  \caption{TODO: make figure that explains PeakSegJoint heuristic algo.}
+  \label{fig:heuristic-algo}
+\end{figure}
 
 \subsection{Convex optimization for supervised penalty learning}
 
@@ -475,7 +480,7 @@ and the derivative of the squared hinge loss is $\phi'(x)=2(x-1)I(x\leq 1)$.
 For FISTA with constant step size we also need a Lipschitz constant of
 $\mathcal L(\mathbf w)$. Following the arguments of
 \citet{hingeSquareFISTA}, we derived a Lipschitz constant of
-$\sum_{i=1}^n ||\mathbf X_i||_2^2/n$. Finally, we used the
+$\sum_{i=1}^n ||\mathbf X_i||_F^2/n$. Finally, we used the
 subdifferential stopping criterion of \citet{HOCKING-penalties}.
 
 % An optimality condition for (\ref{argmin_w}) is 
@@ -486,9 +491,36 @@ subdifferential stopping criterion of \citet{HOCKING-penalties}.
 
 \section{Results}
 
-\includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
+\subsection{Speed of heuristic PeakSegJoint algorithm}
 
-\input{figure-timings}
+Figure~\ref{fig:timings} shows that the PeakSegJoint algorithm is
+orders of magnitude faster than the cDPA of \citet{HOCKING-PeakSeg}
+and the pDPA of \citet{Segmentor}.
+
+\begin{figure}[b!]
+  \centering
+  \input{figure-timings}
+  \vskip -0.8cm
+  \caption{Performance of three segmentation algorithms on simulated
+    data sets of varying size $B$. The grey shaded area represents the
+    range of problem sizes selected in the McGill Histone benchmark
+    data sets. Timings are shown in seconds, and the two measures of
+    segmentation model accuracy are distance to true peak (in units of
+    data points) and mean Poisson loss. }
+  \label{fig:timings}
+\end{figure}
+
+\subsection{Accuracy of PeakSegJoint on benchmark data sets}
+
+\begin{figure}[b!]
+  \centering
+  \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
+  \caption{Test error of peak detectors in the 7 McGill Histone
+    benchmark data sets (panels from left to right). Each dot shows
+    one of 6 train/test splits, and the black vertical line marks the
+    mean of the PeakSegJoint model.}
+  \label{fig:test-error-dots}
+\end{figure}
 
 \section{Discussion}
 
