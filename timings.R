@@ -1,8 +1,11 @@
 works_with_R("3.2.0",
+             data.table="1.9.4",
              microbenchmark="1.3.0",
              Segmentor3IsBack="1.8",
              "tdhock/PeakSegDP@fe06a5b91d68c5d1ec471cb15c3ec3935dc2624d",
              "tdhock/PeakSegJoint@a1ea491f49e9bdb347f1caadebe7b750de807ac4")
+
+load("selected.by.set.RData")
 
 simPeak <- function(n.data){
   stopifnot(is.numeric(n.data))
@@ -97,9 +100,33 @@ for(N in as.integer(10^seq(1, 6, by=0.25))){
 one.sample.times <- do.call(rbind, time.list)
 results <- do.call(rbind, result.list)
 
+selected.df <- do.call(rbind, selected.by.set)
+res.range <- paste(range(selected.df$bases.per.problem))
+problems.list <- list()
+for(set.name in dir("PeakSegJoint-chunks")){
+  set.dir <- file.path("PeakSegJoint-chunks", set.name)
+  problems.RData.vec <- Sys.glob(file.path(set.dir, "*", "problems.RData"))
+  chunk.i <- 0
+  for(problems.RData in problems.RData.vec){
+    chunk.i <- chunk.i + 1
+    chunk.dir <- dirname(problems.RData)
+    chunk.id <- basename(chunk.dir)
+    objs <- load(problems.RData)
+    for(res.str in res.range){
+      step2.data <- step2.data.list[[res.str]]
+      if(is.data.frame(step2.data$problems)){
+        problems.list[[paste(res.str, problems.RData)]] <-
+          step2.data$problems
+      }
+    }
+  }
+}
+problems <- do.call(rbind, problems.list)
+
 timings <-
   list(seconds=one.sample.times,
-       results=results)
+       results=results,
+       problems=problems)
 
 save(timings, file="timings.RData")
 

@@ -1,10 +1,10 @@
 works_with_R("3.2.0",
+             "tdhock/PeakSegJoint@a1ea491f49e9bdb347f1caadebe7b750de807ac4",
+             data.table="1.9.4",
              tikzDevice="0.7.0",
              ggplot2="1.0")
 
 load("timings.RData")
-
-## TODO: load(selected problem sizes!)
 
 by.expr <- split(timings$seconds, timings$seconds$expr)
 last <- function(algo){
@@ -19,8 +19,18 @@ label.df <-
              complexity=c("$O(B^2)$", "$O(B\\log B)$", ""),
              n.data=c(8000, 8000, 4000),
              seconds=c(last("cDPA"), last("pDPA"), 0.05))
+
+timings$problems[, bases := problemEnd-problemStart]
+problem.range <- timings$problems[, .(min=min(bases), max=max(bases))]
+
 gg <- 
 ggplot()+
+  geom_tallrect(aes(xmin=min, xmax=max),
+                data=problem.range,
+                fill="black",
+                alpha=0.1)+
+  ## geom_vline(aes(xintercept=problemEnd-problemStart),
+  ##            data=timings$problems)+
   scale_x_log10("data size to segment $B$")+
   scale_y_log10("")+
   geom_point(aes(n.data, time/1e9, color=expr),
