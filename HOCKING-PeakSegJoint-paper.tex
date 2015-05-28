@@ -197,7 +197,7 @@ m)\in\{0, 1\}$ can be used to classify each base $j\in\{1,\dots B\}$
 as either background noise $P_j(\mathbf m)=0$ or a peak $P_j(\mathbf
 m)=1$.
 
-\subsection{An multi-sample model 
+\subsection{A multi-sample model 
   related to the single-sample PeakSeg
   model}
 
@@ -457,7 +457,7 @@ predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
     is selected, the bin size is decreased to 2, and we consider a new
     set of models around the selected peak starts and ends. We
     continue and return the selected model at bin size 1 (shown in
-    green). Interactive figure at \url{http://bit.ly/1d00KzB}}
+    green). Interactive figure at \url{http://bit.ly/1AA6TgK}}
   \label{fig:heuristic-algo}
 \end{figure}
 
@@ -526,18 +526,38 @@ subdifferential stopping criterion of \citet{HOCKING-penalties}.
 
 \subsection{Speed of heuristic PeakSegJoint algorithm}
 
-Figure~\ref{fig:timings} shows that the PeakSegJoint algorithm is
-orders of magnitude faster than the cDPA of \citet{HOCKING-PeakSeg}
-and the pDPA of \citet{Segmentor}.
+The PeakSegJoint algorithm is orders of magnitude faster than existing
+Poisson segmentation algorithms (Figure~\ref{fig:timings}). For
+simulated data sets of size $B\in\{10^1, \dots, 10^6\}$, we compared
+PeakSegJoint with the $O(B\log B)$ unconstrained pruned dynamic
+programming algorithm (pDPA) of \citet{Segmentor} (R package
+Segmentor3IsBack), and the $O(B^2)$ constrained dynamic programming
+algorithm of \citet{HOCKING-PeakSeg} (R package
+PeakSegDP). Figure~\ref{fig:timings} indicates that PeakSegJoint
+enjoys the same $O(B \log B)$ asymptotic behavior as the pDPA. However
+the PeakSegJoint algorithm is faster by at least two orders of
+magnitude for the range of data sizes that is typical for real data
+($10^2 < B < 10^6$). 
+
+These speed differences are magnified when applying these Poisson
+segmentation models to real ChIP-seq data sets. For example, the hg19
+human genome assembly has about $3\times 10^9$ bases. For the
+H3K36me3\_AM\_immune data set, a resolution of about 200 kilobases per
+problem was optimal, so running PeakSegJoint on the entire human
+genome means solving about 15,000 segmentation problems. PeakSegJoint
+takes about 0.1 seconds to solve each of those problems
+(Figure~\ref{fig:timings}), meaning a total computation time of about
+25 minutes. In contrast, using the pDPA would be orders of magnitude
+slower (hours or days of computation).
 
 \begin{figure}[b!]
   \centering
   \input{figure-timings}
   \vskip -0.5cm
-  \caption{Timings of three segmentation algorithms on simulated
-    data sets of varying size $B$. The grey shaded area represents the
-    range of problem sizes selected in the McGill Histone benchmark
-    data sets. }
+  \caption{Timings of three Poisson segmentation algorithms on
+    simulated data sets of varying size $B$. The grey shaded area
+    represents the range of problem sizes selected in the McGill
+    Histone benchmark data sets. }
   \label{fig:timings}
 \end{figure}
 
