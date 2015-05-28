@@ -1,6 +1,6 @@
 works_with_R("3.2.0",
              ggplot2="1.0",
-             "tdhock/animint@25e5ccf83cef0cd498d455c589c1bc705e056089",
+             "tdhock/animint@3ee3b962ba5737d8b291813fe6e73a75705f5cdf",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
              "tdhock/PeakSegJoint@d99652f043f738c25fad22737999eb794c264c54")
 
@@ -689,7 +689,7 @@ viz <-
          theme_bw()+
          theme(panel.margin=grid::unit(0, "cm"))+
          facet_grid(sample.id ~ ., labeller=function(var, val){
-           sub("McGill0", "", val)
+           ifelse(grepl("sample", val), paste(val), paste("bin size", val))
          }, scales="free")+
          geom_segment(aes(chromStart+0.5, mean,
                           showSelected=peak,
@@ -704,7 +704,9 @@ viz <-
          ggtitle("click blue models to select peak start/end")+
          theme_animint(width=1000, height=600),
 
-       first=list(peak=loss.show.ord$peak),
+       duration=list(peak=500),
+
+       first=list(peak=subset(best.df, sample.id==1)$peak),
 
        title="PeakSegJoint fast heuristic segmentation algorithm")
 
