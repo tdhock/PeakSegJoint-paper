@@ -18,6 +18,10 @@
 \newcommand{\RR}{\mathbb R}
 \newcommand{\ZZ}{\mathbb Z}
 \newcommand{\NN}{\mathbb N}
+\definecolor{noPeaks}{HTML}{F6F4BF}
+\definecolor{peakStart}{HTML}{FFAFAF}
+\definecolor{peakEnd}{HTML}{FF4C4C}
+\definecolor{peaks}{HTML}{A445EE}
 
 \title{PeakSegJoint: fast supervised peak detection via joint
   segmentation of multiple count data samples}
@@ -131,7 +135,7 @@ exhibit the same pattern type.
 \section{Related work}
 
 \citet{hierarchical-joint} proposed the ChIPmeta HMM, but it is for a
-different kind of data: one sample with both ChIP-seq and ChIP-cip
+different kind of data: one sample with both ChIP-seq and ChIP-chip
 data.
 
 Several unsupervised models have been proposed for joint analysis of
@@ -142,18 +146,42 @@ and H3K36me3 profiles. In contrast, our proposed PeakSegJoint model
 takes as input several samples (e.g. brain and kidney cells) for one
 experiment such as H3K4me3.
 
-\citet{JAMM} describe JAMM a joint method for analyzing replicates. It
-says that it and DFilter are both ``universal'' for broad and narrow
-peaks. They used TF bindings sites as positive controls. They say that
-it is better to analyze replicates independantly than to pool
-replicates. TODO: run and compare.
-
+There are several unsupervised algorithms for jointly analyzing
+several samples of the same experiment and cell type. For example, the
+JAMM algorithm of \citet{JAMM} can analyze several samples but is
+limited to a single cell type. 
+%It says that it and DFilter are both ``universal'' for broad and narrow peaks. 
+% They used TF bindings sites as positive controls. They say that
+% it is better to analyze replicates independantly than to pool
+% replicates. TODO: run and compare.
 % TODO: run DFilter.
+The PePr algorithm of \citet{PePr} can identifying peaks that are
+common to samples of a single cell type, or different between samples
+of two cell types, but is unsuitable for analysis of two or more cell
+types. In contrast, our proposed PeakSegJoint method models data from
+several samples without limit on the number of cell types.
+%describe PePr a method for
+%identifying consistent or differential peaks across replicates.
+% They applied it to TF data sets, and used visual inspection to test
+% (but not train). TODO: run and compare.
 
-\citet{PePr} describe PePr a method for identifying consistent or
-differential peaks across replicates. They applied it to TF data sets,
-and used visual inspection to test (but not train). TODO: run and
-compare.
+\begin{figure}[b!]
+  \centering
+  \includegraphics[width=\textwidth]{figure-good-bad}
+  \vskip -0.5cm
+  \caption{Labeled ChIP-seq coverage data for $S=4$ samples (top 4
+    panels) with 3 peak models (bottom 3 panels).
+    % \colorbox{noPeaks}{noPeaks} means there should be no overlapping
+    % peaks, \colorbox{peakStart}{peakStart}/\colorbox{peakEnd}{peakEnd}
+    % mean there should be exactly 1 peak start/end somewhere in the
+    % region, and \colorbox{peaks}{peaks} means that ) 
+    An ideal peak model minimizes the number of incorrect labels
+    (false positives are too many peaks and false negatives are not
+    enough peaks). The ``good'' model achieves 0 errors but the
+    ``better'' model is more interpretable since overlapping peaks in
+    different samples always occur in the exact same positions.}
+  \label{fig:good-bad}
+\end{figure}
 
 \section{Models}
 
@@ -514,6 +542,17 @@ subdifferential stopping criterion of \citet{HOCKING-penalties}.
 
 \subsection{Accuracy of PeakSegJoint on benchmark data sets}
 
+We compared with several unsupervised single-sample and multi-sample
+peak callers from the bioinformatics literature. Each algorithm was
+trained by using grid search to select the significance threshold
+hyperparameter that minimized the train error.
+
+The McGill benchmark data sets that we analyzed contain samples of
+several different cell types. However, the multi-sample JAMM and PePr
+algorithms are designed for the analysis of several replicates of a
+single cell type. So upon recommendation from the authors we ran these
+algorithms independently on each cell type.
+
 \begin{figure}[b!]
   \centering
   \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
@@ -564,6 +603,19 @@ slower (hours or days of computation).
 \section{Discussion}
 
 \section{Conclusions}
+
+Faster.
+
+As accurate as state of the art.
+
+More interpretable (same peaks, several cell types). This was
+advantageous in the McGill H3K4me3\_TDH\_immune data set, which
+contains 3 cell types: tcell, bcell, and monocyte. The PeakSegJoint
+algorithm can be run once on all cell types, and the resulting model
+can be easily interpreted to find the differences, since peaks occur
+in the exact same locations across samples. In contrast, existing
+methods such as JAMM or PePr are less suitable to analyze this data
+set since they are limited to modeling only 1 or 2 cell types.
 
 \bibliographystyle{abbrvnat}
 \bibliography{refs}
