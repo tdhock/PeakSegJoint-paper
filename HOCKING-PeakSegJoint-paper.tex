@@ -1,6 +1,8 @@
 \documentclass{article} % For LaTeX2e
 \usepackage{nips15submit_e,times}
 \usepackage{tikz}
+\usepackage{algorithm}
+\usepackage{algorithmic}
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{natbib}
@@ -485,13 +487,59 @@ predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
 
 \subsection{Heuristic discrete optimization for joint segmentation}
 
+The \ref{PeakSegJoint} model is defined as the solution to an
+optimization problem with a convex objective function and non-convex
+constraints. We propose to find an approximate solution using a new
+discrete optimization algorithm called
+\JointHeuristic~(Algorithm~1). 
+
+Real data sets $\mathbf Z\in\ZZ_+^{B\times S}$ may have a very large
+number of data points to segment $B$. Searching every possible peak
+start and end point is an $O(B^2)$ operation which would take too much
+time. 
+
+The main idea of the \JointHeuristic\ algorithm is to first zoom out
+(downsample the data) repeatedly by a factor of $\beta$, obtaining a
+new data matrix of size $b\times S$, where $b \ll B$
+(line~\ref{zoomout}). Then we solve the \ref{PeakSegJoint} problem for
+$p$ peaks via \textsc{GridSearch} (line~\ref{gridsearch}), a
+sub-routine that checks all $O(b^2)$ possible peak start and end
+positions. Then we zoom in by a factor of $\beta$ (line~\ref{zoomin})
+and refine the peak positions in $O(\beta^2)$ time via
+\textsc{SearchNearPeak} (line~\ref{searchnear}). After having zoomed
+back in to the BinSize=1 level we return the final Peak positions.
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+  \REQUIRE count data $\mathbf Z\in\ZZ_+^{B\times S}$, number of
+  peaks $p\in\{0, \dots, S\}$, zoom factor
+  $\beta\in\{2, 3, \dots\}$.
+  \STATE $\textrm{BinSize} \gets \textsc{MaxBinSize}(B, \beta)$. \label{zoomout}
+  \STATE $\textrm{Peak}, \textrm{Samples} \gets \label{gridsearch}
+  \textsc{GridSearch}(\mathbf Z, p, \textrm{BinSize})$.
+  \WHILE{$1 < \textrm{BinSize}$}
+  \STATE $\textrm{BinSize} \gets \textrm{BinSize} / \beta$. \label{zoomin}
+  \STATE $\textrm{Peak} \gets
+  \textsc{SearchNearPeak}(\mathbf Z, \textrm{Samples}, \label{searchnear}
+  \textrm{BinSize}, \textrm{Peak})$
+  \ENDWHILE
+  \RETURN Peak.
+\caption{\JointHeuristic}
+\end{algorithmic}\label{algo}
+\end{algorithm}
+
+An example of the algorithm is shown in
+Figure~\ref{fig:heuristic-algo}, which has a data size of $B=TODO$
+data points to segment. \textsc{MaxBinSize} returns $b=TODO$ data
+points to segment, and TODO.
+
 \begin{figure}[b!]
   \centering
   \includegraphics[width=\textwidth]{figure-heuristic-algo}
   \vskip -0.5cm
   \caption{Demonstration of the \JointHeuristic\ segmentation
     algorithm. For a data set with $B=24$ data points and $S=2$
-    samples (top 2 panels), the algorithm with bin size parameter of
+    samples (top 2 panels), the algorithm with zoom factor of
     $\beta=2$ proceeds as follows. First, the Poisson loss and
     feasibility (\ref{joint_up_down}) is computed for all possible
     peak starts and ends at bin size 4. The feasible model with
