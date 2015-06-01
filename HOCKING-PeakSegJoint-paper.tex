@@ -22,6 +22,7 @@
 \definecolor{peakStart}{HTML}{FFAFAF}
 \definecolor{peakEnd}{HTML}{FF4C4C}
 \definecolor{peaks}{HTML}{A445EE}
+\newcommand{\JointHeuristic}{\textsc{JointZoom}}
 
 \title{PeakSegJoint: fast supervised peak detection via joint
   segmentation of multiple count data samples}
@@ -79,17 +80,17 @@ Address \\
 \begin{abstract}
   Joint peak detection is a central problem when comparing samples in
   genomic data analysis, and current algorithms for this task are
-  unsupervised and mostly effective for a single data type and pattern
-  (e.g. H3K4me3 data with a sharp peak pattern). We propose
-  PeakSegJoint, a new constrained multi-sample maximum likelihood
-  segmentation model. To select the number of peaks in the
-  segmentation, we propose a new supervised penalty learning model. To
-  infer the parameters of these two models, we propose to use a
-  discrete optimization heuristic for the segmentation, and convex
-  optimization for the penalty learning. In comparisons with
+  unsupervised and limited to at most 2 sample types. We propose
+  PeakSegJoint, a new constrained maximum likelihood segmentation
+  model for any number of sample types. To select the number of peaks
+  in the segmentation, we propose a new supervised penalty learning
+  model. To infer the parameters of these two models, we propose to
+  use a discrete optimization heuristic for the segmentation, and
+  convex optimization for the penalty learning. In comparisons with
   state-of-the-art peak detection algorithms, PeakSegJoint achieves
   comparable accuracy, faster speeds, and a more interpretable model
-  with peaks that occur in exactly the same positions across samples.
+  with overlapping peaks that occur in exactly the same positions
+  across all samples.
 \end{abstract}
 
 \section{Introduction}
@@ -142,7 +143,7 @@ Several unsupervised models have been proposed for joint analysis of
 several different ChIP-seq experiments
 \citep{jmosaics,segway,chromhmm}. In these models, the input is one
 sample (e.g. brain cells) with different experiments such as H3K4me3
-and H3K36me3 profiles. In contrast, our proposed PeakSegJoint model
+and H3K36me3 profiles. In contrast, our proposed \ref{PeakSegJoint} model
 takes as input several samples (e.g. brain and kidney cells) for one
 experiment such as H3K4me3.
 
@@ -158,7 +159,7 @@ limited to a single cell type.
 The PePr algorithm of \citet{PePr} can identifying peaks that are
 common to samples of a single cell type, or different between samples
 of two cell types, but is unsuitable for analysis of two or more cell
-types. In contrast, our proposed PeakSegJoint method models data from
+types. In contrast, our proposed \ref{PeakSegJoint} method models data from
 several samples without limit on the number of cell types.
 %describe PePr a method for
 %identifying consistent or differential peaks across replicates.
@@ -185,12 +186,19 @@ several samples without limit on the number of cell types.
 
 \section{Models}
 
+We begin by introducing the single-sample PeakSeg model of
+\citet{HOCKING-PeakSeg}, which is the current state-of-the-art peak
+detection algorithm in the McGill benchmark data set of
+\citet{hocking2014visual}. Then we will discuss extensions of the
+PeakSeg model to data sets with multiple samples.
+
 \subsection{PeakSeg: finding the best $0,\dots,p_{\text{max}}$ peaks
   in a single sample}
 
 Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned reads
-across $B$ bases, and a maximum number of peaks $p_{\text{max}}\leq
-B$, the PeakSeg model with $p\in\{0, \dots, p_{\text{max}}\}$ peaks is
+across $B$ bases, and a maximum number of peaks $p_{\text{max}}$, the
+PeakSeg model for the mean vector $\mathbf m\in\RR^B$ with $p\in\{0,
+\dots, p_{\text{max}}\}$ peaks is
 \begin{align}
   \label{PeakSeg}
   \mathbf{\tilde m}^p(\mathbf z)  =
@@ -231,9 +239,9 @@ m)=1$.
 
 For $S$ sample profiles $\mathbf z_1, \dots, \mathbf z_S\in\ZZ_+^B$
 defined on the same $B$ bases, we stack the vectors into a matrix
-$\mathbf Z\in\ZZ_+^{B \times S}$. Consider the following model which
-allows each sample to have either 0 or 1 peaks, with a total of
-$p\in\{0, \dots, S\}$ peaks:
+$\mathbf Z\in\ZZ_+^{B \times S}$. Consider the following model for the
+mean matrix $\mathbf M\in\RR^{B\times S}$ which allows each sample to
+have either 0 or 1 peaks, with a total of $p\in\{0, \dots, S\}$ peaks:
 \begin{align}
   \label{Unconstrained}
   \mathbf{\tilde M}^p(\mathbf Z)  =
@@ -325,12 +333,16 @@ for some $p_1,\dots, p_S\in\{0, 1\}$ with $p=\sum_{i=s}^S p_s$.
 \begin{figure}[b!]
   \centering
   \includegraphics[width=\textwidth]{figure-PeakSegJoint}
-  \caption{Blue line segments show the sequence of PeakSegJoint models
-    for $S=3$ samples and $p\in\{0, 1, 2, 3\}$ peaks.}
+  \caption{A labeled data set with $S=3$ samples (top 3 panels) and
+    the models for $p\in\{0, 1, 2, 3\}$ peaks (bottom 4 panels). The
+    \ref{Unconstrained} model does not include the \ref{PeakSegJoint}
+    constraint (\ref{joint_constraint}) that overlapping peaks should
+    occur in exactly the same positions.}
   \label{fig:PeakSegJoint}
 \end{figure}
 
-The PeakSegJoint model with $p\in\{0, \dots, S\}$ peaks is defined by
+The 
+\ref{PeakSegJoint} model with $p\in\{0, \dots, S\}$ peaks is defined by
 starting with the \ref{Unconstrained} multi-sample model, and adding
 the constraint that peaks should occur in the exact same positions in
 each sample (\ref{joint_constraint}):
@@ -351,7 +363,7 @@ each sample (\ref{joint_constraint}):
   \\
   &\ \forall s\in\{1, \dots, S\},\,
   \forall j\in\{1, \dots, B\},\, P_j(\mathbf m_s) \in\{0, 1\},
-  \nonumber
+  \label{joint_up_down}
   \\
   &\ \forall s_1\neq s_2\mid
   \nonumber
@@ -361,7 +373,8 @@ each sample (\ref{joint_constraint}):
   \label{joint_constraint}
 \end{align}
 
-The PeakSegJoint model for a data set with $S=3$ samples is shown in
+The 
+\ref{PeakSegJoint} model for a data set with $S=3$ samples is shown in
 Figure~\ref{fig:PeakSegJoint}.
 
 \subsection{Supervised penalty learning}
@@ -415,9 +428,9 @@ y_i = (
 Briefly,
 a predicted penalty in the target interval $f(\mathbf
 X_i)\in\mathbf y_i$ implies that the
-PeakSegJoint model with $p^*\left[\exp f(\mathbf X_i), \mathbf
+\ref{PeakSegJoint} model with $p^*\left[\exp f(\mathbf X_i), \mathbf
   Z_i\right]$ peaks achieves the minimum number of incorrect labels
-$L_i$, among all $S+1$ PeakSegJoint models for genomic region $i$.
+$L_i$, among all $S+1$ \ref{PeakSegJoint} models for genomic region $i$.
 %  $\exp f(\mathbf X_i)\in \argmin_\lambda
 % E\left[ \mathbf P\big( \mathbf{\hat M}^{p^*(\lambda, \mathbf
 %     Z)}(\mathbf Z) \big), L_i\right]$ (TODO: should we actually show
@@ -476,16 +489,17 @@ predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
   \centering
   \includegraphics[width=\textwidth]{figure-heuristic-algo}
   \vskip -0.5cm
-  \caption{Demonstration of the PeakSegJoint fast heuristic
-    segmentation algorithm. For a data set with $B=24$ data points and
-    $S=2$ samples (top 2 panels), the algorithm with bin size
-    parameter of $\beta=2$ proceeds as follows. First, the Poisson
-    loss and feasibility is computed for all possible peak starts and
-    ends at bin size 4. The feasible model with minimum Poisson loss
-    is selected, the bin size is decreased to 2, and we consider a new
-    set of models around the selected peak starts and ends. We
-    continue and return the selected model at bin size 1 (shown in
-    green). Interactive figure at \url{http://bit.ly/1AA6TgK}}
+  \caption{Demonstration of the \JointHeuristic\ segmentation
+    algorithm. For a data set with $B=24$ data points and $S=2$
+    samples (top 2 panels), the algorithm with bin size parameter of
+    $\beta=2$ proceeds as follows. First, the Poisson loss and
+    feasibility (\ref{joint_up_down}) is computed for all possible
+    peak starts and ends at bin size 4. The feasible model with
+    minimum Poisson loss is selected, the bin size is decreased to 2,
+    and we consider a new set of models around the selected peak
+    starts and ends. We continue and return the selected model at bin
+    size 1 (shown in green). Interactive figure at
+    \url{http://bit.ly/1AA6TgK}}
   \label{fig:heuristic-algo}
 \end{figure}
 
@@ -559,24 +573,25 @@ algorithms independently on each cell type.
   \caption{Test error of peak detectors in the 7 McGill Histone
     benchmark data sets (panels from left to right). Each dot shows
     one of 6 train/test splits, and the black vertical line marks the
-    mean of the PeakSegJoint model.}
+    mean of the \ref{PeakSegJoint} model.}
   \label{fig:test-error-dots}
 \end{figure}
 
 \subsection{Speed of heuristic PeakSegJoint algorithm}
 
-The PeakSegJoint algorithm is orders of magnitude faster than existing
-Poisson segmentation algorithms (Figure~\ref{fig:timings}). For
-simulated data sets of size $B\in\{10^1, \dots, 10^6\}$, we compared
-PeakSegJoint with the $O(B\log B)$ unconstrained pruned dynamic
-programming algorithm (pDPA) of \citet{Segmentor} (R package
-Segmentor3IsBack), and the $O(B^2)$ constrained dynamic programming
-algorithm of \citet{HOCKING-PeakSeg} (R package
+The \JointHeuristic\ algorithm is orders of magnitude faster than
+existing Poisson segmentation algorithms
+(Figure~\ref{fig:timings}). For simulated data sets of size
+$B\in\{10^1, \dots, 10^6\}$, we compared PeakSegJoint with the
+$O(B\log B)$ unconstrained pruned dynamic programming algorithm (pDPA)
+of \citet{Segmentor} (R package Segmentor3IsBack), and the $O(B^2)$
+constrained dynamic programming algorithm (cDPA) of
+\citet{HOCKING-PeakSeg} (R package
 PeakSegDP). Figure~\ref{fig:timings} indicates that PeakSegJoint
 enjoys the same $O(B \log B)$ asymptotic behavior as the pDPA. However
-the PeakSegJoint algorithm is faster by at least two orders of
+the \JointHeuristic\ algorithm is faster by at least two orders of
 magnitude for the range of data sizes that is typical for real data
-($10^2 < B < 10^6$). 
+($10^2 < B < 10^6$).
 
 These speed differences are magnified when applying these Poisson
 segmentation models to real ChIP-seq data sets. For example, the hg19
@@ -611,7 +626,7 @@ As accurate as state of the art.
 More interpretable (same peaks, several cell types). This was
 advantageous in the McGill H3K4me3\_TDH\_immune data set, which
 contains 3 cell types: tcell, bcell, and monocyte. The PeakSegJoint
-algorithm can be run once on all cell types, and the resulting model
+model can be run once on all cell types, and the resulting model
 can be easily interpreted to find the differences, since peaks occur
 in the exact same locations across samples. In contrast, existing
 methods such as JAMM or PePr are less suitable to analyze this data
