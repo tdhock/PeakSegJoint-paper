@@ -85,12 +85,12 @@ Address \\
   unsupervised and limited to at most 2 sample types. We propose
   PeakSegJoint, a new constrained maximum likelihood segmentation
   model for any number of sample types. To select the number of peaks
-  in the segmentation, we propose a new supervised penalty learning
+  in the segmentation, we propose a supervised penalty learning
   model. To infer the parameters of these two models, we propose to
   use a discrete optimization heuristic for the segmentation, and
   convex optimization for the penalty learning. In comparisons with
   state-of-the-art peak detection algorithms, PeakSegJoint achieves
-  comparable accuracy, faster speeds, and a more interpretable model
+  similar accuracy, faster speeds, and a more interpretable model
   with overlapping peaks that occur in exactly the same positions
   across all samples.
 \end{abstract}
@@ -108,11 +108,11 @@ genomic position. To compare samples at a given genomic position,
 biologists visually examine coverage plots such as
 Figure~\ref{fig:good-bad} for presence or absence of common ``peaks.''
 In machine learning terms, a single sample over $B$ base positions is
-a vector of count data $\mathbf z\in\ZZ_+^B$ and a peak detector is a
-binary classifier $c:\ZZ_+^B\rightarrow\{0, 1\}^B$. The positive class
-is peaks and the negative class is background noise. Importantly,
-peaks and background occur in long contiguous segments across the
-genome.
+a vector of non-negative count data $\mathbf z\in\ZZ_+^B$ and a peak
+detector is a binary classifier $c:\ZZ_+^B\rightarrow\{0, 1\}^B$. The
+positive class is peaks and the negative class is background
+noise. Importantly, peaks and background occur in long contiguous
+segments across the genome.
 
 In this paper we use the supervised learning framework of
 \citet{hocking2014visual}, who proposed to use labels obtained from
@@ -167,13 +167,16 @@ detector with identical overlapping peak positions across samples (the
 \subsection{Contributions and organization}
 
 The main contribution of this paper is the \ref{PeakSegJoint} model
-for supervised joint peak detection. It is the first joint peak
-detection algorithm that can handle any number of sample types, and
-can be trained using efficient supervised learning algorithms.
-
-After discussing related work in Section~\ref{sec:related}, we
-propose the \ref{PeakSegJoint} model in Section~\ref{sec:models}.Section~\ref{sec:algorithms}.
-
+for supervised joint peak detection. Unlike previous methods
+(Section~\ref{sec:related}), it is the first joint peak detector that
+explicitly models any number of sample types
+(Section~\ref{sec:models}). A secondary contribution is the
+\JointHeuristic\ heuristic segmentation algorithm, and a supervised
+learning algorithm for efficiently selecting the \ref{PeakSegJoint}
+model complexity (Section~\ref{sec:algorithms}).  We show test error
+and timing results in Section~\ref{sec:results}, provide a discussion
+in Section~\ref{sec:discussion}, and propose some future research
+directions in Section~\ref{sec:conclusions}.
 
 \section{Related work: unsupervised peak detectors}
 \label{sec:related}
@@ -663,6 +666,7 @@ subdifferential stopping criterion of \citet{HOCKING-penalties}.
 % \end{equation}
 
 \section{Results}
+\label{sec:results}
 
 \subsection{Accuracy of PeakSegJoint on benchmark data sets}
 
@@ -739,6 +743,7 @@ takes about 0.1 seconds to solve each of those problems
 slower (hours or days of computation).
 
 \section{Discussion}
+\label{sec:discussion}
 
 We attempted to compare with the JAMM and PePr algorithms, two joint
 peak detectors from the bioinformatics literature \citep{JAMM,
@@ -759,10 +764,11 @@ they are limited to modeling only 1 or 2 cell types.
 
 
 \section{Conclusions}
+\label{sec:conclusions}
 
 We proposed the \ref{PeakSegJoint} model for supervised joint peak
 detection. It generalizes the state-of-the-art \ref{PeakSeg} model to
-multiple samples. We proposed the \textsc{JointZoom} Poisson
+multiple samples. We proposed the \JointHeuristic\ Poisson
 segmentation algorithm that is orders of magnitude faster than
 existing algorithms. Finally, we showed that choosing the number of
 peaks in \ref{PeakSegJoint} using supervised penalty learning yields
