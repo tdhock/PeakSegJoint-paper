@@ -189,7 +189,7 @@ current state-of-the-art is the supervised \ref{PeakSeg} model of
 \citet{HOCKING-PeakSeg}. 
 
 In the multi-sample setting of this paper, each of these algorithms
-may be applied idendependently to each sample. The drawback of these
+may be applied independently to each sample. The drawback of these
 methods is that the peaks do not occur in the same positions across
 each sample, so it is not straightforward to determine differences
 between samples.
@@ -487,21 +487,14 @@ vector $\mathbf w\in\RR^d$ in a linear function $f_{\mathbf w}(\mathbf X) =
 vector of $S$ ones.
 
 For supervision we use the annotated region labels $L_i$ to compute
-the annotation error (\ref{eq:error}) and a target interval $\mathbf
-y_i = (
-    \underline y_i, \overline y_i
-)$ of penalty values. We used the algorithm of
-\citet{HOCKING-penalties} to compute the exact target interval.
-% The
-% target interval consists of the lower $\underline y_i$ and upper
-% $\overline y_i$ limits of the largest region of the $\log \lambda$
-% penalty space that has minimum error (\ref{eq:error}). 
-Briefly,
-a predicted penalty in the target interval $f(\mathbf
-X_i)\in\mathbf y_i$ implies that the
-\ref{PeakSegJoint} model with $p^*\left[\exp f(\mathbf X_i), \mathbf
-  Z_i\right]$ peaks achieves the minimum number of incorrect labels
-$L_i$, among all $S+1$ \ref{PeakSegJoint} models for genomic region $i$.
+the number of incorrect regions (\ref{eq:error}) for each model size
+$p$, and then a target interval $\mathbf y_i = ( \underline y_i,
+\overline y_i )$ of penalty values \citep{HOCKING-penalties}.
+Briefly, a predicted penalty in the target interval $f(\mathbf
+X_i)\in\mathbf y_i$ implies that the \ref{PeakSegJoint} model with
+$p^*\left[\exp f(\mathbf X_i), \mathbf Z_i\right]$ peaks achieves the
+minimum number of incorrect labels $L_i$, among all $S+1$
+\ref{PeakSegJoint} models for genomic region $i$.
 %  $\exp f(\mathbf X_i)\in \argmin_\lambda
 % E\left[ \mathbf P\big( \mathbf{\hat M}^{p^*(\lambda, \mathbf
 %     Z)}(\mathbf Z) \big), L_i\right]$ (TODO: should we actually show
@@ -546,11 +539,13 @@ learning problem:
   \mathcal L(\mathbf w) + \gamma ||\mathbf w||_1.
 \end{equation}
 
-To predict on test data $\mathbf Z$ with features $\mathbf
-X$, we compute the predicted penalty $\hat \lambda = \exp
-f_{\mathbf{\hat w}}(\mathbf X)$, the predicted number of
-peaks $\hat p = p^*(\hat \lambda, \mathbf Z)$, and finally the
-predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
+To predict on test data $\mathbf Z$ with features $\mathbf X$, we
+compute the predicted penalty $\hat \lambda = \exp f_{\mathbf{\hat
+    w}}(\mathbf X)$, the predicted number of peaks $\hat p = p^*(\hat
+\lambda, \mathbf Z)$, and finally the predicted mean matrix
+$\mathbf{\hat M}^{\hat p}(\mathbf Z)$. Each column/sample of the mean
+matrix has either two changes (the second segment is the peak) or no
+changes (no peak).
 
 \section{Algorithms}
 \label{sec:algorithms}
@@ -559,15 +554,13 @@ predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
 
 The \ref{PeakSegJoint} model is defined as the solution to an
 optimization problem with a convex objective function and non-convex
-constraints. 
-Real data sets $\mathbf Z\in\ZZ_+^{B\times S}$ may have a very large
-number of data points to segment $B$. Searching every possible peak
-start and end point is an $O(B^2)$ operation which would take too much
-time. 
-Instead, we propose to find an approximate solution using a new
-discrete optimization algorithm called
-\JointHeuristic~(Algorithm~1).\footnote{C implementation available in
-  R package \url{https://github.com/tdhock/PeakSegJoint}}
+constraints.  Real data sets $\mathbf Z\in\ZZ_+^{B\times S}$ may have
+a very large number of data points to segment $B$. Explicitly
+computing the maximum likelihood and feasibility for all $O(B^2)$
+possible peak start/endpoints is guaranteed to find the global
+optimum, but would take too much time.  Instead, we propose to find an
+approximate solution using a new discrete optimization algorithm
+called \JointHeuristic~(Algorithm~1).
 
 The main idea of the \JointHeuristic\ algorithm is to first zoom out
 (downsample the data) repeatedly by a factor of $\beta$, obtaining a
@@ -589,13 +582,13 @@ positions.
     algorithm. For a data set with $B=24$ data points and $S=2$
     samples (top 2 panels), the algorithm with zoom factor of
     $\beta=2$ proceeds as follows. First, the Poisson loss and
-    feasibility (\ref{joint_up_down}) is computed for all 
-    peak starts and ends at bin size 4. The feasible model with
-    minimum Poisson loss is selected, the bin size is decreased to 2,
-    and we consider a new set of models around the selected peak
-    starts and ends. We continue and return the optimal model at bin
-    size 1 (shown in green). Interactive figure at
-    \url{http://bit.ly/1AA6TgK}}
+    feasibility (\ref{joint_up_down}) is computed via
+    \textsc{GridSearch} over all peak starts and ends at bin size
+    4. The feasible model with minimum Poisson loss is selected, the
+    bin size is decreased to 2, and \textsc{SearchNearPeak} considers
+    a new set of models around the selected peak starts and ends. We
+    continue and return the optimal model at bin size 1 (shown in
+    green). Interactive figure at \url{http://bit.ly/1AA6TgK}}
   \label{fig:heuristic-algo}
 \end{figure}
 
@@ -614,12 +607,13 @@ positions.
   \textrm{BinSize}, \textrm{Peak})$
   \ENDWHILE
   \RETURN Peak.
-\caption{\JointHeuristic}
+  \caption{\JointHeuristic, available at
+    \url{https://github.com/tdhock/PeakSegJoint}}
 \end{algorithmic}\label{algo}
 \end{algorithm}
 
-For example let us fix the zoom factor at its smallest possible value,
-$\beta=2$. A demonstration of the algorithm on a small set of data
+For example if we fix the zoom factor at
+$\beta=2$, a demonstration of the algorithm on a small data set 
 with $B=24$ points is shown in
 Figure~\ref{fig:heuristic-algo}. \textsc{MaxBinSize} returns 4, so
 \textsc{GridSearch} considers 15 models of $b=7$ data points at bin
@@ -642,7 +636,7 @@ matrix $\mathbf Z\in\ZZ_+^{B\times S}$, computing the sequence of
 
 
 The convex supervised learning problem (\ref{argmin_w}) can be
-computed using gradient-based methods such as FISTA, a Fast Iterative
+solved using gradient-based methods such as FISTA, a Fast Iterative
 Shinkage-Thresholding Algorithm \citep{fista}. 
 % To apply FISTA, we need
 % to compute the gradient of the smooth average surrogate loss
