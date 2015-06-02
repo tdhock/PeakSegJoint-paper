@@ -1,8 +1,8 @@
 works_with_R("3.2.0",
              ggplot2="1.0",
-             "tdhock/animint@3ee3b962ba5737d8b291813fe6e73a75705f5cdf",
+             "tdhock/animint@a0677f2062b455da97138b43ede1f158e4bd36ae",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@d99652f043f738c25fad22737999eb794c264c54")
+             "tdhock/PeakSegJoint@86bee0a4620160e2d4b904e7819b5792280d51de")
 
 ##load("TF.benchmark.corrected.RData")
 
@@ -717,6 +717,14 @@ fig <-
     scale_x_continuous("data to segment (base position along chromosome)",
                        breaks=c(1,seq(2, 24, by=2)))+
     scale_color_continuous("Poisson loss")+
+    geom_text(aes(22, 0, label=algo),
+              vjust=0,
+              size=3,
+              data=data.frame(algo=c("GridSearch",
+                                "SearchNearPeak", "SearchNearPeak"),
+                sample.id=factor(c("4", "2", "1"),
+                  c("sample1", "sample2", "4", "2", "1")
+                                 )))+
     geom_segment(aes(chromStart+0.5, model.i,
                      xend=chromEnd+0.5, yend=model.i,
                      linetype=ifelse(feasible, "feasible", "infeasible"),
@@ -736,12 +744,13 @@ fig <-
     scale_linetype_discrete("feasible?")+
     ##guides(linetype=guide_legend(order=2))+
     geom_text(aes(right.chromEnd+0.5, y,
-                  label=" selected"),
+                  label=ifelse(sample.id==1, " optimal peak",
+                    " selected peak")),
               data=best.df,
               size=3,
               hjust=0)+
     geom_text(aes(chromStart+0.5, model.i,
-                  label="selected "),
+                  label="selected peak "),
               data=loss.show.ord,
               size=3,
               hjust=1)+

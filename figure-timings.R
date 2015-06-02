@@ -1,5 +1,5 @@
 works_with_R("3.2.0",
-             "tdhock/PeakSegJoint@a1ea491f49e9bdb347f1caadebe7b750de807ac4",
+             "tdhock/PeakSegJoint@86bee0a4620160e2d4b904e7819b5792280d51de",
              data.table="1.9.4",
              tikzDevice="0.7.0",
              ggplot2="1.0")
@@ -16,8 +16,8 @@ last <- function(algo){
 label.df <-
   data.frame(data="seconds",
              algorithm=c("cDPA", "pDPA", "PeakSegJoint"),
-             complexity=c("$O(B^2)$", "$O(B\\log B)$", ""),
-             n.data=c(8000, 8000, 4000),
+             complexity=c("$O(B^2)$", "$O(B\\log B)$", "$O(B\\log B)$"),
+             n.data=c(8000, 8000, 2000),
              seconds=c(last("cDPA"), last("pDPA"), 0.05))
 
 timings$problems[, bases := problemEnd-problemStart]

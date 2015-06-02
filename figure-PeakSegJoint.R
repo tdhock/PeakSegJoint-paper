@@ -70,6 +70,7 @@ regions.plot <-
   facet_grid(panel ~ ., scales="free")
 
 profile.list <- ProfileList(some.counts)
+step1 <- PeakSegJointHeuristicStep1(profile.list)
 unconstrained.list <- list()
 for(sample.id in names(profile.list)){
   pro <- profile.list[sample.id]

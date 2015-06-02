@@ -491,7 +491,8 @@ The \ref{PeakSegJoint} model is defined as the solution to an
 optimization problem with a convex objective function and non-convex
 constraints. We propose to find an approximate solution using a new
 discrete optimization algorithm called
-\JointHeuristic~(Algorithm~1). 
+\JointHeuristic~(Algorithm~1).\footnote{C implementation available in
+  R package \url{https://github.com/tdhock/PeakSegJoint}}
 
 Real data sets $\mathbf Z\in\ZZ_+^{B\times S}$ may have a very large
 number of data points to segment $B$. Searching every possible peak
@@ -507,7 +508,8 @@ sub-routine that checks all $O(b^2)$ possible peak start and end
 positions. Then we zoom in by a factor of $\beta$ (line~\ref{zoomin})
 and refine the peak positions in $O(\beta^2)$ time via
 \textsc{SearchNearPeak} (line~\ref{searchnear}). After having zoomed
-back in to the BinSize=1 level we return the final Peak positions.
+back in to the BinSize=1 level we return the final Peak
+positions. 
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -528,10 +530,22 @@ back in to the BinSize=1 level we return the final Peak positions.
 \end{algorithmic}\label{algo}
 \end{algorithm}
 
-An example of the algorithm is shown in
-Figure~\ref{fig:heuristic-algo}, which has a data size of $B=TODO$
-data points to segment. \textsc{MaxBinSize} returns $b=TODO$ data
-points to segment, and TODO.
+For example let us fix the zoom factor at its smallest possible value,
+$\beta=2$. A demonstration of the algorithm on a small set of data
+with $B=24$ points is shown in
+Figure~\ref{fig:heuristic-algo}. \textsc{MaxBinSize} returns 4, so
+\textsc{GridSearch} considers 15 models of $b=7$ data points at bin
+size 4, and then \textsc{SearchNearPeak} considers 16 models each at
+bin sizes 2 and 1. In the real data set of
+Figure~\ref{fig:PeakSegJoint}, there are $B=85846$ data points,
+\textsc{MaxBinSize} returns 16384, \textsc{GridSearch} considers 10
+models of $b=6$ data points, and then \textsc{SearchNearPeak}
+considers 16 models each at bin sizes 8192, 4096, ..., 4, 2, 1.
+
+Overall \JointHeuristic\ with zoom factor $\beta$ searches a total of
+$O(\beta^2\log B)$ models, and computing the likelihood for each model
+is an $O(B)$ operation, so the algorithm has a time complexity of
+$O(\beta^2 B\log B)$.
 
 \begin{figure}[b!]
   \centering
@@ -541,11 +555,11 @@ points to segment, and TODO.
     algorithm. For a data set with $B=24$ data points and $S=2$
     samples (top 2 panels), the algorithm with zoom factor of
     $\beta=2$ proceeds as follows. First, the Poisson loss and
-    feasibility (\ref{joint_up_down}) is computed for all possible
+    feasibility (\ref{joint_up_down}) is computed for all 
     peak starts and ends at bin size 4. The feasible model with
     minimum Poisson loss is selected, the bin size is decreased to 2,
     and we consider a new set of models around the selected peak
-    starts and ends. We continue and return the selected model at bin
+    starts and ends. We continue and return the optimal model at bin
     size 1 (shown in green). Interactive figure at
     \url{http://bit.ly/1AA6TgK}}
   \label{fig:heuristic-algo}
@@ -680,7 +694,10 @@ in the exact same locations across samples. In contrast, existing
 methods such as JAMM or PePr are less suitable to analyze this data
 set since they are limited to modeling only 1 or 2 cell types.
 
+\newpage
+
 \bibliographystyle{abbrvnat}
+
 \bibliography{refs}
 
 \end{document}
