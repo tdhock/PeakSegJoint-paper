@@ -228,14 +228,16 @@ ChIP-seq and ChIP-chip data. In contrast,
 
 \section{Models}\label{sec:models}
 
-We begin by summarizing the single-sample \ref{PeakSeg} model of
-\citet{HOCKING-PeakSeg}, which is the current state-of-the-art peak
-detection algorithm in the McGill benchmark data set of
-\citet{hocking2014visual}. Then we introduce \ref{PeakSegJoint}, a
-model for data sets with multiple samples.
+We begin by summarizing the single-sample \ref{PeakSeg} model, and
+then introduce the multi-sample \ref{PeakSegJoint} model.
 
 \subsection{PeakSeg: finding the most likely $0,\dots,p_{\text{max}}$
   peaks in a single sample}
+
+This section describes the \ref{PeakSeg} model of
+\citet{HOCKING-PeakSeg}, which is the current state-of-the-art peak
+detection algorithm in the McGill benchmark data set of
+\citet{hocking2014visual}. 
 
 Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned read counts
 on $B$ bases, and a maximum number of peaks $p_{\text{max}}$, the
@@ -634,7 +636,6 @@ matrix $\mathbf Z\in\ZZ_+^{B\times S}$, computing the sequence of
 
 \subsection{Convex optimization for supervised penalty learning}
 
-
 The convex supervised learning problem (\ref{argmin_w}) can be
 solved using gradient-based methods such as FISTA, a Fast Iterative
 Shinkage-Thresholding Algorithm \citep{fista}. 
@@ -699,15 +700,13 @@ peak per sample, we divided each window into separate
 \ref{PeakSegJoint} problems of size $B$ (a hyper-parameter tuned via
 grid search).
 
-We compared our proposed \ref{PeakSegJoint} model with the
-state-of-the-art \ref{PeakSeg} single-sample supervised model
-(Figure~\ref{fig:test-error-dots}). In all 7 of the McGill benchmark
-data sets, our proposed \ref{PeakSegJoint} model achieved test error
-rates comparable to the state-of-the-art \ref{PeakSeg} model. We also
-show results for two unsupervised single-sample %and multi-sample
-peak callers, macs and hmcan.broad. These algorithms were trained by
-using grid search to select the significance threshold hyperparameter
-that minimized the train error.
+We compared the test error of \ref{PeakSegJoint} with three
+single-sample models (Figure~\ref{fig:test-error-dots}). In all 7 of
+the McGill benchmark data sets, our proposed \ref{PeakSegJoint} model
+achieved test error rates comparable to the previous state-of-the-art
+\ref{PeakSeg} model. In contrast, the baseline hmcan.broad and macs
+models from the bioinformatics literature were each only effective for
+a single experiment type (either H3K36me3 or H3K4me3, but not both).
 
 % We attempted to compare with joint peak detectors from the
 % bioinformatics literature. In particular, we considered the
@@ -742,10 +741,11 @@ $O(B\log B)$ unconstrained pruned dynamic programming algorithm (pDPA)
 of \citet{Segmentor} (R package Segmentor3IsBack), and the $O(B^2)$
 constrained dynamic programming algorithm (cDPA) of
 \citet{HOCKING-PeakSeg} (R package
-PeakSegDP). Figure~\ref{fig:timings} indicates that PeakSegJoint
-enjoys the same $O(B \log B)$ asymptotic behavior as the pDPA. However
-the \JointHeuristic\ algorithm is faster by at least two orders of
-magnitude for the range of data sizes that is typical for real data
+PeakSegDP). Figure~\ref{fig:timings} indicates that the
+\JointHeuristic\ algorithm of \ref{PeakSegJoint} enjoys the same $O(B
+\log B)$ asymptotic behavior as the pDPA. However the \JointHeuristic\
+algorithm is faster than both the cDPA and pDPA by at least two orders
+of magnitude for the range of data sizes that is typical for real data
 ($10^2 < B < 10^6$).
 
 These speed differences are magnified when applying these Poisson
@@ -756,29 +756,42 @@ problem was optimal, so running PeakSegJoint on the entire human
 genome means solving about 15,000 segmentation problems. PeakSegJoint
 takes about 0.1 seconds to solve each of those problems
 (Figure~\ref{fig:timings}), meaning a total computation time of about
-25 minutes. In contrast, using the pDPA would be orders of magnitude
-slower (hours or days of computation).
+25 minutes. In contrast, using the pDPA or cDPA would be orders of
+magnitude slower (hours or days of computation).
 
 \section{Discussion}
 \label{sec:discussion}
 
-We attempted to compare with the JAMM and PePr algorithms, two joint
-peak detectors from the bioinformatics literature \citep{JAMM,
-  PePr}. However, both programs produced errors and were unable to
-analyze the McGill benchmark data sets. 
+\subsection{Multi-sample PeakSegJoint versus single-sample PeakSeg}
 
+The \ref{PeakSegJoint} model is explicitly designed for supervised,
+multi-sample peak detection problems such as the McGill benchmark data
+sets that we considered. We observed that the single-sample
+\ref{PeakSeg} model is as accurate as \ref{PeakSegJoint} in these data
+(Figure~\ref{fig:test-error-dots}). However, any single-sample model
+is qualitatively inferior to a multi-sample model since it can not
+predict overlapping peaks at the exact same positions. Furthermore,
+the $O(B \log B)$ \JointHeuristic\ algorithm can compute the
+\ref{PeakSegJoint} model much faster than the $O(B^2)$ cDPA of
+\ref{PeakSeg} (Figure~\ref{fig:timings}).
 
-Additionally, the \ref{PeakSegJoint} model is more interpretable than
-existing methods, since it is able to handle several sample types, and
-call peaks in exactly the same positions across samples. This was
-advantageous in the McGill H3K4me3\_TDH\_immune data set, which
-contains 3 cell types: tcell, bcell, and monocyte. The PeakSegJoint
-model can be run once on all cell types, and the resulting model can
-be easily interpreted to find the differences, since peaks occur in
-the exact same locations across samples. In contrast, existing methods
-such as JAMM or PePr are less suitable to analyze this data set since
-they are limited to modeling only 1 or 2 cell types.
+\subsection{PeakSegJoint versus other joint peak detectors}
 
+We attempted to compare with the multi-sample JAMM and PePr
+algorithms, two joint peak detectors from the bioinformatics
+literature \citep{JAMM, PePr}. The \ref{PeakSegJoint} model is more
+interpretable than these existing methods, since it is able to handle
+several sample types. This was advantageous in data sets such as
+Figure~\ref{fig:good-bad}, which contains 3 cell types: tcell, bcell,
+and monocyte. The PeakSegJoint model can be run once on all cell
+types, and the resulting model can be easily interpreted to find the
+differences, since peaks occur in the exact same locations across
+samples. In contrast, existing methods such as JAMM or PePr are less
+suitable to analyze this data set since they are limited to modeling
+only 1 or 2 cell types. We nevertheless downloaded and ran the
+algorithms separately on each sample type, but both JAMM and PePr
+produced errors and so were unable to analyze the McGill benchmark
+data sets.
 
 \section{Conclusions}
 \label{sec:conclusions}
