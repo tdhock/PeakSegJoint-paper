@@ -186,7 +186,7 @@ directions in Section~\ref{sec:conclusions}.
 There are many different unsupervised peak detection algorithms
 \citep{evaluation2010, rye2010manually, chip-seq-bench}, and the
 current state-of-the-art is the supervised \ref{PeakSeg} model of
-\citet{HOCKING-PeakSeg}.
+\citet{HOCKING-PeakSeg}. 
 
 In the multi-sample setting of this paper, each of these algorithms
 may be applied idendependently to each sample. The drawback of these
@@ -212,18 +212,18 @@ Figure~\ref{fig:good-bad} one would have to run JAMM 3 times (once for
 each cell type), and the resulting peaks would not be the same across
 cell types. Another example is the PePr algorithm of \citet{PePr},
 which can model either one or two cell types, but is unsuitable for
-analysis of three or more cell types. In contrast, our proposed
-\ref{PeakSegJoint} method models data from several samples without
-limit on the number of cell types.
+analysis of three or more cell types. In contrast, \ref{PeakSegJoint}
+is for data from several samples without limit on the number of cell
+types.
 
 Although not the subject of this paper, there are several algorithms
 designed for the analysis of data from several different ChIP-seq
-experiments \citep{jmosaics,segway,chromhmm}. In these models, the
+experiments \citep{chromhmm,segway,jmosaics}. In these models, the
 input is one sample (e.g. monocyte cells) with different experiments
-such as H3K4me3 and H3K36me3 profiles. Also,
+such as H3K4me3 and H3K36me3. Also,
 \citet{hierarchical-joint} proposed a model for one sample with both
-ChIP-seq and ChIP-chip data. In contrast, our proposed
-\ref{PeakSegJoint} model takes as input several samples
+ChIP-seq and ChIP-chip data. In contrast, 
+\ref{PeakSegJoint} takes as input several samples
 (e.g. monocyte, tcell, bcell) for one experiment such as H3K4me3.
 
 \section{Models}\label{sec:models}
@@ -234,8 +234,8 @@ detection algorithm in the McGill benchmark data set of
 \citet{hocking2014visual}. Then we introduce \ref{PeakSegJoint}, a
 model for data sets with multiple samples.
 
-\subsection{PeakSeg: finding the best $0,\dots,p_{\text{max}}$ peaks
-  in a single sample}
+\subsection{PeakSeg: finding the most likely $0,\dots,p_{\text{max}}$
+  peaks in a single sample}
 
 Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned read counts
 on $B$ bases, and a maximum number of peaks $p_{\text{max}}$, the
@@ -248,32 +248,45 @@ PeakSeg model for the mean vector $\mathbf m\in\RR^B$ with $p\in\{0,
     \text{PoissonLoss}(\mathbf m, \mathbf z) 
     \tag{\textbf{PeakSeg}}
 \\
-    \text{such that} &\ \  \Peaks(\mathbf m)=p,  \\
+    \text{such that} &\ \  \Peaks(\mathbf m)=p, \label{peaks=p} \\
      \forall j\in\{1, \dots, B\}, &\ \ P_j(\mathbf m) \in\{0, 1\},
     \label{eq:peak_constraint}
 \end{align}
 where the Poisson loss function is
 \begin{equation}\label{eq:rho}
-  \text{PoissonLoss}(\mathbf m, \mathbf z)= \sum_{j=1}^B m_j - y_j \log m_j,
+  \text{PoissonLoss}(\mathbf m, \mathbf z)= \sum_{j=1}^B m_j - z_j \log m_j.
 \end{equation} 
-the model complexity is the number of peaks
+Note that the optimization objective of minimizing the Poisson loss is
+equivalent to maximizing the Poisson likelihood. The model complexity
+(\ref{peaks=p}) is the number of peaks
 \begin{equation}
   \Peaks(\mathbf m)=(\Segments(\mathbf m)-1)/2,
 \end{equation}
-which is a function of the number of segments
+which is a function of the number of piecewise constant segments
 \begin{equation}
-  \Segments(\mathbf m)=1+\sum_{j=2}^B I(m_j \neq m_{j-1}),
+  \Segments(\mathbf m)=1+\sum_{j=2}^B I(m_j \neq m_{j-1}).
 \end{equation}
-and the peak indicator at base $j$ is
+Finally, the peak indicator at base $j$ is defined as the cumulative sum of
+signs of changes
 \begin{equation}
   \label{eq:peaks}
   P_j(\mathbf m) = \sum_{k=2}^j \sign( m_{k} - m_{k-1} ),
 \end{equation}
-with $P_1(\mathbf m)=0$ by convention. Note that the constraint
+with $P_1(\mathbf m)=0$ by convention. The constraint
 (\ref{eq:peak_constraint}) means that the peak indicator $P_j(\mathbf
 m)\in\{0, 1\}$ can be used to classify each base $j\in\{1,\dots B\}$
 as either background noise $P_j(\mathbf m)=0$ or a peak $P_j(\mathbf
-m)=1$.
+m)=1$.  In other words, $\mathbf{\tilde m}^p(\mathbf z)$ is a
+piecewise constant vector that changes up, down, up, down (and not up,
+up, down). Thus the even numbered segments are interpreted as peaks,
+and the odd numbered segments are interpreted as background noise.
+
+Note that since \ref{PeakSeg} is defined for a single sample, it may
+be independently applied to each sample in data sets such as
+Figure~\ref{fig:good-bad}. However, any overlapping peaks in different
+samples will not necessarily occur in the same positions. In the next
+section we fix this problem by proposing the more interpretable
+multi-sample \ref{PeakSegJoint} model.
 
 % \subsection{A multi-sample model 
 %   related to the single-sample PeakSeg
@@ -370,8 +383,8 @@ m)=1$.
 %   % The proof for $p>2$ peaks proceeds by induction.
 % \end{proof}
 
-\subsection{PeakSegJoint: finding the best common peak in $0,\dots, S$
-  samples}
+\subsection{PeakSegJoint: finding the most likely common peak in
+  $0,\dots, S$ samples}
 
 \begin{figure}[b!]
   \centering
@@ -387,9 +400,10 @@ m)=1$.
 
 For $S$ sample profiles $\mathbf z_1, \dots, \mathbf z_S\in\ZZ_+^B$
 defined on the same $B$ bases, we stack the vectors into a matrix
-$\mathbf Z\in\ZZ_+^{B \times S}$. Consider the following model for the
-mean matrix $\mathbf M\in\RR^{B\times S}$ which allows each sample to
-have either 0 or 1 peaks, with a total of $p\in\{0, \dots, S\}$ peaks:
+$\mathbf Z\in\ZZ_+^{B \times S}$ of count data. Consider the following
+model for the mean matrix $\mathbf M\in\RR^{B\times S}$ which allows
+each sample to have either 0 or 1 peaks, with a total of $p\in\{0,
+\dots, S\}$ peaks:
 % The \ref{PeakSegJoint} model with $p\in\{0, \dots, S\}$ peaks is
 % defined using the same Poisson loss function as the \ref{PeakSeg}
 % single-sample model, and adding some other constraints:
@@ -407,12 +421,13 @@ have either 0 or 1 peaks, with a total of $p\in\{0, \dots, S\}$ peaks:
   \label{zero_or_one}
   \\
   &\ 
-  p = \sum_{s=1}^S \Peaks(\mathbf m_s)
-  \label{total_peaks}
-  \\
-  &\ \forall s\in\{1, \dots, S\},\,
+  \forall s\in\{1, \dots, S\},\,
   \forall j\in\{1, \dots, B\},\, P_j(\mathbf m_s) \in\{0, 1\},
   \label{joint_up_down}
+  \\
+  &\ 
+  p = \sum_{s=1}^S \Peaks(\mathbf m_s)
+  \label{total_peaks}
   \\
   &\ \forall s_1\neq s_2\mid
   \nonumber
@@ -421,16 +436,15 @@ have either 0 or 1 peaks, with a total of $p\in\{0, \dots, S\}$ peaks:
   &\ \ P_j(\mathbf m_{s_1}) = P_j(\mathbf m_{s_2}).
   \label{joint_constraint}
 \end{align}
-The constraint on the number of peaks per
-sample (\ref{zero_or_one}) means that each sample may have either zero
-or one peak. 
-The constraint (\ref{up_down}) is the same constraint
-as in \ref{PeakSeg}, which here requires the segment mean $\mathbf
-m_s$ of each sample to have alternating changes (up, down, up, down
-and not up, up, down). Finally, the overall constraint (\ref{total_peaks}) means
-that there is a total of $p$ samples 
-and adding the constraint that peaks should occur in the exact same
-positions in each sample (\ref{joint_constraint}):
+The first two constraints are similar to the \ref{PeakSeg} model
+constraints. The constraint on the number of peaks per sample
+(\ref{zero_or_one}) means that each sample may have either zero or one
+peak. The constraint (\ref{joint_up_down}) requires the segment mean
+$\mathbf m_s$ of each sample to have alternating changes (up, down,
+up, down and not up, up, down). The overall constraint
+(\ref{total_peaks}) means that there is a total of $p$ samples with
+exactly 1 peak. The last constraint (\ref{joint_constraint}) means
+that peaks should occur in the exact same positions in each sample.
 The \ref{PeakSegJoint} model for a data set with $S=3$ samples is
 shown in Figure~\ref{fig:PeakSegJoint}.
 
