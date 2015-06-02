@@ -717,7 +717,7 @@ fig <-
     scale_x_continuous("data to segment (base position along chromosome)",
                        breaks=c(1,seq(2, 24, by=2)))+
     scale_color_continuous("Poisson loss")+
-    geom_text(aes(22, 0, label=algo),
+    geom_text(aes(23, 0, label=algo),
               vjust=0,
               size=3,
               data=data.frame(algo=c("GridSearch",
@@ -768,6 +768,6 @@ fig <-
                color="green",
                linetype="dotted")
 
-pdf("figure-heuristic-algo.pdf", h=5)
+pdf("figure-heuristic-algo.pdf", h=4)
 print(fig)
 dev.off()

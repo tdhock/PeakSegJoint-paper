@@ -128,6 +128,6 @@ ggplot()+
   scale_x_continuous("percent incorrect peak region labels (test error)",
                      breaks=seq(0, 100, by=25))
 
-pdf("figure-test-error-dots.pdf", h=3, w=7)
+pdf("figure-test-error-dots.pdf", h=2.5, w=7)
 print(dots)
 dev.off()

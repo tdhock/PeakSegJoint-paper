@@ -91,7 +91,7 @@ converted <- ConvertModelList(fit)
 converted$peaks$diff <- NA
 peaks.by.model <- 
   list(
-       Unconstrained=unconstrained.peaks.list,
+    ##Unconstrained=unconstrained.peaks.list,
     PeakSegJoint=with(converted, split(peaks, peaks$peaks)))
 error.region.list <- list()
 error.peaks.list <- list()
@@ -188,6 +188,9 @@ regions.plot+
                    color=model, size=model,
                    xend=chromEnd/1e3, yend=sample.y),
                data=data.frame(what="peaks", error.peaks))
+if(length(peaks.by.model) < 2){
+  err.plot <- err.plot + guides(color="none", size="none")
+}
 
 png("figure-PeakSegJoint.png", width=8, height=5, units="in", res=200)
 print(err.plot)

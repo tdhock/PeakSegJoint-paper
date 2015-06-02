@@ -100,27 +100,27 @@ Address \\
 %\subsection{}
 
 Chromatin immunoprecipitation sequencing (ChIP-seq) is an experimental
-technique that is often used for genome-wide profiling of histone
-modifications and transcription factor binding sites
-\citep{practical}. Each experiment yields a set of sequence reads
-which are aligned to a reference genome, and then the number of
-aligned reads are counted at each genomic position. To compare samples
-at a given genomic position, biologists visually examine coverage
-plots such as Figure~\ref{fig:good-bad} for presence or absence of
-common ``peaks.'' In machine learning terms, a single sample over $B$
-base positions is a vector of count data $\mathbf z\in\ZZ_+^B$ and a
-peak detector is a binary classifier $c:\ZZ_+^B\rightarrow\{0,
-1\}^B$. The positive class is peaks and the negative class is
-background noise. Importantly, peaks and background occur in long
-contiguous segments across the genome.
+technique used for genome-wide profiling of histone modifications and
+transcription factor binding sites \citep{practical}. Each experiment
+yields a set of sequence reads which are aligned to a reference
+genome, and then the number of aligned reads are counted at each
+genomic position. To compare samples at a given genomic position,
+biologists visually examine coverage plots such as
+Figure~\ref{fig:good-bad} for presence or absence of common ``peaks.''
+In machine learning terms, a single sample over $B$ base positions is
+a vector of count data $\mathbf z\in\ZZ_+^B$ and a peak detector is a
+binary classifier $c:\ZZ_+^B\rightarrow\{0, 1\}^B$. The positive class
+is peaks and the negative class is background noise. Importantly,
+peaks and background occur in long contiguous segments across the
+genome.
 
 In this paper we use the supervised learning framework of
-\citet{hocking2014visual}, who proposed to use a set of manually
-annotated region labels obtained from visual inspection of genome
-plots. For each labeled genomic region $i\in\{1, \dots, n\}$ there is
-a set of count data $\mathbf z_i$ and labels $L_i$ (``noPeaks,''
-``peaks,'' etc. as in Figure~\ref{fig:good-bad}). These labels define
-a non-convex annotation error function
+\citet{hocking2014visual}, who proposed to use labels obtained from
+manual visual inspection of genome plots. For each labeled genomic
+region $i\in\{1, \dots, n\}$ there is a set of count data $\mathbf
+z_i$ and labels $L_i$ (``noPeaks,'' ``peaks,'' etc. as in
+Figure~\ref{fig:good-bad}). These labels define a non-convex
+annotation error function
 \begin{equation}
   \label{eq:error}
   E[c(\mathbf z_i),  L_i] =
@@ -134,20 +134,45 @@ $c$ that minimizes the number of incorrect labels (\ref{eq:error}) on
 a test set of data:
 \begin{equation}
   \label{eq:min_error}
-  \minimize_c \sum_{i\in\text{test}} E[c(\mathbf y_i),  L_i].
+  \minimize_c \sum_{i\in\text{test}} E[c(\mathbf z_i),  L_i].
 \end{equation}
 
-TODO: explain joint peak detection over several samples.
+\begin{figure}[b!]
+  \centering
+  \includegraphics[width=\textwidth]{figure-good-bad}
+  \vskip -0.5cm
+  \caption{Labeled ChIP-seq coverage data for $S=4$ samples (top 4
+    panels) with 3 peak models (bottom 3 panels).
+    % \colorbox{noPeaks}{noPeaks} means there should be no overlapping
+    % peaks, \colorbox{peakStart}{peakStart}/\colorbox{peakEnd}{peakEnd}
+    % mean there should be exactly 1 peak start/end somewhere in the
+    % region, and \colorbox{peaks}{peaks} means that ) 
+    An ideal peak model minimizes the number of incorrect labels
+    (false positives are too many peaks and false negatives are not
+    enough peaks). The ``good'' model achieves 0 errors but the
+    ``better'' model is more interpretable since overlapping peaks in
+    different samples always occur in the exact same positions.}
+  \label{fig:good-bad}
+\end{figure}
+
+In practical situations we have $S>1$ samples, and a matrix $\mathbf
+Z\in\ZZ_+^{B\times S}$ of count data. For example in
+Figure~\ref{fig:good-bad} we have $S=4$ samples. In these data we are
+not only interested in accurate peak detection in individual samples,
+but also in detecting the differences between samples. In particular,
+an ideal model of a multi-sample data set is a \textbf{joint} peak
+detector with identical overlapping peak positions across samples (the
+``better'' model in Figure~\ref{fig:good-bad}).
 
 \subsection{Contributions and organization}
 
 The main contribution of this paper is the \ref{PeakSegJoint} model
 for supervised joint peak detection. It is the first joint peak
 detection algorithm that can handle any number of sample types, and
-can be trained using efficient supervised
-learning algorithms.
+can be trained using efficient supervised learning algorithms.
 
-%After discussing related work in Section~\ref that we propose in Section~\ref{sec:algorithms}.
+After discussing related work in Section~\ref{sec:related}, we
+propose the \ref{PeakSegJoint} model in Section~\ref{sec:models}.Section~\ref{sec:algorithms}.
 
 
 \section{Related work: unsupervised peak detectors}
@@ -188,42 +213,20 @@ from several samples without limit on the number of cell types.
 % They applied it to TF data sets, and used visual inspection to test
 % (but not train). TODO: run and compare.
 
-\begin{figure}[b!]
-  \centering
-  \includegraphics[width=\textwidth]{figure-good-bad}
-  \vskip -0.5cm
-  \caption{Labeled ChIP-seq coverage data for $S=4$ samples (top 4
-    panels) with 3 peak models (bottom 3 panels).
-    % \colorbox{noPeaks}{noPeaks} means there should be no overlapping
-    % peaks, \colorbox{peakStart}{peakStart}/\colorbox{peakEnd}{peakEnd}
-    % mean there should be exactly 1 peak start/end somewhere in the
-    % region, and \colorbox{peaks}{peaks} means that ) 
-    An ideal peak model minimizes the number of incorrect labels
-    (false positives are too many peaks and false negatives are not
-    enough peaks). The ``good'' model achieves 0 errors but the
-    ``better'' model is more interpretable since overlapping peaks in
-    different samples always occur in the exact same positions.}
-  \label{fig:good-bad}
-\end{figure}
 
-% \subsection{Poisson segmentation and supervised penalty
-%   learning models}
+\section{Models}\label{sec:models}
 
-% TODO: explain.
-
-\section{Models}
-
-We begin by introducing the single-sample PeakSeg model of
+We begin by summarizing the single-sample \ref{PeakSeg} model of
 \citet{HOCKING-PeakSeg}, which is the current state-of-the-art peak
 detection algorithm in the McGill benchmark data set of
-\citet{hocking2014visual}. Then we will discuss extensions of the
-PeakSeg model to data sets with multiple samples.
+\citet{hocking2014visual}. Then we introduce \ref{PeakSegJoint}, a
+model for data sets with multiple samples.
 
 \subsection{PeakSeg: finding the best $0,\dots,p_{\text{max}}$ peaks
   in a single sample}
 
-Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned reads
-across $B$ bases, and a maximum number of peaks $p_{\text{max}}$, the
+Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned read counts
+on $B$ bases, and a maximum number of peaks $p_{\text{max}}$, the
 PeakSeg model for the mean vector $\mathbf m\in\RR^B$ with $p\in\{0,
 \dots, p_{\text{max}}\}$ peaks is
 \begin{align}
@@ -239,7 +242,7 @@ PeakSeg model for the mean vector $\mathbf m\in\RR^B$ with $p\in\{0,
 \end{align}
 where the Poisson loss function is
 \begin{equation}\label{eq:rho}
-  \text{PoissonLoss}(\mathbf m, \mathbf y)= \sum_{j=1}^B m_j - y_j \log m_j,
+  \text{PoissonLoss}(\mathbf m, \mathbf z)= \sum_{j=1}^B m_j - y_j \log m_j,
 \end{equation} 
 the model complexity is the number of peaks
 \begin{equation}
@@ -260,99 +263,100 @@ m)\in\{0, 1\}$ can be used to classify each base $j\in\{1,\dots B\}$
 as either background noise $P_j(\mathbf m)=0$ or a peak $P_j(\mathbf
 m)=1$.
 
-\subsection{A multi-sample model 
-  related to the single-sample PeakSeg
-  model}
+% \subsection{A multi-sample model 
+%   related to the single-sample PeakSeg
+%   model}
 
-For $S$ sample profiles $\mathbf z_1, \dots, \mathbf z_S\in\ZZ_+^B$
-defined on the same $B$ bases, we stack the vectors into a matrix
-$\mathbf Z\in\ZZ_+^{B \times S}$. Consider the following model for the
-mean matrix $\mathbf M\in\RR^{B\times S}$ which allows each sample to
-have either 0 or 1 peaks, with a total of $p\in\{0, \dots, S\}$ peaks:
-\begin{align}
-  \label{Unconstrained}
-  \mathbf{\tilde M}^p(\mathbf Z)  =
-  \argmin_{\mathbf M\in\RR^{B\times S}} &\ \ 
-  \sum_{s=1}^S 
-  \text{PoissonLoss}(\mathbf m_s, \mathbf z_s) 
-  \tag{\textbf{Unconstrained}}
-  \\
-  \text{such that} &\ p = \sum_{s=1}^S \Peaks(\mathbf m_s)
-  \label{total_Peaks}
-  \\
-  &\ \forall s\in\{1, \dots, S\},\, 
-  \Peaks(\mathbf m_s)\in\{0, 1\},  
-  \label{zero_or_one}
-  \\
-  &\ \forall s\in\{1, \dots, S\},\, 
-  \forall j\in\{1, \dots, B\},\, P_j(\mathbf m_s) \in\{0, 1\}.
-  \label{up_down}
-\end{align}
-This optimization problem is \ref{Unconstrained} in the sense that the
-peaks are not required to be in the exact same locations in each of
-the $S$ samples. The constraint (\ref{up_down}) is the same constraint
-as in \ref{PeakSeg}, which here requires the segment mean $\mathbf
-m_s$ of each sample to have alternating changes (up, down, up, down
-and not up, up, down). The constraint on the number of peaks per
-sample (\ref{zero_or_one}) means that each sample may have either zero
-or one peak. Finally, the overall constraint (\ref{total_Peaks}) means
-that there is a total of $p$ samples each with exactly 1 peak (not
-necessarily with the same start/end positions across samples).
+% For $S$ sample profiles $\mathbf z_1, \dots, \mathbf z_S\in\ZZ_+^B$
+% defined on the same $B$ bases, we stack the vectors into a matrix
+% $\mathbf Z\in\ZZ_+^{B \times S}$. Consider the following model for the
+% mean matrix $\mathbf M\in\RR^{B\times S}$ which allows each sample to
+% have either 0 or 1 peaks, with a total of $p\in\{0, \dots, S\}$ peaks:
+% \begin{align}
+%   \label{Unconstrained}
+%   \mathbf{\tilde M}^p(\mathbf Z)  =
+%   \argmin_{\mathbf M\in\RR^{B\times S}} &\ \ 
+%   \sum_{s=1}^S 
+%   \text{PoissonLoss}(\mathbf m_s, \mathbf z_s) 
+%   \tag{\textbf{Unconstrained}}
+%   \\
+%   \text{such that} &\ p = \sum_{s=1}^S \Peaks(\mathbf m_s)
+%   \label{total_Peaks}
+%   \\
+%   &\ \forall s\in\{1, \dots, S\},\, 
+%   \Peaks(\mathbf m_s)\in\{0, 1\},  
+%   \label{zero_or_one}
+%   \\
+%   &\ \forall s\in\{1, \dots, S\},\, 
+%   \forall j\in\{1, \dots, B\},\, P_j(\mathbf m_s) \in\{0, 1\}.
+%   \label{up_down}
+% \end{align}
+% This optimization problem is \ref{Unconstrained} in the sense that the
+% peaks are not required to be in the exact same locations in each of
+% the $S$ samples. The constraint (\ref{up_down}) is the same constraint
+% as in \ref{PeakSeg}, which here requires the segment mean $\mathbf
+% m_s$ of each sample to have alternating changes (up, down, up, down
+% and not up, up, down). The constraint on the number of peaks per
+% sample (\ref{zero_or_one}) means that each sample may have either zero
+% or one peak. Finally, the overall constraint (\ref{total_Peaks}) means
+% that there is a total of $p$ samples each with exactly 1 peak (not
+% necessarily with the same start/end positions across samples, see
+% Figure~\ref{fig:PeakSegJoint}).
 
-\begin{proposition}
-The \ref{Unconstrained} solution in $p$ peaks
-can be written in terms of the \ref{PeakSeg} solutions in 0 or 1 peaks:
-\begin{equation}
-  \label{eq:unconstrained_PeakSeg}
-  \mathbf{\tilde M}^p(\mathbf Z) = \left[
-    \begin{array}{ccc}
-      \mathbf{\tilde m}^{p_1}(\mathbf z_1) & 
-      \cdots &
-      \mathbf{\tilde m}^{p_S}(\mathbf z_S) 
-    \end{array}
-  \right],
-\end{equation}
-for some $p_1,\dots, p_S\in\{0, 1\}$ with $p=\sum_{i=s}^S p_s$.
-\end{proposition}
+% \begin{proposition}
+% The \ref{Unconstrained} solution in $p$ peaks
+% can be written in terms of the \ref{PeakSeg} solutions in 0 or 1 peaks:
+% \begin{equation}
+%   \label{eq:unconstrained_PeakSeg}
+%   \mathbf{\tilde M}^p(\mathbf Z) = \left[
+%     \begin{array}{ccc}
+%       \mathbf{\tilde m}^{p_1}(\mathbf z_1) & 
+%       \cdots &
+%       \mathbf{\tilde m}^{p_S}(\mathbf z_S) 
+%     \end{array}
+%   \right],
+% \end{equation}
+% for some $p_1,\dots, p_S\in\{0, 1\}$ with $p=\sum_{i=s}^S p_s$.
+% \end{proposition}
 
-\begin{proof}
-  Since the objective function of \ref{Unconstrained} is separable on
-  samples $s$, it can be re-written as $p$ \ref{PeakSeg} sub-problems
-  each with 1 peak, and $S-p$ trivial sub-problems with 0 peaks.
-  % To begin, consider the trivial case with $p=0$ peaks. Clearly, the
-  % PeakSegJoint solution is
-  % $\mathbf{\tilde M}^p(\mathbf Z) = \left[
-  %   \begin{array}{ccc}
-  %     \mathbf{\bar z}_1 & 
-  %     \cdots &
-  %     \mathbf{\bar z}_S 
-  %   \end{array}
-  % \right]$, where $\mathbf{\bar z}_s$ is the constant mean vector for
-  % sample $s$. This is also the PeakSeg model with 0 peaks $\mathbf{\tilde
-  %   m}^0(\mathbf z_s)=\mathbf{\bar z}_s$. 
+% \begin{proof}
+%   Since the objective function of \ref{Unconstrained} is separable on
+%   samples $s$, it can be re-written as $p$ \ref{PeakSeg} sub-problems
+%   each with 1 peak, and $S-p$ trivial sub-problems with 0 peaks.
+%   % To begin, consider the trivial case with $p=0$ peaks. Clearly, the
+%   % PeakSegJoint solution is
+%   % $\mathbf{\tilde M}^p(\mathbf Z) = \left[
+%   %   \begin{array}{ccc}
+%   %     \mathbf{\bar z}_1 & 
+%   %     \cdots &
+%   %     \mathbf{\bar z}_S 
+%   %   \end{array}
+%   % \right]$, where $\mathbf{\bar z}_s$ is the constant mean vector for
+%   % sample $s$. This is also the PeakSeg model with 0 peaks $\mathbf{\tilde
+%   %   m}^0(\mathbf z_s)=\mathbf{\bar z}_s$. 
   
-  % Now consider the case for $p=1$ peak. There are $S$ possible models,
-  % one for each sample $s$. The sample with a peak model
-  % $\mathbf{\tilde m}^1(\mathbf z_{s^*})$ is $s^*=\argmin_{s\in
-  %   1,\dots, S} \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^1(\mathbf
-  %   z_s), \mathbf z_s \right] - \textrm{PoissonLoss}\left[
-  %   \mathbf{\tilde m}^0(\mathbf z_s), \mathbf z_s \right]$, and all
-  % the other samples $s$ have 0 peaks $\mathbf{\tilde m}^0(\mathbf
-  % z_{s})$. This model is clearly optimal since the \ref{Unconstrained} cost
-  % function is separable on samples.
+%   % Now consider the case for $p=1$ peak. There are $S$ possible models,
+%   % one for each sample $s$. The sample with a peak model
+%   % $\mathbf{\tilde m}^1(\mathbf z_{s^*})$ is $s^*=\argmin_{s\in
+%   %   1,\dots, S} \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^1(\mathbf
+%   %   z_s), \mathbf z_s \right] - \textrm{PoissonLoss}\left[
+%   %   \mathbf{\tilde m}^0(\mathbf z_s), \mathbf z_s \right]$, and all
+%   % the other samples $s$ have 0 peaks $\mathbf{\tilde m}^0(\mathbf
+%   % z_{s})$. This model is clearly optimal since the \ref{Unconstrained} cost
+%   % function is separable on samples.
 
-  % Consider the case for $p=2$ peaks. By the constraint of either zero
-  % or one peak for each sample (\ref{zero_or_one}), and the constraint
-  % on the total number of peaks (\ref{total_Peaks}), it is clear that
-  % the optimal solution has $p=2$ samples with exactly 1 peak and $S-2$
-  % samples with exactly 0 peaks. The samples with peaks are $s^*$ and
-  % $\argmin_{s\neq s^*} \textrm{PoissonLoss}\left[ \mathbf{\tilde
-  %     m}^1(\mathbf z_s), \mathbf z_s \right] -
-  % \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^0(\mathbf z_s), \mathbf
-  %   z_s \right]$.
+%   % Consider the case for $p=2$ peaks. By the constraint of either zero
+%   % or one peak for each sample (\ref{zero_or_one}), and the constraint
+%   % on the total number of peaks (\ref{total_Peaks}), it is clear that
+%   % the optimal solution has $p=2$ samples with exactly 1 peak and $S-2$
+%   % samples with exactly 0 peaks. The samples with peaks are $s^*$ and
+%   % $\argmin_{s\neq s^*} \textrm{PoissonLoss}\left[ \mathbf{\tilde
+%   %     m}^1(\mathbf z_s), \mathbf z_s \right] -
+%   % \textrm{PoissonLoss}\left[ \mathbf{\tilde m}^0(\mathbf z_s), \mathbf
+%   %   z_s \right]$.
 
-  % The proof for $p>2$ peaks proceeds by induction.
-\end{proof}
+%   % The proof for $p>2$ peaks proceeds by induction.
+% \end{proof}
 
 \subsection{PeakSegJoint: finding the best common peak in $0,\dots, S$
   samples}
@@ -360,19 +364,23 @@ for some $p_1,\dots, p_S\in\{0, 1\}$ with $p=\sum_{i=s}^S p_s$.
 \begin{figure}[b!]
   \centering
   \includegraphics[width=\textwidth]{figure-PeakSegJoint}
+  \vskip -0.5cm
   \caption{A labeled data set with $S=3$ samples (top 3 panels) and
-    the models for $p\in\{0, 1, 2, 3\}$ peaks (bottom 4 panels). The
-    \ref{Unconstrained} model does not include the \ref{PeakSegJoint}
-    constraint (\ref{joint_constraint}) that overlapping peaks should
-    occur in exactly the same positions.}
+    the \ref{PeakSegJoint} models for $p\in\{0, 1, 2, 3\}$ peaks
+    (bottom 4 panels).
+%The    ``Unconstrained'' model does not include the \ref{PeakSegJoint}    constraint (\ref{joint_constraint}) that overlapping peaks must    occur in exactly the same positions.
+}
   \label{fig:PeakSegJoint}
 \end{figure}
 
-The 
-\ref{PeakSegJoint} model with $p\in\{0, \dots, S\}$ peaks is defined by
-starting with the \ref{Unconstrained} multi-sample model, and adding
-the constraint that peaks should occur in the exact same positions in
-each sample (\ref{joint_constraint}):
+For $S$ sample profiles $\mathbf z_1, \dots, \mathbf z_S\in\ZZ_+^B$
+defined on the same $B$ bases, we stack the vectors into a matrix
+$\mathbf Z\in\ZZ_+^{B \times S}$. Consider the following model for the
+mean matrix $\mathbf M\in\RR^{B\times S}$ which allows each sample to
+have either 0 or 1 peaks, with a total of $p\in\{0, \dots, S\}$ peaks:
+% The \ref{PeakSegJoint} model with $p\in\{0, \dots, S\}$ peaks is
+% defined using the same Poisson loss function as the \ref{PeakSeg}
+% single-sample model, and adding some other constraints:
 \begin{align}
   \label{PeakSegJoint}
   \mathbf{\hat M}^p(\mathbf Z)  =
@@ -381,12 +389,14 @@ each sample (\ref{joint_constraint}):
   \text{PoissonLoss}(\mathbf m_s, \mathbf z_s) 
   \tag{\textbf{PeakSegJoint}}
   \\
-  \text{such that} &\ p = \sum_{s=1}^S \Peaks(\mathbf m_s)
-  \nonumber
-  \\
-  &\ \forall s\in\{1, \dots, S\},\, 
+  \text{such that} &\ 
+  \forall s\in\{1, \dots, S\},\, 
   \Peaks(\mathbf m_s)\in\{0, 1\},  
-  \nonumber
+  \label{zero_or_one}
+  \\
+  &\ 
+  p = \sum_{s=1}^S \Peaks(\mathbf m_s)
+  \label{total_peaks}
   \\
   &\ \forall s\in\{1, \dots, S\},\,
   \forall j\in\{1, \dots, B\},\, P_j(\mathbf m_s) \in\{0, 1\},
@@ -399,10 +409,18 @@ each sample (\ref{joint_constraint}):
   &\ \ P_j(\mathbf m_{s_1}) = P_j(\mathbf m_{s_2}).
   \label{joint_constraint}
 \end{align}
-
-The 
-\ref{PeakSegJoint} model for a data set with $S=3$ samples is shown in
-Figure~\ref{fig:PeakSegJoint}.
+The constraint on the number of peaks per
+sample (\ref{zero_or_one}) means that each sample may have either zero
+or one peak. 
+The constraint (\ref{up_down}) is the same constraint
+as in \ref{PeakSeg}, which here requires the segment mean $\mathbf
+m_s$ of each sample to have alternating changes (up, down, up, down
+and not up, up, down). Finally, the overall constraint (\ref{total_peaks}) means
+that there is a total of $p$ samples 
+and adding the constraint that peaks should occur in the exact same
+positions in each sample (\ref{joint_constraint}):
+The \ref{PeakSegJoint} model for a data set with $S=3$ samples is
+shown in Figure~\ref{fig:PeakSegJoint}.
 
 \subsection{Supervised penalty learning}
 
@@ -515,15 +533,15 @@ predicted model $\mathbf{\hat M}^{\hat p}(\mathbf Z)$.
 
 The \ref{PeakSegJoint} model is defined as the solution to an
 optimization problem with a convex objective function and non-convex
-constraints. We propose to find an approximate solution using a new
-discrete optimization algorithm called
-\JointHeuristic~(Algorithm~1).\footnote{C implementation available in
-  R package \url{https://github.com/tdhock/PeakSegJoint}}
-
+constraints. 
 Real data sets $\mathbf Z\in\ZZ_+^{B\times S}$ may have a very large
 number of data points to segment $B$. Searching every possible peak
 start and end point is an $O(B^2)$ operation which would take too much
 time. 
+Instead, we propose to find an approximate solution using a new
+discrete optimization algorithm called
+\JointHeuristic~(Algorithm~1).\footnote{C implementation available in
+  R package \url{https://github.com/tdhock/PeakSegJoint}}
 
 The main idea of the \JointHeuristic\ algorithm is to first zoom out
 (downsample the data) repeatedly by a factor of $\beta$, obtaining a
@@ -536,6 +554,24 @@ and refine the peak positions in $O(\beta^2)$ time via
 \textsc{SearchNearPeak} (line~\ref{searchnear}). After having zoomed
 back in to the BinSize=1 level we return the final Peak
 positions. 
+
+\begin{figure}[b!]
+  \centering
+  \includegraphics[width=\textwidth]{figure-heuristic-algo}
+  \vskip -0.5cm
+  \caption{Demonstration of the \JointHeuristic\ segmentation
+    algorithm. For a data set with $B=24$ data points and $S=2$
+    samples (top 2 panels), the algorithm with zoom factor of
+    $\beta=2$ proceeds as follows. First, the Poisson loss and
+    feasibility (\ref{joint_up_down}) is computed for all 
+    peak starts and ends at bin size 4. The feasible model with
+    minimum Poisson loss is selected, the bin size is decreased to 2,
+    and we consider a new set of models around the selected peak
+    starts and ends. We continue and return the optimal model at bin
+    size 1 (shown in green). Interactive figure at
+    \url{http://bit.ly/1AA6TgK}}
+  \label{fig:heuristic-algo}
+\end{figure}
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -570,74 +606,50 @@ considers 16 models each at bin sizes 8192, 4096, ..., 4, 2, 1.
 
 Overall \JointHeuristic\ with zoom factor $\beta$ searches a total of
 $O(\beta^2\log B)$ models, and computing the likelihood and
-feasibility for each model is an $O(B)$ operation, so the algorithm
-has a time complexity of $O(\beta^2 B\log B)$.
-
-\begin{figure}[b!]
-  \centering
-  \includegraphics[width=\textwidth]{figure-heuristic-algo}
-  \vskip -0.5cm
-  \caption{Demonstration of the \JointHeuristic\ segmentation
-    algorithm. For a data set with $B=24$ data points and $S=2$
-    samples (top 2 panels), the algorithm with zoom factor of
-    $\beta=2$ proceeds as follows. First, the Poisson loss and
-    feasibility (\ref{joint_up_down}) is computed for all 
-    peak starts and ends at bin size 4. The feasible model with
-    minimum Poisson loss is selected, the bin size is decreased to 2,
-    and we consider a new set of models around the selected peak
-    starts and ends. We continue and return the optimal model at bin
-    size 1 (shown in green). Interactive figure at
-    \url{http://bit.ly/1AA6TgK}}
-  \label{fig:heuristic-algo}
-\end{figure}
+feasibility for each model is an $O(pB)$ operation, so the algorithm
+has a time complexity of $O(\beta^2 pB\log B)$. Thus for a count data
+matrix $\mathbf Z\in\ZZ_+^{B\times S}$, computing the sequence of
+\ref{PeakSegJoint} models $\mathbf{\hat M}^0(\mathbf Z), \dots,
+\mathbf{\hat M}^S(\mathbf Z)$ takes $O(\beta^2 S B\log B)$ time.
 
 \subsection{Convex optimization for supervised penalty learning}
 
+
 The convex supervised learning problem (\ref{argmin_w}) can be
 computed using gradient-based methods such as FISTA, a Fast Iterative
-Shinkage-Thresholding Algorithm \citep{fista}. To apply FISTA, we need
-to compute the gradient of the smooth average surrogate loss
-\begin{equation}
-  \label{eq:average_gradient}
-  \nabla \mathcal L(\mathbf w) = 
-  \frac 1 n
-  \sum_{i=1}^n 
-  \nabla \ell \left[
-    \mathbf y_i,\,
-    f_{\mathbf w}(  \mathbf X_i )
-  \right],
-\end{equation}
-where the gradient of one observation $i$ is
-\begin{equation}
-  \label{eq:one_gradient}
-  \nabla \ell \left[
-    \mathbf y_i,\,
-    f_{\mathbf w}( \mathbf X_i )
-  \right]
-  =
-  \mathbf X_i \mathbf 1_S
-  \left[
-    \phi'\big(
-    f_{\mathbf w}( \mathbf X_i ) - \underline y_i
-    \big)
-    -
-    \phi'\big(
-    \overline y_i - f_{\mathbf w}( \mathbf X_i )
-    \big)
-  \right],
-\end{equation}
-and the derivative of the squared hinge loss is $\phi'(x)=2(x-1)I(x\leq 1)$.
-
-\begin{figure}[b!]
-  \centering
-  \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
-  \caption{Test error of peak detectors in the 7 McGill Histone
-    benchmark data sets (panels from left to right). Each dot shows
-    one of 6 train/test splits, and the black vertical line marks the
-    mean of the \ref{PeakSegJoint} model.}
-  \label{fig:test-error-dots}
-\end{figure}
-
+Shinkage-Thresholding Algorithm \citep{fista}. 
+% To apply FISTA, we need
+% to compute the gradient of the smooth average surrogate loss
+% \begin{equation}
+%   \label{eq:average_gradient}
+%   \nabla \mathcal L(\mathbf w) = 
+%   \frac 1 n
+%   \sum_{i=1}^n 
+%   \nabla \ell \left[
+%     \mathbf y_i,\,
+%     f_{\mathbf w}(  \mathbf X_i )
+%   \right],
+% \end{equation}
+% where the gradient of one observation $i$ is
+% \begin{equation}
+%   \label{eq:one_gradient}
+%   \nabla \ell \left[
+%     \mathbf y_i,\,
+%     f_{\mathbf w}( \mathbf X_i )
+%   \right]
+%   =
+%   \mathbf X_i \mathbf 1_S
+%   \left[
+%     \phi'\big(
+%     f_{\mathbf w}( \mathbf X_i ) - \underline y_i
+%     \big)
+%     -
+%     \phi'\big(
+%     \overline y_i - f_{\mathbf w}( \mathbf X_i )
+%     \big)
+%   \right],
+% \end{equation}
+% and the derivative of the squared hinge loss is $\phi'(x)=2(x-1)I(x\leq 1)$.
 For FISTA with constant step size we also need a Lipschitz constant of
 $\mathcal L(\mathbf w)$. Following the arguments of
 \citet{hingeSquareFISTA}, we derived a Lipschitz constant of
@@ -654,6 +666,18 @@ subdifferential stopping criterion of \citet{HOCKING-penalties}.
 
 \subsection{Accuracy of PeakSegJoint on benchmark data sets}
 
+We used the 7 McGill benchmark data sets of
+\citet{hocking2014visual}, which included a total of 12,826 manually
+annotated
+region labels.\footnote{\url{http://cbio.ensmp.fr/~thocking/chip-seq-chunk-db/}}
+Each data set contains labels grouped into windows of nearby regions
+(from 4 to 30 windows per data set). For each data set, we performed 6
+random splits of windows into half train, half test. Since there are
+multiple peaks per window, and \ref{PeakSegJoint} can detect at most 1
+peak per sample, we divided each window into separate
+\ref{PeakSegJoint} problems of size $B$ (a hyper-parameter tuned via
+grid search).
+
 We compared our proposed \ref{PeakSegJoint} model with the
 state-of-the-art \ref{PeakSeg} single-sample supervised model
 (Figure~\ref{fig:test-error-dots}). In all 7 of the McGill benchmark
@@ -664,20 +688,30 @@ peak callers, macs and hmcan.broad. These algorithms were trained by
 using grid search to select the significance threshold hyperparameter
 that minimized the train error.
 
-We attempted to compare with joint peak detectors from the
-bioinformatics literature. In particular, we considered the
-multi-sample JAMM and PePr algorithms \citep{JAMM, PePr}. The McGill
-benchmark data sets that we analyzed contain samples of 3 or more
-different cell types, but these algorithms are only meant for one or
-two cell types. Upon recommendation from the authors we attempted to
-run these algorithms independently on each cell type. For both
-algorithms we ran into problems. For PePr we ran out of memory (>10GB)
-and an error when analyzing only one sample (at least two samples is
-necessary). For JAMM we also encountered an error. In conclusion, we
-found that JAMM and PePr were unable to analyze the McGill benchmark
-data sets.
+% We attempted to compare with joint peak detectors from the
+% bioinformatics literature. In particular, we considered the
+% multi-sample JAMM and PePr algorithms \citep{JAMM, PePr}. The McGill
+% benchmark data sets that we analyzed contain samples of 3 or more
+% different cell types, but these algorithms are only meant for one or
+% two cell types. Upon recommendation from the authors we attempted to
+% run these algorithms independently on each cell type. For both
+% algorithms we ran into problems. PePr stopped with an error when
+% analyzing only one sample (at least two samples is necessary). For
+% JAMM we also encountered an error. In conclusion, we found that JAMM
+% and PePr were unable to analyze the McGill benchmark data sets.
 
 \subsection{Speed of heuristic PeakSegJoint algorithm}
+
+\begin{figure}[b!]
+  \centering
+  \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
+  \vskip -0.5cm
+  \caption{Test error of peak detectors in the 7 McGill Histone
+    benchmark data sets (panels from left to right). Each dot shows
+    one of 6 train/test splits, and the black vertical line marks the
+    mean of the \ref{PeakSegJoint} model.}
+  \label{fig:test-error-dots}
+\end{figure}
 
 The \JointHeuristic\ algorithm is orders of magnitude faster than
 existing Poisson segmentation algorithms
@@ -704,29 +738,13 @@ takes about 0.1 seconds to solve each of those problems
 25 minutes. In contrast, using the pDPA would be orders of magnitude
 slower (hours or days of computation).
 
-\begin{figure}[b!]
-  \centering
-  \input{figure-timings}
-  \vskip -0.5cm
-  \caption{Timings of three Poisson segmentation algorithms on
-    simulated data sets of varying size $B$. The grey shaded area
-    represents the range of problem sizes selected in the McGill
-    Histone benchmark data sets. }
-  \label{fig:timings}
-\end{figure}
+\section{Discussion}
 
-%\section{Discussion}
+We attempted to compare with the JAMM and PePr algorithms, two joint
+peak detectors from the bioinformatics literature \citep{JAMM,
+  PePr}. However, both programs produced errors and were unable to
+analyze the McGill benchmark data sets. 
 
-\section{Conclusions}
-
-We proposed the \ref{PeakSegJoint} model for supervised joint peak
-detection. It generalizes the state-of-the-art \ref{PeakSeg} model to
-multiple samples. We proposed the \textsc{JointZoom} Poisson
-segmentation algorithm that is orders of magnitude faster than
-existing algorithms. Finally, we showed that choosing the number of
-peaks in \ref{PeakSegJoint} using supervised penalty learning yields
-test error rates that are comparable to the previous state-of-the-art
-\ref{PeakSeg} model.
 
 Additionally, the \ref{PeakSegJoint} model is more interpretable than
 existing methods, since it is able to handle several sample types, and
@@ -739,10 +757,33 @@ the exact same locations across samples. In contrast, existing methods
 such as JAMM or PePr are less suitable to analyze this data set since
 they are limited to modeling only 1 or 2 cell types.
 
+
+\section{Conclusions}
+
+We proposed the \ref{PeakSegJoint} model for supervised joint peak
+detection. It generalizes the state-of-the-art \ref{PeakSeg} model to
+multiple samples. We proposed the \textsc{JointZoom} Poisson
+segmentation algorithm that is orders of magnitude faster than
+existing algorithms. Finally, we showed that choosing the number of
+peaks in \ref{PeakSegJoint} using supervised penalty learning yields
+test error rates that are comparable to the previous state-of-the-art
+\ref{PeakSeg} model.
+
 For future work, we would be interested in a theoretical analysis
 analogous to the work of \citet{cleynen2013segmentation}, which could
 suggest the form of the optimal penalty function to choose the number
 of peaks in the \ref{PeakSegJoint} model.
+
+\begin{figure}[b!]
+  \centering
+  \input{figure-timings}
+  \vskip -0.5cm
+  \caption{Timings of three Poisson segmentation algorithms on
+    simulated data sets of varying size $B$. The grey shaded area
+    represents the range of problem sizes selected in the McGill
+    Histone benchmark data sets. }
+  \label{fig:timings}
+\end{figure}
 
 \newpage
 
