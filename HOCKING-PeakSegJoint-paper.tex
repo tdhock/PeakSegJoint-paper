@@ -178,44 +178,53 @@ and timing results in Section~\ref{sec:results}, provide a discussion
 in Section~\ref{sec:discussion}, and propose some future research
 directions in Section~\ref{sec:conclusions}.
 
-\section{Related work: unsupervised peak detectors}
+\section{Related work}
 \label{sec:related}
 
-The bioinformatics literature has described many different
-unsupervised peak detection algorithms \citep{evaluation2010,
-  rye2010manually, chip-seq-bench}.
+\subsection{Single-sample ChIP-seq peak detectors}
 
-\citet{hierarchical-joint} proposed the ChIPmeta HMM, but it is for a
-different kind of data: one sample with both ChIP-seq and ChIP-chip
-data.
+There are many different unsupervised peak detection algorithms
+\citep{evaluation2010, rye2010manually, chip-seq-bench}, and the
+current state-of-the-art is the supervised \ref{PeakSeg} model of
+\citet{HOCKING-PeakSeg}.
 
-Several unsupervised models have been proposed for joint analysis of
-several different ChIP-seq experiments
-\citep{jmosaics,segway,chromhmm}. In these models, the input is one
-sample (e.g. brain cells) with different experiments such as H3K4me3
-and H3K36me3 profiles. In contrast, our proposed \ref{PeakSegJoint} model
-takes as input several samples (e.g. brain and kidney cells) for one
-experiment such as H3K4me3.
+In the multi-sample setting of this paper, each of these algorithms
+may be applied idendependently to each sample. The drawback of these
+methods is that the peaks do not occur in the same positions across
+each sample, so it is not straightforward to determine differences
+between samples.
 
-There are several unsupervised algorithms for jointly analyzing
-several samples of the same experiment and cell type. For example, the
-JAMM algorithm of \citet{JAMM} can analyze several samples but is
-limited to a single cell type. 
-%It says that it and DFilter are both ``universal'' for broad and narrow peaks. 
-% They used TF bindings sites as positive controls. They say that
-% it is better to analyze replicates independantly than to pool
-% replicates. TODO: run and compare.
-% TODO: run DFilter.
-The PePr algorithm of \citet{PePr} can identify peaks that are common
-to samples of a single cell type, or different between samples of two
-cell types, but is unsuitable for analysis of two or more cell
-types. In contrast, our proposed \ref{PeakSegJoint} method models data
-from several samples without limit on the number of cell types.
-%describe PePr a method for
-%identifying consistent or differential peaks across replicates.
-% They applied it to TF data sets, and used visual inspection to test
-% (but not train). TODO: run and compare.
+\subsection{Methods for several data sets}
 
+This paper is concerned with the particular setting of analyzing
+several samples (perhaps of different cell types) of the same
+experiment type. For example, Figure~\ref{fig:good-bad} shows 2 bcell
+samples, 1 monocyte sample, and 1 tcell sample (all of the H3K4me3
+experiment type). As far as we know, there are no existing algorithms
+that can explicitly model these data.
+
+The most similar peak detectors in the bioinformatics literature model
+several samples of the same cell type. For example, the JAMM algorithm
+of \citet{JAMM} can analyze several samples, but is limited to a
+single cell type since it assumes that each sample is a replicate with
+the exact same peak pattern. So to analyze the data of
+Figure~\ref{fig:good-bad} one would have to run JAMM 3 times (once for
+each cell type), and the resulting peaks would not be the same across
+cell types. Another example is the PePr algorithm of \citet{PePr},
+which can model either one or two cell types, but is unsuitable for
+analysis of three or more cell types. In contrast, our proposed
+\ref{PeakSegJoint} method models data from several samples without
+limit on the number of cell types.
+
+Although not the subject of this paper, there are several algorithms
+designed for the analysis of data from several different ChIP-seq
+experiments \citep{jmosaics,segway,chromhmm}. In these models, the
+input is one sample (e.g. monocyte cells) with different experiments
+such as H3K4me3 and H3K36me3 profiles. Also,
+\citet{hierarchical-joint} proposed a model for one sample with both
+ChIP-seq and ChIP-chip data. In contrast, our proposed
+\ref{PeakSegJoint} model takes as input several samples
+(e.g. monocyte, tcell, bcell) for one experiment such as H3K4me3.
 
 \section{Models}\label{sec:models}
 
