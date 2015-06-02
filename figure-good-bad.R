@@ -1,6 +1,6 @@
 works_with_R("3.2.0",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
-             "tdhock/PeakSegJoint@a1ea491f49e9bdb347f1caadebe7b750de807ac4",
+             "tdhock/PeakSegJoint@86bee0a4620160e2d4b904e7819b5792280d51de",
              ggplot2="1.0")
              
 
@@ -96,10 +96,11 @@ combine <- function(...){
   do.call(rbind, out.peaks)
 }
 
-some.peaks$left <- "6 errors"
+some.peaks$left <- "5 errors"
 some.peaks$right <- factor("bad", levs)
+fake.peaks <- subset(some.peaks, sample.id != "McGill0002")
 all.peaks <-
-  sampley(combine(each.type, joint, some.peaks[-c(6, 14),]))
+  sampley(combine(each.type, joint, fake.peaks))
 peaks.by.right <- split(all.peaks, all.peaks$right, drop=TRUE)
 regions.by.right <- list()
 for(right in names(peaks.by.right)){
