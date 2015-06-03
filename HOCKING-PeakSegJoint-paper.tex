@@ -428,7 +428,7 @@ each sample to have either 0 or 1 peaks, with a total of $p\in\{0,
   \label{joint_up_down}
   \\
   &\ 
-  p = \sum_{s=1}^S \Peaks(\mathbf m_s)
+  p = \sum_{s=1}^S \Peaks(\mathbf m_s),
   \label{total_peaks}
   \\
   &\ \forall s_1\neq s_2\mid
@@ -447,7 +447,7 @@ up, down and not up, up, down). The overall constraint
 (\ref{total_peaks}) means that there is a total of $p$ samples with
 exactly 1 peak. The last constraint (\ref{joint_constraint}) means
 that peaks should occur in the exact same positions in each sample.
-The \ref{PeakSegJoint} model for a data set with $S=3$ samples is
+The \ref{PeakSegJoint} models for a data set with $S=3$ samples is
 shown in Figure~\ref{fig:PeakSegJoint}.
 
 \subsection{Supervised penalty learning}
@@ -675,7 +675,7 @@ Shinkage-Thresholding Algorithm \citep{fista}.
 %   \right],
 % \end{equation}
 % and the derivative of the squared hinge loss is $\phi'(x)=2(x-1)I(x\leq 1)$.
-For FISTA with constant step size we also need a Lipschitz constant of
+For FISTA with constant step size we need a Lipschitz constant of
 $\mathcal L(\mathbf w)$. Following the arguments of
 \citet{hingeSquareFISTA}, we derived a Lipschitz constant of
 $\sum_{i=1}^n ||\mathbf X_i||_F^2/n$. Finally, we used the
@@ -700,7 +700,7 @@ Each data set contains labels grouped into windows of nearby regions
 (from 4 to 30 windows per data set). For each data set, we performed 6
 random splits of windows into half train, half test. Since there are
 multiple peaks per window, and \ref{PeakSegJoint} can detect at most 1
-peak per sample, we divided each window into separate
+peak per sample (\ref{zero_or_one}), we divided each window into separate
 \ref{PeakSegJoint} problems of size $B$ (a hyper-parameter tuned via
 grid search).
 
@@ -725,7 +725,7 @@ literature were each only effective for a single experiment type
 % JAMM we also encountered an error. In conclusion, we found that JAMM
 % and PePr were unable to analyze the McGill benchmark data sets.
 
-\subsection{Speed of heuristic PeakSegJoint algorithm}
+\subsection{Speed of \JointHeuristic\ algorithm for PeakSegJoint}
 
 \begin{figure}[b!]
   \centering
@@ -757,13 +757,13 @@ of magnitude for the range of data sizes that is typical for real data
 These speed differences are magnified when applying these Poisson
 segmentation models to real ChIP-seq data sets. For example, the hg19
 human genome assembly has about $3\times 10^9$ bases. For the
-H3K36me3\_AM\_immune data set, a resolution of about 200 kilobases per
-problem was optimal, so running PeakSegJoint on the entire human
-genome means solving about 15,000 segmentation problems. PeakSegJoint
-takes about 0.1 seconds to solve each of those problems
-(Figure~\ref{fig:timings}), meaning a total computation time of about
-25 minutes. In contrast, using the pDPA or cDPA would be orders of
-magnitude slower (hours or days of computation).
+H3K36me3\_AM\_immune data set, a problem size of about $B=\text{200,000}$
+bases was optimal, so running PeakSegJoint on the entire
+human genome means solving about 15,000 segmentation
+problems. PeakSegJoint takes about 0.1 seconds to solve each of those
+problems (Figure~\ref{fig:timings}), meaning a total computation time
+of about 25 minutes. In contrast, using the pDPA or cDPA would be
+orders of magnitude slower (hours or days of computation).
 
 \section{Discussion}
 \label{sec:discussion}
@@ -804,12 +804,12 @@ data sets.
 
 We proposed the \ref{PeakSegJoint} model for supervised joint peak
 detection. It generalizes the state-of-the-art \ref{PeakSeg} model to
-multiple samples. We proposed the \JointHeuristic\ Poisson
-segmentation algorithm that is orders of magnitude faster than
-existing algorithms. Finally, we showed that choosing the number of
-peaks in \ref{PeakSegJoint} using supervised penalty learning yields
-test error rates that are comparable to the previous state-of-the-art
-\ref{PeakSeg} model.
+multiple samples. We proposed the \JointHeuristic\ algorithm and
+showed that it is orders of magnitude faster than existing Poisson
+segmentation algorithms. Finally, we showed that choosing the number
+of peaks in \ref{PeakSegJoint} using supervised penalty learning
+yields test error rates that are comparable to the previous
+state-of-the-art \ref{PeakSeg} model.
 
 For future work, we would be interested in a theoretical analysis
 analogous to the work of \citet{cleynen2013segmentation}, which could
