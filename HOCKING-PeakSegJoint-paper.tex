@@ -608,7 +608,7 @@ positions.
   \textsc{SearchNearPeak}(\mathbf Z, \textrm{Samples}, \label{searchnear}
   \textrm{BinSize}, \textrm{Peak})$
   \ENDWHILE
-  \RETURN Peak.
+  \RETURN Peak, Samples.
   \caption{\JointHeuristic, available at
     \url{https://github.com/tdhock/PeakSegJoint}}
 \end{algorithmic}\label{algo}
@@ -633,6 +633,10 @@ has a time complexity of $O(\beta^2 pB\log B)$. Thus for a count data
 matrix $\mathbf Z\in\ZZ_+^{B\times S}$, computing the sequence of
 \ref{PeakSegJoint} models $\mathbf{\hat M}^0(\mathbf Z), \dots,
 \mathbf{\hat M}^S(\mathbf Z)$ takes $O(\beta^2 S B\log B)$ time.
+
+Finally note that when there is only $S=1$ sample, \JointHeuristic\
+can be used to find an approximate solution to the \ref{PeakSeg} model
+with $p=1$ peak.
 
 \subsection{Convex optimization for supervised penalty learning}
 
@@ -704,9 +708,10 @@ We compared the test error of \ref{PeakSegJoint} with three
 single-sample models (Figure~\ref{fig:test-error-dots}). In all 7 of
 the McGill benchmark data sets, our proposed \ref{PeakSegJoint} model
 achieved test error rates comparable to the previous state-of-the-art
-\ref{PeakSeg} model. In contrast, the baseline hmcan.broad and macs
-models from the bioinformatics literature were each only effective for
-a single experiment type (either H3K36me3 or H3K4me3, but not both).
+\ref{PeakSeg} model. In contrast, the baseline hmcan.broad
+\citep{HMCan} and macs \citep{MACS} models from the bioinformatics
+literature were each only effective for a single experiment type
+(either H3K36me3 or H3K4me3, but not both).
 
 % We attempted to compare with joint peak detectors from the
 % bioinformatics literature. In particular, we considered the
@@ -726,7 +731,7 @@ a single experiment type (either H3K36me3 or H3K4me3, but not both).
   \centering
   \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
   \vskip -0.5cm
-  \caption{Test error of peak detectors in the 7 McGill Histone
+  \caption{Test error of peak detectors in the 7 McGill 
     benchmark data sets (panels from left to right). Each dot shows
     one of 6 train/test splits, and the black vertical line marks the
     mean of the \ref{PeakSegJoint} model.}
@@ -735,15 +740,16 @@ a single experiment type (either H3K36me3 or H3K4me3, but not both).
 
 The \JointHeuristic\ algorithm is orders of magnitude faster than
 existing Poisson segmentation algorithms
-(Figure~\ref{fig:timings}). For simulated data sets of size
-$B\in\{10^1, \dots, 10^6\}$, we compared PeakSegJoint with the
-$O(B\log B)$ unconstrained pruned dynamic programming algorithm (pDPA)
-of \citet{Segmentor} (R package Segmentor3IsBack), and the $O(B^2)$
-constrained dynamic programming algorithm (cDPA) of
-\citet{HOCKING-PeakSeg} (R package
-PeakSegDP). Figure~\ref{fig:timings} indicates that the
-\JointHeuristic\ algorithm of \ref{PeakSegJoint} enjoys the same $O(B
-\log B)$ asymptotic behavior as the pDPA. However the \JointHeuristic\
+(Figure~\ref{fig:timings}). For simulated single-sample, single-peak
+data sets of size $B\in\{10^1, \dots, 10^6\}$, we compared
+PeakSegJoint with the $O(B\log B)$ unconstrained pruned dynamic
+programming algorithm (pDPA) of \citet{Segmentor} (R package
+Segmentor3IsBack), and the $O(B^2)$ constrained dynamic programming
+algorithm (cDPA) of \citet{HOCKING-PeakSeg} (R package PeakSegDP). We
+set the maximum number of segments to 3 in the pDPA and cDPA, meaning
+one peak. Figure~\ref{fig:timings} indicates that the \JointHeuristic\
+algorithm of \ref{PeakSegJoint} enjoys the same $O(B \log B)$
+asymptotic behavior as the pDPA. However the \JointHeuristic\
 algorithm is faster than both the cDPA and pDPA by at least two orders
 of magnitude for the range of data sizes that is typical for real data
 ($10^2 < B < 10^6$).
@@ -817,7 +823,7 @@ of peaks in the \ref{PeakSegJoint} model.
   \caption{Timings of three Poisson segmentation algorithms on
     simulated data sets of varying size $B$. The grey shaded area
     represents the range of problem sizes selected in the McGill
-    Histone benchmark data sets. }
+     benchmark data sets. }
   \label{fig:timings}
 \end{figure}
 
