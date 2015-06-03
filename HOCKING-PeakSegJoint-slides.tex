@@ -134,9 +134,43 @@ maxIter 20
   image-based screens with iterative feedback and machine learning.
 \end{frame}
 
+\begin{frame}
+  \frametitle{Labels indicate presence/absence of peaks}
+
+  False negative is too few peaks, false positive is too many peaks.
+
+  \includegraphics[width=\textwidth]{figure-good-bad}
+
+  Goals: peaks in same positions across samples,\\
+  with minimal number of incorrect regions.
+
+\end{frame}
+
 \section{The PeakSegJoint model}
 
 \input{figure-profiles}
+
+\begin{frame}
+  \frametitle{Demonstration of heuristic algorithm}
+
+  \includegraphics[width=\textwidth]{figure-heuristic-algo}
+
+  Interactive figure at \url{http://bit.ly/1AA6TgK}
+\end{frame}
+
+\begin{frame}
+  \frametitle{PeakSegJoint much faster than other Poisson
+    segmentation algorithms}
+
+  Data: simulated single-sample, single-peak.
+
+  \input{figure-timings-small} 
+
+  pDPA from Segmentor3IsBack R package (Cleynen et al, 2014).
+
+  cDPA from PeakSegDP R package (Hocking et al, ICML 2015).
+
+\end{frame}
 
 \begin{frame}
   \frametitle{H3K36me3 data, PeakSeg and Joint model}
@@ -152,14 +186,37 @@ maxIter 20
   Find best 0,...,9 peaks in each of 8 samples (80 PeakSeg
   models):
 
+  \scriptsize
+
   \input{table-H3K36me3-PeakSeg}
 
   \vskip 0.2 cm
 
-  Find best common peak in 0,...,8 samples in each of 4 genomic
-  regions (36 PeakSegJoint models):
+  \small
+
+  Find best common peak in 0,...,8 samples in each of 5 genomic
+  regions (45 PeakSegJoint models):
+
+  \scriptsize
 
   \input{table-H3K36me3}
+
+\end{frame}
+
+\section{Conclusions}
+
+\begin{frame}
+  \frametitle{Thanks for your attention!}
+  Write me at \alert{\texttt{toby.hocking@mail.mcgill.ca}} to collaborate!
+
+  \vskip 1cm
+
+  Source code for slides, figures, paper online!\\
+  \small
+  \url{https://github.com/tdhock/PeakSegJoint-paper}
+  \vskip 1cm
+
+  Supplementary slides appear after this one.
 
 \end{frame}
 
@@ -190,23 +247,6 @@ maxIter 20
 
   \input{table-H3K27ac}
   }
-
-\end{frame}
-
-\section{Conclusions}
-
-\begin{frame}
-  \frametitle{Thanks for your attention!}
-  Write me at \alert{\texttt{toby.hocking@mail.mcgill.ca}} to collaborate!
-
-  \vskip 1cm
-
-  Source code for slides, figures, paper online!\\
-  \small
-  \url{https://github.com/tdhock/PeakSegJoint-paper}
-  \vskip 1cm
-
-  Supplementary slides appear after this one.
 
 \end{frame}
 

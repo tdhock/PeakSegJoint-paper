@@ -5,7 +5,7 @@ works_with_R("3.2.0",
              ggplot2="1.0",
              dplyr="0.4.0",
              "tdhock/PeakSegDP@fe06a5b91d68c5d1ec471cb15c3ec3935dc2624d",
-             "tdhock/PeakSegJoint@e6bc386c555e203cc80343814939d51785c03af1",
+             "tdhock/PeakSegJoint@2a20461096bf2f8b43c45a91999de3637cf6dce9",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732")
 
 data(H3K36me3.TDH.other.chunk1)
@@ -37,14 +37,19 @@ chrom.range <- with(H3K36me3.TDH.other.chunk1$counts, {
 chrom.bases <- chrom.range[2]-chrom.range[1]
 n.bins <- 2000L
 bases.per.bin <- as.integer(chrom.bases/n.bins)
+load("../PeakSeg-paper/dp.timings.RData")
+chunk.timings <-
+  subset(dp.timings, set.name=="H3K36me3_TDH_other" & chunk.id==1,
+         select=c(sample.id, bases, data, seconds))
+rownames(chunk.timings) <- chunk.timings$sample.id
+chunk.timings$seconds2000 <- NA
 fit.list <- list()
-timing.list <- list()
 error.region.list <- list()
 peak.list <- list()
 for(sample.id in names(profile.list)){
   profile <- profile.list[[sample.id]]
   regions <- region.list[[sample.id]]
-  seconds <- system.time({
+  chunk.timings[sample.id, "seconds2000"] <- system.time({
     fit.list[[sample.id]] <- fit <- 
       segmentBins(profile,
                   chrom.range[1], bases.per.bin)
@@ -71,7 +76,6 @@ for(sample.id in names(profile.list)){
     data.frame(ymin=y-h, ymax=y+h, sample.region.list[[peaks.str]])
   peak.list[[sample.id]] <-
     data.frame(sample.id, fit$fit$peaks[[peaks.str]], y)
-  timing.list[[sample.id]] <- data.frame(seconds, sample.id)
 }
 error.regions <- do.call(rbind, error.region.list)
 peaks.df <- do.call(rbind, peak.list)
@@ -84,6 +88,7 @@ bases.per.problem.vec <-
   as.integer(sort(c((4.5) * (2^(12:17))
                     ##,(4.9) * (2^(12:16))
                     )))
+bases.per.problem.vec <- 200000
 
 count.dt <- data.table(H3K36me3.TDH.other.chunk1$counts)
 setkey(count.dt, chromStart, chromEnd)
@@ -303,7 +308,7 @@ for(bases.per.problem in bases.per.problem.vec){
 }
 resolution.err <- do.call(rbind, resolution.err.list)
 print(resolution.err)
-best.res <- resolution.err[which.min(resolution.err$weighted.error), ]
+best.res <- resolution.err[1, ]
 best.res.str <- paste(best.res$bases.per.problem)
 best.peaks <- do.call(rbind, best.peak.list[[best.res.str]])
 best.problems <- problem.list[[best.res.str]]
@@ -473,7 +478,7 @@ ggplot()+
                    xend=problemEnd/1e3, yend=problem.i),
                data=data.frame(sample.id="step 2", newprobs))+
   geom_text(aes(max(best.problems$problemStart)/1e3, 1,
-                label=paste(bases.per.problem, "bases/problem")),
+                label=sprintf("%d bases/problem", bases.per.problem)),
             vjust=0, 
             data=data.frame(sample.id="step 1", best.res))+
   theme(panel.margin=grid::unit(0, "cm"))+
@@ -496,7 +501,7 @@ best.times.df <-
   rbind(best.times[, c("data", "seconds")],
         data.frame(data=NA, seconds=sum(best.times$seconds), row.names="total"))
 
-single.times <- do.call(rbind, timing.list)
+single.times <- chunk.timings
 ggplot()+
   geom_point(aes(data, seconds), data=joint.times)
 resolution.times <- joint.times %>%
@@ -505,7 +510,11 @@ resolution.times <- joint.times %>%
 
 single.times.df <-
   rbind(single.times,
-        data.frame(seconds=sum(single.times$seconds), sample.id="total"))
+        data.frame(sample.id="total",
+                   bases="",
+                   data="",
+                   seconds=sum(single.times$seconds),
+                   seconds2000=sum(single.times$seconds2000)))
 single.times.xt <- xtable(single.times.df)
 print(single.times.xt, include.rownames=FALSE, floating=FALSE,
       file="table-H3K36me3-PeakSeg.tex")
