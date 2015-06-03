@@ -691,9 +691,10 @@ We compared the test error of \ref{PeakSegJoint} with three
 single-sample models (Figure~\ref{fig:test-error-dots}). In all 7 of
 the McGill benchmark data sets, our proposed \ref{PeakSegJoint} model
 achieved test error rates comparable to the previous state-of-the-art
-\ref{PeakSeg} model. In contrast, the baseline hmcan.broad and macs
-models from the bioinformatics literature were each only effective for
-a single experiment type (either H3K36me3 or H3K4me3, but not both).
+\ref{PeakSeg} model. In contrast, the baseline hmcan.broad
+\citep{HMCan} and macs \citep{MACS} models from the bioinformatics
+literature were each only effective for a single experiment type
+(either H3K36me3 or H3K4me3, but not both).
 
 % We attempted to compare with joint peak detectors from the
 % bioinformatics literature. In particular, we considered the
@@ -768,16 +769,18 @@ magnitude slower (hours or days of computation).
 The table below presents a summary of our proposed \ref{PeakSegJoint}
 model alongside several other peak detection algorithms. Time
 complexity is for detecting one peak in $B$ data points. The ``?''  of
-the JAMM and PePr unsupervised joint peak detectors means that their
-articles did not discuss the time complexity \citep{JAMM, PePr}.
+the unsupervised joint peak detectors means that their articles did
+not discuss time complexity \citep{MACS, HMCan, JAMM, PePr}.
 
 \begin{center}
   \begin{tabular}{crrcc}
   Algorithm & Samples & Cell types & Time complexity & Learning \\
   \hline
+  macs & 1 & 1 & ? & unsupervised \\
+  hmcan.broad & 1 & 1 & ? & unsupervised \\
+  PeakSeg (cDPA) & 1 & 1 & $O(B^2)$ & supervised \\
   JAMM & $\geq 1$ & 1 & ? & unsupervised \\
   PePr & $\geq 2$ & 1--2 & ? & unsupervised \\
-  PeakSeg (cDPA) & 1 & 1 & $O(B^2)$ & supervised \\
   PeakSegJoint (JointZoom) & $\geq 1$ & $\geq 1$ & $O(B \log B)$ & supervised
 \end{tabular}
 \end{center}
