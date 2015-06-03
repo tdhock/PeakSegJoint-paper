@@ -1,5 +1,6 @@
 \documentclass{article} % For LaTeX2e
-\usepackage{nips15submit_e,times}
+\usepackage{times}
+\usepackage{fullpage}
 \usepackage{tikz}
 \usepackage{algorithm}
 \usepackage{algorithmic}
@@ -30,36 +31,8 @@
   segmentation of multiple count data samples}
 
 
-\author{
-David S.~Hippocampus\thanks{ Use footnote for providing further information
-about author (webpage, alternative address)---\emph{not} for acknowledging
-funding agencies.} \\
-Department of Computer Science\\
-Cranberry-Lemon University\\
-Pittsburgh, PA 15213 \\
-\texttt{hippo@cs.cranberry-lemon.edu} \\
-\And
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-\AND
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-\And
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-\And
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-(if needed)\\
-}
+\author{Toby Dylan Hocking toby.hocking@mail.mcgill.ca \\
+Guillaume Bourque guil.bourque@mcgill.ca}
 
 % The \author macro works with any number of authors. There are two commands
 % used to separate the names and addresses of multiple authors: \And and \AND.
@@ -761,6 +734,17 @@ magnitude slower (hours or days of computation).
 
 \section{Discussion}
 \label{sec:discussion}
+
+\begin{center}
+  \begin{tabular}{ccccc}
+  Algorithm & Samples & Cell types & Time complexity & Learning \\
+  \hline
+  JAMM & $\geq 1$ & 1 & ? & unsupervised \\
+  PePr & $\geq 2$ & 1--2 & ? & unsupervised \\
+  PeakSeg (cDPA) & 1 & 1 & $O(B^2)$ & supervised \\
+  PeakSegJoint & $\geq 1$ & $\geq 1$ & $O(B \log B)$ & supervised
+\end{tabular}
+\end{center}
 
 \subsection{Multi-sample PeakSegJoint versus single-sample PeakSeg}
 
