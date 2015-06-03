@@ -32,8 +32,8 @@
 
 \begin{document}
 
-\title{Supervised detection of the same peaks jointly across 
-  several ChIP-seq samples}
+\title{PeakSegJoint: fast supervised peak detection via joint
+  segmentation of count data samples}
 
 \author{
   Toby Dylan Hocking\\
@@ -43,6 +43,98 @@
 %\date{2 April 2015}
 
 \maketitle
+
+\section{ChIP-seq data and previous work on peak detection}
+
+
+\begin{frame}
+  \frametitle{Chromatin immunoprecipitation sequencing (ChIP-seq)}
+  Analysis of DNA-protein interactions.
+
+  \includegraphics[width=\textwidth]{Chromatin_immunoprecipitation_sequencing_wide.png}
+
+  Source: ``ChIP-sequencing,'' Wikipedia.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Problem: find peaks in each of several samples}
+  \includegraphics[width=\textwidth]{screenshot-ucsc-edited}
+
+  Grey profiles are normalized aligned read count signals.
+
+  Black bars are ``peaks'' called by MACS2 (Zhang et al, 2008):
+  \begin{itemize}
+  \item many false positives.
+  \item overlapping peaks have different start/end positions.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Existing peak detection algorithms}
+  \begin{itemize}
+  \item Model-based analysis of ChIP-Seq (MACS), Zhang et al, 2008.
+  \item SICER, Zang et al, 2009.
+  \item HOMER findPeaks, Heinz et al, 2010.
+  \item RSEG, Song and Smith, 2011.
+  \item Histone modifications in cancer (HMCan), Ashoor et al, 2013.
+  \item ... dozens of others.
+  \end{itemize}
+  Two big questions: how to choose the best...
+  \begin{itemize}
+  \item ...algorithm?
+  \item ...parameters?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{How to choose model parameters?}
+\scriptsize
+19 parameters for Model-based analysis of ChIP-Seq (MACS), Zhang et al, 2008.
+\begin{verbatim}
+  [-g GSIZE]
+  [-s TSIZE] [--bw BW] [-m MFOLD MFOLD] [--fix-bimodal]
+  [--nomodel] [--extsize EXTSIZE | --shiftsize SHIFTSIZE]
+  [-q QVALUE | -p PVALUE | -F FOLDENRICHMENT] [--to-large]
+  [--down-sample] [--seed SEED] [--nolambda]
+  [--slocal SMALLLOCAL] [--llocal LARGELOCAL]
+  [--shift-control] [--half-ext] [--broad]
+  [--broad-cutoff BROADCUTOFF] [--call-summits]
+\end{verbatim}
+10 parameters for Histone modifications in cancer (HMCan),
+Ashoor et al, 2013.
+\begin{verbatim}
+minLength 145
+medLength 150
+maxLength 155
+smallBinLength 50
+largeBinLength 100000
+pvalueThreshold 0.01
+mergeDistance 200
+iterationThreshold 5
+finalThreshold 0
+maxIter 20
+\end{verbatim}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Previous work in computer vision: look and add labels
+    to...}
+  \begin{tabular}{ccc}
+    Photos & Cell images & Copy number profiles \\
+    \includegraphics[width=1.3in]{faces} &
+    \includegraphics[width=1.3in]{cellprofiler} &
+    \includegraphics[width=1.5in]{regions-axes}\\
+    Labels: names & phenotypes & alterations \\ \\
+    CVPR 2013 & CellProfiler & SegAnnDB \\
+    246 papers & 873 citations & Hocking et al, 2014. \\
+     &
+  \end{tabular}
+  Sources: \url{http://en.wikipedia.org/wiki/Face_detection}\\
+  Jones et al PNAS 2009. Scoring diverse cellular morphologies in
+  image-based screens with iterative feedback and machine learning.
+\end{frame}
+
+\section{The PeakSegJoint model}
 
 \input{figure-profiles}
 
@@ -213,23 +305,6 @@
   \frametitle{Select L1-regularized model with minimal validation error}
 
   \includegraphics[height=0.9\textheight]{figure-lasso-path}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Size of positive regions good heuristic for initial grid search}
-
-  \includegraphics[height=0.8\textheight]{figure-label-problem-size}
-
-  6 train/test splits per data set.
-\end{frame}
-
-\begin{frame}
-  \frametitle{Resolution with min annotation error same across
-    train/test splits}
-
-  \includegraphics[height=0.8\textheight]{figure-scatter-cheating-step1}
-
-  6 train/test splits per data set.
 \end{frame}
 
 \end{document}

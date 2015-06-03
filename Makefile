@@ -4,7 +4,7 @@ HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoi
 	bibtex HOCKING-PeakSegJoint-paper
 	pdflatex HOCKING-PeakSegJoint-paper
 	pdflatex HOCKING-PeakSegJoint-paper
-HOCKING-PeakSegJoint-slides.pdf: HOCKING-PeakSegJoint-slides.tex figure-profiles.tex table-H3K36me3.tex table-H3K4me3.tex figure-bin-factor.pdf table-nrsf.tex table-H3K27ac.tex figure-heuristic-loss.pdf figure-weighted-error.pdf figure-label-problem-size.pdf figure-lasso-path.pdf figure-scatter-cheating-step1.pdf
+HOCKING-PeakSegJoint-slides.pdf: HOCKING-PeakSegJoint-slides.tex figure-profiles.tex table-H3K36me3.tex table-H3K4me3.tex figure-bin-factor.pdf table-nrsf.tex table-H3K27ac.tex figure-heuristic-loss.pdf figure-weighted-error.pdf figure-lasso-path.pdf figure-scatter-cheating-step1.pdf
 	rm -f *.aux *.bbl
 	pdflatex HOCKING-PeakSegJoint-slides
 figure-profiles.tex: figure-profiles.R
@@ -25,8 +25,6 @@ table-H3K27ac.tex: table-H3K27ac.R H3K27ac_TDH_control.RData
 	R --no-save < $<
 figure-heuristic-loss.pdf: figure-heuristic-loss.R
 	R --no-save < $<
-chunk.problems.RData: chunk.problems.R
-	R --no-save < $<
 figure-weighted-error.pdf: figure-weighted-error.R chunk.problems.RData
 	R --no-save < $<
 histone.sets.RData: histone.sets.R
@@ -44,8 +42,6 @@ step1.error.RData: step1.error.R selected.by.set.RData
 figure-test-error-dots.pdf: figure-test-error-dots.R step2.error.RData 
 	R --no-save < $<
 cheating.error.RData: cheating.error.R selected.by.set.RData
-	R --no-save < $<
-figure-scatter-cheating-step1.pdf: figure-scatter-cheating-step1.R cheating.error.RData selected.by.set.RData
 	R --no-save < $<
 figure-timings.tex: figure-timings.R timings.RData
 	R --no-save < $<
