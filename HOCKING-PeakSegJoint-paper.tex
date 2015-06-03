@@ -68,9 +68,31 @@ Guillaume Bourque guil.bourque@mcgill.ca}
   across all samples.
 \end{abstract}
 
+\tableofcontents
+
+\newpage
+
 \section{Introduction: Joint supervised peak detection in ChIP-seq data}
 
 %\subsection{}
+
+\begin{figure}[b!]
+  \centering
+  \includegraphics[width=\textwidth]{figure-good-bad}
+  \vskip -0.5cm
+  \caption{Labeled ChIP-seq coverage data for $S=4$ samples (top 4
+    panels) with 3 peak models (bottom 3 panels).
+    % \colorbox{noPeaks}{noPeaks} means there should be no overlapping
+    % peaks, \colorbox{peakStart}{peakStart}/\colorbox{peakEnd}{peakEnd}
+    % mean there should be exactly 1 peak start/end somewhere in the
+    % region, and \colorbox{peaks}{peaks} means that ) 
+    An ideal peak model minimizes the number of incorrect labels
+    (false positives are too many peaks and false negatives are not
+    enough peaks). The ``good'' model achieves 0 errors but the
+    ``better'' model is more interpretable since overlapping peaks in
+    different samples always occur in the exact same positions.}
+  \label{fig:good-bad}
+\end{figure}
 
 Chromatin immunoprecipitation sequencing (ChIP-seq) is an experimental
 technique used for genome-wide profiling of histone modifications and
@@ -109,24 +131,6 @@ a test set of data:
   \label{eq:min_error}
   \minimize_c \sum_{i\in\text{test}} E[c(\mathbf z_i),  L_i].
 \end{equation}
-
-\begin{figure}[b!]
-  \centering
-  \includegraphics[width=\textwidth]{figure-good-bad}
-  \vskip -0.5cm
-  \caption{Labeled ChIP-seq coverage data for $S=4$ samples (top 4
-    panels) with 3 peak models (bottom 3 panels).
-    % \colorbox{noPeaks}{noPeaks} means there should be no overlapping
-    % peaks, \colorbox{peakStart}{peakStart}/\colorbox{peakEnd}{peakEnd}
-    % mean there should be exactly 1 peak start/end somewhere in the
-    % region, and \colorbox{peaks}{peaks} means that ) 
-    An ideal peak model minimizes the number of incorrect labels
-    (false positives are too many peaks and false negatives are not
-    enough peaks). The ``good'' model achieves 0 errors but the
-    ``better'' model is more interpretable since overlapping peaks in
-    different samples always occur in the exact same positions.}
-  \label{fig:good-bad}
-\end{figure}
 
 In practical situations we have $S>1$ samples, and a matrix $\mathbf
 Z\in\ZZ_+^{B\times S}$ of count data. For example in
@@ -198,6 +202,8 @@ such as H3K4me3 and H3K36me3. Also,
 ChIP-seq and ChIP-chip data. In contrast, 
 \ref{PeakSegJoint} takes as input several samples
 (e.g. monocyte, tcell, bcell) for one experiment such as H3K4me3.
+
+\newpage
 
 \section{Models}\label{sec:models}
 
@@ -357,6 +363,8 @@ multi-sample \ref{PeakSegJoint} model.
 
 %   % The proof for $p>2$ peaks proceeds by induction.
 % \end{proof}
+
+\newpage 
 
 \subsection{PeakSegJoint: finding the most likely common peak in
   $0,\dots, S$ samples}
@@ -522,6 +530,7 @@ $\mathbf{\hat M}^{\hat p}(\mathbf Z)$. Each column/sample of the mean
 matrix has either two changes (the second segment is the peak) or no
 changes (no peak).
 
+
 \section{Algorithms}
 \label{sec:algorithms}
 
@@ -537,6 +546,8 @@ optimum, but would take too much time.  Instead, we propose to find an
 approximate solution using a new discrete optimization algorithm
 called \JointHeuristic~(Algorithm~1).
 
+\newpage
+
 The main idea of the \JointHeuristic\ algorithm is to first zoom out
 (downsample the data) repeatedly by a factor of $\beta$, obtaining a
 new data matrix of size $b\times S$, where $b \ll B$
@@ -546,12 +557,12 @@ sub-routine that checks all $O(b^2)$ possible peak start and end
 positions. Then we zoom in by a factor of $\beta$ (line~\ref{zoomin})
 and refine the peak positions in $O(\beta^2)$ time via
 \textsc{SearchNearPeak} (line~\ref{searchnear}). After having zoomed
-back in to the BinSize=1 level we return the final Peak
-positions. 
+back in to the BinSize=1 level we return the final Peak positions, and
+the $p$ Samples in which that peak was observed.
 
 \begin{figure}[b!]
   \centering
-  \includegraphics[width=\textwidth]{figure-heuristic-algo}
+  \includegraphics[width=0.95\textwidth]{figure-heuristic-algo}
   \vskip -0.5cm
   \caption{Demonstration of the \JointHeuristic\ segmentation
     algorithm. For a data set with $B=24$ data points and $S=2$
@@ -581,7 +592,7 @@ positions.
   \textsc{SearchNearPeak}(\mathbf Z, \textrm{Samples}, \label{searchnear}
   \textrm{BinSize}, \textrm{Peak})$
   \ENDWHILE
-  \RETURN Peak.
+  \RETURN Peak, Samples.
   \caption{\JointHeuristic, available at
     \url{https://github.com/tdhock/PeakSegJoint}}
 \end{algorithmic}\label{algo}
@@ -606,6 +617,10 @@ has a time complexity of $O(\beta^2 pB\log B)$. Thus for a count data
 matrix $\mathbf Z\in\ZZ_+^{B\times S}$, computing the sequence of
 \ref{PeakSegJoint} models $\mathbf{\hat M}^0(\mathbf Z), \dots,
 \mathbf{\hat M}^S(\mathbf Z)$ takes $O(\beta^2 S B\log B)$ time.
+
+Finally note that when there is only $S=1$ sample, \JointHeuristic\
+can be used to find an approximate solution to the \ref{PeakSeg} model
+with $p=1$ peak.
 
 \subsection{Convex optimization for supervised penalty learning}
 
@@ -661,17 +676,16 @@ subdifferential stopping criterion of \citet{HOCKING-penalties}.
 
 \subsection{Accuracy of PeakSegJoint on benchmark data sets}
 
-We used the 7 McGill benchmark data sets of
-\citet{hocking2014visual}, which included a total of 12,826 manually
-annotated
-region labels.\footnote{\url{http://cbio.ensmp.fr/~thocking/chip-seq-chunk-db/}}
-Each data set contains labels grouped into windows of nearby regions
-(from 4 to 30 windows per data set). For each data set, we performed 6
-random splits of windows into half train, half test. Since there are
-multiple peaks per window, and \ref{PeakSegJoint} can detect at most 1
-peak per sample, we divided each window into separate
-\ref{PeakSegJoint} problems of size $B$ (a hyper-parameter tuned via
-grid search).
+We used McGill benchmark data sets from
+\url{http://cbio.ensmp.fr/~thocking/chip-seq-chunk-db/} which included
+a total of 12,826 manually annotated region labels
+\citep{hocking2014visual}. Each data set contains labels
+grouped into windows of nearby regions (from 4 to 30 windows per data
+set). For each data set, we performed 6 random splits of windows into
+half train, half test. Since there are multiple peaks per window, and
+\ref{PeakSegJoint} can detect at most 1 peak per sample, we divided
+each window into separate \ref{PeakSegJoint} problems of size $B$ (a
+hyper-parameter tuned via grid search).
 
 We compared the test error of \ref{PeakSegJoint} with three
 single-sample models (Figure~\ref{fig:test-error-dots}). In all 7 of
@@ -693,28 +707,31 @@ a single experiment type (either H3K36me3 or H3K4me3, but not both).
 % JAMM we also encountered an error. In conclusion, we found that JAMM
 % and PePr were unable to analyze the McGill benchmark data sets.
 
-\subsection{Speed of heuristic PeakSegJoint algorithm}
-
-\begin{figure}[b!]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
   \vskip -0.5cm
-  \caption{Test error of peak detectors in the 7 McGill Histone
+  \caption{Test error of peak detectors in the 7 McGill 
     benchmark data sets (panels from left to right). Each dot shows
     one of 6 train/test splits, and the black vertical line marks the
     mean of the \ref{PeakSegJoint} model.}
   \label{fig:test-error-dots}
 \end{figure}
 
+\newpage
+
+\subsection{Speed of heuristic PeakSegJoint algorithm}
+
 The \JointHeuristic\ algorithm is orders of magnitude faster than
 existing Poisson segmentation algorithms
-(Figure~\ref{fig:timings}). For simulated data sets of size
-$B\in\{10^1, \dots, 10^6\}$, we compared PeakSegJoint with the
-$O(B\log B)$ unconstrained pruned dynamic programming algorithm (pDPA)
-of \citet{Segmentor} (R package Segmentor3IsBack), and the $O(B^2)$
-constrained dynamic programming algorithm (cDPA) of
-\citet{HOCKING-PeakSeg} (R package
-PeakSegDP). Figure~\ref{fig:timings} indicates that the
+(Figure~\ref{fig:timings}). For simulated single-sample, single-peak
+data sets of size $B\in\{10^1, \dots, 10^6\}$, we compared
+\JointHeuristic\ with the $O(B\log B)$ unconstrained pruned dynamic
+programming algorithm (pDPA) of \citet{Segmentor} (R package
+Segmentor3IsBack), and the $O(B^2)$ constrained dynamic programming
+algorithm (cDPA) of \citet{HOCKING-PeakSeg} (R package PeakSegDP). We
+set the maximum number of segments to 3 in the pDPA and cDPA, meaning
+one peak. Figure~\ref{fig:timings} indicates that the
 \JointHeuristic\ algorithm of \ref{PeakSegJoint} enjoys the same $O(B
 \log B)$ asymptotic behavior as the pDPA. However the \JointHeuristic\
 algorithm is faster than both the cDPA and pDPA by at least two orders
@@ -732,17 +749,36 @@ takes about 0.1 seconds to solve each of those problems
 25 minutes. In contrast, using the pDPA or cDPA would be orders of
 magnitude slower (hours or days of computation).
 
+\begin{figure}[H]
+  \centering
+  \input{figure-timings}
+  \vskip -0.5cm
+  \caption{Timings of three Poisson segmentation algorithms on
+    simulated data sets of varying size $B$. The grey shaded area
+    represents the range of problem sizes selected in the McGill
+     benchmark data sets. }
+  \label{fig:timings}
+\end{figure}
+
+\newpage
+
 \section{Discussion}
 \label{sec:discussion}
 
+The table below presents a summary of our proposed \ref{PeakSegJoint}
+model alongside several other peak detection algorithms. Time
+complexity is for detecting one peak in $B$ data points. The ``?''  of
+the JAMM and PePr unsupervised joint peak detectors means that their
+articles did not discuss the time complexity \citep{JAMM, PePr}.
+
 \begin{center}
-  \begin{tabular}{ccccc}
+  \begin{tabular}{crrcc}
   Algorithm & Samples & Cell types & Time complexity & Learning \\
   \hline
   JAMM & $\geq 1$ & 1 & ? & unsupervised \\
   PePr & $\geq 2$ & 1--2 & ? & unsupervised \\
   PeakSeg (cDPA) & 1 & 1 & $O(B^2)$ & supervised \\
-  PeakSegJoint & $\geq 1$ & $\geq 1$ & $O(B \log B)$ & supervised
+  PeakSegJoint (JointZoom) & $\geq 1$ & $\geq 1$ & $O(B \log B)$ & supervised
 \end{tabular}
 \end{center}
 
@@ -762,8 +798,7 @@ the $O(B \log B)$ \JointHeuristic\ algorithm can compute the
 \subsection{PeakSegJoint versus other joint peak detectors}
 
 We attempted to compare with the multi-sample JAMM and PePr
-algorithms, two joint peak detectors from the bioinformatics
-literature \citep{JAMM, PePr}. The \ref{PeakSegJoint} model is more
+algorithms. The \ref{PeakSegJoint} model is more
 interpretable than these existing methods, since it is able to handle
 several sample types. This was advantageous in data sets such as
 Figure~\ref{fig:good-bad}, which contains 3 cell types: tcell, bcell,
@@ -793,17 +828,6 @@ For future work, we would be interested in a theoretical analysis
 analogous to the work of \citet{cleynen2013segmentation}, which could
 suggest the form of the optimal penalty function to choose the number
 of peaks in the \ref{PeakSegJoint} model.
-
-\begin{figure}[b!]
-  \centering
-  \input{figure-timings}
-  \vskip -0.5cm
-  \caption{Timings of three Poisson segmentation algorithms on
-    simulated data sets of varying size $B$. The grey shaded area
-    represents the range of problem sizes selected in the McGill
-    Histone benchmark data sets. }
-  \label{fig:timings}
-\end{figure}
 
 \newpage
 
