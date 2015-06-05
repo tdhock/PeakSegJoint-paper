@@ -12,13 +12,18 @@ last <- function(algo){
   df <- subset(df, n.data == max(n.data))
   mean(df$time)/1e9
 }
+expr2algo <-
+  c(cDPA="cDPA PeakSeg",
+    pDPA="pDPA",
+    PeakSegJoint="JointZoom PeakSegJoint")
+timings$seconds$algorithm <- expr2algo[paste(timings$seconds$expr)]
 
 label.df <-
   data.frame(data="seconds",
-             algorithm=c("cDPA", "pDPA", "PeakSegJoint"),
+             algorithm=c("cDPA PeakSeg", "pDPA", "JointZoom PeakSegJoint"),
              complexity=c("$O(B^2)$", "$O(B\\log B)$", "$O(B\\log B)$"),
-             n.data=c(8000, 8000, 2000),
-             seconds=c(last("cDPA"), last("pDPA"), 0.05))
+             n.data=c(8000, 8000, 5e3),
+             seconds=c(last("cDPA"), last("pDPA"), 5e-4))
 
 timings$problems[, bases := problemEnd-problemStart]
 problem.range <- timings$problems[, .(min=min(bases), max=max(bases))]
@@ -34,7 +39,8 @@ ggplot()+
   geom_point(aes(n.data, time/1e9, color=expr),
              pch=1,
              data=data.frame(timings$seconds, data="seconds"))+
-  scale_size_manual(values=c(PeakSegJoint=2, cDPA=2, pDPA=1))+
+  scale_size_manual(values=c("JointZoom PeakSegJoint"=2,
+                      "cDPA PeakSeg"=2, pDPA=1))+
   theme_bw()+
   guides(size="none", color="none")+
   geom_text(aes(n.data, seconds, label=paste(algorithm, complexity, sep="\n"),
@@ -63,10 +69,11 @@ ggplot()+
   ##            data=timings$problems)+
   scale_x_log10("data size to segment $B$")+
   scale_y_log10("seconds")+
-  geom_point(aes(n.data, time/1e9, color=expr),
+  geom_point(aes(n.data, time/1e9, color=algorithm),
              pch=1,
              data=data.frame(timings$seconds, data="seconds"))+
-  scale_size_manual(values=c(PeakSegJoint=2, cDPA=2, pDPA=1))+
+  scale_size_manual(values=c("JointZoom PeakSegJoint"=2,
+                      "cDPA PeakSeg"=2, pDPA=1))+
   ## geom_line(aes(n.data, diff, color=algorithm, size=algorithm),
   ##           data=data.frame(timings$results, data="distance to\ntrue peak"))+
   ## geom_line(aes(n.data, 10^mean.loss, color=algorithm, size=algorithm),
@@ -83,6 +90,6 @@ ggplot()+
   ##facet_grid(data ~ ., scales="free")+
   theme(panel.margin=grid::unit(0, "cm"))
 
-tikz("figure-timings.tex", h=2, w=5)
+tikz("figure-timings.tex", h=1.7, w=5)
 print(gg)
 dev.off()

@@ -80,19 +80,20 @@ Address \\
 \maketitle
 
 \begin{abstract}
-  Joint peak detection is a central problem when comparing samples in
-  genomic data analysis, but current algorithms for this task are
-  unsupervised and limited to at most 2 sample types. We propose
-  PeakSegJoint, a new constrained maximum likelihood segmentation
-  model for any number of sample types. To select the number of peaks
-  in the segmentation, we propose a supervised penalty learning
-  model. To infer the parameters of these two models, we propose to
-  use a discrete optimization heuristic for the segmentation, and
-  convex optimization for the penalty learning. In comparisons with
+  Peak detection algorithms identify enriched regions in genomic count
+  data. Joint peak detectors attempt to find common peaks in several
+  samples, but current algorithms for this task are unsupervised and
+  limited to at most 2 sample types. We propose PeakSegJoint, a new
+  constrained maximum likelihood segmentation model for any number of
+  sample types. To select the number of peaks in the segmentation, we
+  propose a supervised penalty learning model. To infer the parameters
+  of these two models, we propose a discrete optimization heuristic
+  for the segmentation, and a gradient-based convex optimization
+  algorithm for the penalty learning. In comparisons with
   state-of-the-art peak detection algorithms, PeakSegJoint achieves
-  similar accuracy, faster speeds, and a more interpretable model
-  with overlapping peaks that occur in exactly the same positions
-  across all samples.
+  similar accuracy, faster speeds, and a more interpretable model with
+  overlapping peaks that occur in exactly the same positions across
+  all samples.
 \end{abstract}
 
 \section{Introduction: Joint supervised peak detection in ChIP-seq data}
@@ -142,7 +143,8 @@ a test set of data:
   \includegraphics[width=\textwidth]{figure-good-bad}
   \vskip -0.5cm
   \caption{Labeled ChIP-seq coverage data for $S=4$ samples (top 4
-    panels) with 3 peak models (bottom 3 panels).
+    panels) with 3 peak models (bottom 3 panels), which predict peaks 
+    in blue regions and background noise in other regions.
     % \colorbox{noPeaks}{noPeaks} means there should be no overlapping
     % peaks, \colorbox{peakStart}{peakStart}/\colorbox{peakEnd}{peakEnd}
     % mean there should be exactly 1 peak start/end somewhere in the
@@ -151,7 +153,7 @@ a test set of data:
     (false positives are too many peaks and false negatives are not
     enough peaks). The ``good'' model achieves 0 errors but the
     ``better'' model is more interpretable since overlapping peaks in
-    different samples always occur in the exact same positions.}
+    different samples occur in the exact same positions.}
   \label{fig:good-bad}
 \end{figure}
 
@@ -198,23 +200,23 @@ between samples.
 
 This paper is concerned with the particular setting of analyzing
 several samples (perhaps of different cell types) of the same
-experiment type. For example, Figure~\ref{fig:good-bad} shows 2 bcell
-samples, 1 monocyte sample, and 1 tcell sample (all of the H3K4me3
-experiment type). As far as we know, there are no existing algorithms
-that can explicitly model these data.
+experiment data type. For example, Figure~\ref{fig:good-bad} shows
+H3K4me3 experimental data for 2 bcell samples, 1 monocyte sample, and
+1 tcell sample (different types of blood cells). As far as we know,
+there are no existing algorithms that can explicitly model these data.
 
-The most similar peak detectors in the bioinformatics literature model
-several samples of the same cell type. For example, the JAMM algorithm
-of \citet{JAMM} can analyze several samples, but is limited to a
-single cell type since it assumes that each sample is a replicate with
-the exact same peak pattern. So to analyze the data of
-Figure~\ref{fig:good-bad} one would have to run JAMM 3 times (once for
-each cell type), and the resulting peaks would not be the same across
-cell types. Another example is the PePr algorithm of \citet{PePr},
-which can model either one or two cell types, but is unsuitable for
-analysis of three or more cell types. In contrast, \ref{PeakSegJoint}
-is for data from several samples without limit on the number of cell
-types.
+For these data the most applicable peak detectors in the
+bioinformatics literature model several samples of the same cell
+type. For example, the JAMM algorithm of \citet{JAMM} can analyze
+several samples, but is limited to a single cell type since it assumes
+that each sample is a replicate with the exact same peak pattern. So
+to analyze the data of Figure~\ref{fig:good-bad} one would have to run
+JAMM 3 times (once for each cell type), and the resulting peaks would
+not be the same across cell types. Another example is the PePr
+algorithm of \citet{PePr}, which can model either one or two cell
+types, but is unsuitable for analysis of three or more cell types. In
+contrast, \ref{PeakSegJoint} is for data from several samples without
+limit on the number of cell types.
 
 Although not the subject of this paper, there are several algorithms
 designed for the analysis of data from several different ChIP-seq
@@ -236,13 +238,14 @@ then introduce the multi-sample \ref{PeakSegJoint} model.
 
 This section describes the \ref{PeakSeg} model of
 \citet{HOCKING-PeakSeg}, which is the current state-of-the-art peak
-detection algorithm in the McGill benchmark data set of
+detection algorithm in the benchmark data set of
 \citet{hocking2014visual}. 
 
-Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned read counts
-on $B$ bases, and a maximum number of peaks $p_{\text{max}}$, the
-PeakSeg model for the mean vector $\mathbf m\in\RR^B$ with $p\in\{0,
-\dots, p_{\text{max}}\}$ peaks is
+Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned read
+counts on $B$ bases, the PeakSeg model for the mean vector $\mathbf
+m\in\RR^B$ is $z_j\sim \text{Poisson}(m_j)$. For a maximum number of
+peaks $p_{\text{max}}$ the constrained maximum likelihood PeakSeg
+model with $p\in\{0, \dots, p_{\text{max}}\}$ peaks is defined as
 \begin{align}
   \label{PeakSeg}
   \mathbf{\tilde m}^p(\mathbf z)  =
@@ -394,9 +397,10 @@ multi-sample \ref{PeakSegJoint} model.
   \vskip -0.5cm
   \caption{A labeled data set with $S=3$ samples (top 3 panels) and
     the \ref{PeakSegJoint} models for $p\in\{0, 1, 2, 3\}$ peaks
-    (bottom 4 panels).
+    (bottom 4 panels). Blue positions show model peaks and other positions 
+    show background noise.
 %The    ``Unconstrained'' model does not include the \ref{PeakSegJoint}    constraint (\ref{joint_constraint}) that overlapping peaks must    occur in exactly the same positions.
-}
+  }
   \label{fig:PeakSegJoint}
 \end{figure}
 
@@ -458,7 +462,7 @@ that we have data $\mathbf Z_1,\dots, \mathbf Z_n\in\ZZ_+^{B\times S}$
 for $n$ genomic regions, along with annotated region labels
 $L_1,\dots, L_n$. 
 
-For each genomic region $i\in\{1,\dots,n\}$ we can compute a sequence
+Faor each genomic region $i\in\{1,\dots,n\}$ we can compute a sequence
 of \ref{PeakSegJoint} models $\mathbf{\hat M}^0(\mathbf Z_i),\dots,
 \mathbf{\hat M}^S(\mathbf Z_i)$, but how will we predict which of
 these $S+1$ models will be best?
@@ -476,15 +480,18 @@ the optimal number of peaks as
   \text{PoissonLoss}\left[
     \mathbf{\hat M}^p(\mathbf Z),
     \mathbf Z
-  \right].
+  \right],
 \end{equation}
-Also suppose that we can compute $d$-dimensional sample-specific
-feature vectors $\mathbf x\in\RR^d$ and stack them to obtain feature
-matrices $\mathbf X_1,\dots, \mathbf X_n\in\RR^{d\times S}$. We will
-learn a function $f:\RR^{d\times S}\rightarrow\RR$ that predicts
-region-specific penalty values $f(\mathbf X_i) = \log \lambda_i\in\RR$
-for each genomic region $i$. In particular we will learn a weight
-vector $\mathbf w\in\RR^d$ in a linear function $f_{\mathbf w}(\mathbf X) =
+The penalty $\lambda$ controls the tradeoff between minimizing the
+Poisson loss (a decreasing function of $p$) and the model complexity
+($p$).  Also suppose that we can compute $d$-dimensional
+sample-specific feature vectors $\mathbf x\in\RR^d$ (mean, quantiles,
+etc) and stack them to obtain feature matrices $\mathbf X_1,\dots,
+\mathbf X_n\in\RR^{d\times S}$. We will learn a function
+$f:\RR^{d\times S}\rightarrow\RR$ that predicts region-specific
+penalty values $f(\mathbf X_i) = \log \lambda_i\in\RR$ for each
+genomic region $i$. In particular we will learn a weight vector
+$\mathbf w\in\RR^d$ in a linear function $f_{\mathbf w}(\mathbf X) =
 \mathbf w^\intercal \mathbf X \mathbf 1_S$, where $\mathbf 1_S$ is a
 vector of $S$ ones.
 
@@ -692,7 +699,7 @@ subdifferential stopping criterion of \citet{HOCKING-penalties}.
 
 \subsection{Accuracy of PeakSegJoint on benchmark data sets}
 
-We used the 7 McGill benchmark data sets of
+We used the 7 benchmark data sets of
 \citet{hocking2014visual}, which included a total of 12,826 manually
 annotated
 region labels.\footnote{\url{http://cbio.ensmp.fr/~thocking/chip-seq-chunk-db/}}
@@ -706,16 +713,16 @@ grid search).
 
 We compared the test error of \ref{PeakSegJoint} with three
 single-sample models (Figure~\ref{fig:test-error-dots}). In all 7 of
-the McGill benchmark data sets, our proposed \ref{PeakSegJoint} model
+the benchmark data sets, our proposed \ref{PeakSegJoint} model
 achieved test error rates comparable to the previous state-of-the-art
 \ref{PeakSeg} model. In contrast, the baseline hmcan.broad
 \citep{HMCan} and macs \citep{MACS} models from the bioinformatics
 literature were each only effective for a single experiment type
-(either H3K36me3 or H3K4me3, but not both).
+(either H3K36me3 or H3K4me3, but not both).  
 
 % We attempted to compare with joint peak detectors from the
 % bioinformatics literature. In particular, we considered the
-% multi-sample JAMM and PePr algorithms \citep{JAMM, PePr}. The McGill
+% multi-sample JAMM and PePr algorithms \citep{JAMM, PePr}. The 
 % benchmark data sets that we analyzed contain samples of 3 or more
 % different cell types, but these algorithms are only meant for one or
 % two cell types. Upon recommendation from the authors we attempted to
@@ -723,7 +730,7 @@ literature were each only effective for a single experiment type
 % algorithms we ran into problems. PePr stopped with an error when
 % analyzing only one sample (at least two samples is necessary). For
 % JAMM we also encountered an error. In conclusion, we found that JAMM
-% and PePr were unable to analyze the McGill benchmark data sets.
+% and PePr were unable to analyze the  benchmark data sets.
 
 \subsection{Speed of \JointHeuristic\ algorithm for PeakSegJoint}
 
@@ -731,7 +738,7 @@ literature were each only effective for a single experiment type
   \centering
   \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
   \vskip -0.5cm
-  \caption{Test error of peak detectors in the 7 McGill 
+  \caption{Test error of peak detectors in the 7  
     benchmark data sets (panels from left to right). Each dot shows
     one of 6 train/test splits, and the black vertical line marks the
     mean of the \ref{PeakSegJoint} model.}
@@ -750,20 +757,24 @@ set the maximum number of segments to 3 in the pDPA and cDPA, meaning
 one peak. Figure~\ref{fig:timings} indicates that the \JointHeuristic\
 algorithm of \ref{PeakSegJoint} enjoys the same $O(B \log B)$
 asymptotic behavior as the pDPA. However the \JointHeuristic\
-algorithm is faster than both the cDPA and pDPA by at least two orders
-of magnitude for the range of data sizes that is typical for real data
-($10^2 < B < 10^6$).
+algorithm is faster than both the pDPA and \ref{PeakSeg} cDPA by at
+least two orders of magnitude for the range of data sizes that is
+typical for real data ($10^2 < B < 10^6$).
 
 These speed differences are magnified when applying these Poisson
 segmentation models to real ChIP-seq data sets. For example, the hg19
 human genome assembly has about $3\times 10^9$ bases. For the
-H3K36me3\_AM\_immune data set, a problem size of about $B=\text{200,000}$
-bases was optimal, so running PeakSegJoint on the entire
-human genome means solving about 15,000 segmentation
+H3K36me3\_AM\_immune data set, a problem size of about
+$B=\text{200,000}$ bases was optimal, so running PeakSegJoint on the
+entire human genome means solving about 15,000 segmentation
 problems. PeakSegJoint takes about 0.1 seconds to solve each of those
 problems (Figure~\ref{fig:timings}), meaning a total computation time
-of about 25 minutes. In contrast, using the pDPA or cDPA would be
-orders of magnitude slower (hours or days of computation).
+of about 25 minutes. In contrast, using the pDPA or \ref{PeakSeg} cDPA
+would be orders of magnitude slower (hours or days of computation).
+Finally, it is difficult to perform fair speed comparisons with the
+unsupervised macs and hmcan.broad algorithms, since they can only be
+trained using grid search of their %10--20 
+hyper-parameters.
 
 \section{Discussion}
 \label{sec:discussion}
@@ -771,7 +782,7 @@ orders of magnitude slower (hours or days of computation).
 \subsection{Multi-sample PeakSegJoint versus single-sample PeakSeg}
 
 The \ref{PeakSegJoint} model is explicitly designed for supervised,
-multi-sample peak detection problems such as the McGill benchmark data
+multi-sample peak detection problems such as the benchmark data
 sets that we considered. We observed that the single-sample
 \ref{PeakSeg} model is as accurate as \ref{PeakSegJoint} in these data
 (Figure~\ref{fig:test-error-dots}). However, any single-sample model
@@ -796,7 +807,7 @@ samples. In contrast, existing methods such as JAMM or PePr are less
 suitable to analyze this data set since they are limited to modeling
 only 1 or 2 cell types. We nevertheless downloaded and ran the
 algorithms separately on each sample type, but both JAMM and PePr
-produced errors and so were unable to analyze the McGill benchmark
+produced errors and so were unable to analyze the benchmark
 data sets.
 
 \section{Conclusions}
@@ -822,7 +833,7 @@ of peaks in the \ref{PeakSegJoint} model.
   \vskip -0.5cm
   \caption{Timings of three Poisson segmentation algorithms on
     simulated data sets of varying size $B$. The grey shaded area
-    represents the range of problem sizes selected in the McGill
+    represents the range of problem sizes selected in the 
      benchmark data sets. }
   \label{fig:timings}
 \end{figure}
