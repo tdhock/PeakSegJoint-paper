@@ -171,7 +171,7 @@ detector with identical overlapping peak positions across samples (the
 The main contribution of this paper is the \ref{PeakSegJoint} model
 for supervised joint peak detection. Unlike previous methods
 (Section~\ref{sec:related}), it is the first joint peak detector that
-explicitly models any number of sample types
+explicitly models any number of samples regardless of their types
 (Section~\ref{sec:models}). A secondary contribution is the
 \JointHeuristic\ heuristic segmentation algorithm, and a supervised
 learning algorithm for efficiently selecting the \ref{PeakSegJoint}
@@ -205,18 +205,18 @@ H3K4me3 experimental data for 2 bcell samples, 1 monocyte sample, and
 1 tcell sample (different types of blood cells). As far as we know,
 there are no existing algorithms that can explicitly model these data.
 
-For these data the most applicable peak detectors in the
-bioinformatics literature model several samples of the same cell
-type. For example, the JAMM algorithm of \citet{JAMM} can analyze
-several samples, but is limited to a single cell type since it assumes
-that each sample is a replicate with the exact same peak pattern. So
-to analyze the data of Figure~\ref{fig:good-bad} one would have to run
-JAMM 3 times (once for each cell type), and the resulting peaks would
-not be the same across cell types. Another example is the PePr
-algorithm of \citet{PePr}, which can model either one or two cell
-types, but is unsuitable for analysis of three or more cell types. In
-contrast, \ref{PeakSegJoint} is for data from several samples without
-limit on the number of cell types.
+For these data the most applicable existing peak detectors model
+several samples of the same cell type, under the assumption that each
+sample is a replicate with the same peaks. For example, the JAMM
+algorithm of \citet{JAMM} can analyze several samples, but is limited
+to a single cell type. So to analyze the data of
+Figure~\ref{fig:good-bad} one would have to run JAMM 3 times (once for
+each cell type), and the resulting peaks would not be the same across
+cell types. Another example is the PePr algorithm of \citet{PePr},
+which can model either one or two cell types, but is unsuitable for
+analysis of three or more cell types. In contrast, \ref{PeakSegJoint}
+does not assume that samples are replicates with the same peaks, so
+can analyze any number of samples and cell types.
 
 Although not the subject of this paper, there are several algorithms
 designed for the analysis of data from several different ChIP-seq
@@ -242,10 +242,11 @@ detection algorithm in the benchmark data set of
 \citet{hocking2014visual}. 
 
 Given a single sample profile $\mathbf z\in\ZZ_+^B$ of aligned read
-counts on $B$ bases, the PeakSeg model for the mean vector $\mathbf
-m\in\RR^B$ is $z_j\sim \text{Poisson}(m_j)$. For a maximum number of
-peaks $p_{\text{max}}$ the constrained maximum likelihood PeakSeg
-model with $p\in\{0, \dots, p_{\text{max}}\}$ peaks is defined as
+counts on $B$ bases, the \ref{PeakSeg} model for the mean vector
+$\mathbf m\in\RR^B$ is $z_j\sim \text{Poisson}(m_j), \, \forall j\in\{1,
+\dots, B\}$. For a maximum number of peaks $p_{\text{max}}$ the
+constrained maximum likelihood \ref{PeakSeg} model with $p\in\{0,
+\dots, p_{\text{max}}\}$ peaks is 
 \begin{align}
   \label{PeakSeg}
   \mathbf{\tilde m}^p(\mathbf z)  =
@@ -483,17 +484,17 @@ the optimal number of peaks as
   \right],
 \end{equation}
 The penalty $\lambda$ controls the tradeoff between minimizing the
-Poisson loss (a decreasing function of $p$) and the model complexity
-($p$).  Also suppose that we can compute $d$-dimensional
-sample-specific feature vectors $\mathbf x\in\RR^d$ (mean, quantiles,
-etc) and stack them to obtain feature matrices $\mathbf X_1,\dots,
-\mathbf X_n\in\RR^{d\times S}$. We will learn a function
-$f:\RR^{d\times S}\rightarrow\RR$ that predicts region-specific
-penalty values $f(\mathbf X_i) = \log \lambda_i\in\RR$ for each
-genomic region $i$. In particular we will learn a weight vector
-$\mathbf w\in\RR^d$ in a linear function $f_{\mathbf w}(\mathbf X) =
-\mathbf w^\intercal \mathbf X \mathbf 1_S$, where $\mathbf 1_S$ is a
-vector of $S$ ones.
+model complexity $p$ and the \mbox{Poisson} loss (a decreasing
+function of $p$).  Also suppose that we have   $d$-dimensional
+sample-specific feature vectors $\mathbf x\in\RR^d$ (we used sample
+statistics of $\mathbf z$: mean, quantiles, etc) and stack them
+to obtain feature matrices $\mathbf X_1,\dots, \mathbf
+X_n\in\RR^{d\times S}$. We will learn a function $f:\RR^{d\times
+  S}\rightarrow\RR$ that predicts region-specific penalty values
+$f(\mathbf X_i) = \log \lambda_i\in\RR$ for each genomic region
+$i$. In particular we will learn a weight vector $\mathbf w\in\RR^d$
+in a linear function $f_{\mathbf w}(\mathbf X) = \mathbf w^\intercal
+\mathbf X \mathbf 1_S$, where $\mathbf 1_S$ is a vector of $S$ ones.
 
 For supervision we use the annotated region labels $L_i$ to compute
 the number of incorrect regions (\ref{eq:error}) for each model size
@@ -797,17 +798,17 @@ the $O(B \log B)$ \JointHeuristic\ algorithm can compute the
 We attempted to compare with the multi-sample JAMM and PePr
 algorithms, two joint peak detectors from the bioinformatics
 literature \citep{JAMM, PePr}. The \ref{PeakSegJoint} model is more
-interpretable than these existing methods, since it is able to handle
-several sample types. This was advantageous in data sets such as
-Figure~\ref{fig:good-bad}, which contains 3 cell types: tcell, bcell,
-and monocyte. The PeakSegJoint model can be run once on all cell
-types, and the resulting model can be easily interpreted to find the
-differences, since peaks occur in the exact same locations across
-samples. In contrast, existing methods such as JAMM or PePr are less
-suitable to analyze this data set since they are limited to modeling
-only 1 or 2 cell types. We nevertheless downloaded and ran the
-algorithms separately on each sample type, but both JAMM and PePr
-produced errors and so were unable to analyze the benchmark
+interpretable than these existing methods, since can model any number
+of samples regardless of their cell types. This was advantageous in
+data sets such as Figure~\ref{fig:good-bad}, which contains 3 cell
+types: tcell, bcell, and monocyte. The \ref{PeakSegJoint} model can be fit
+once on all cell types, and the resulting model can be easily
+interpreted to find the differences, since peaks occur in the exact
+same locations across samples. In contrast, existing methods such as
+JAMM or PePr are less suitable to analyze this data set since they are
+limited to modeling only 1 or 2 cell types. We nevertheless downloaded
+and ran the algorithms separately on each sample type, but both JAMM
+and PePr produced errors and so were unable to analyze the benchmark
 data sets.
 
 \section{Conclusions}
