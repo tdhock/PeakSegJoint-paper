@@ -782,10 +782,10 @@ hyper-parameters.
 
 \subsection{Multi-sample PeakSegJoint versus single-sample PeakSeg}
 
-The \ref{PeakSegJoint} model is explicitly designed for supervised,
-multi-sample peak detection problems such as the benchmark data
-sets that we considered. We observed that the single-sample
-\ref{PeakSeg} model is as accurate as \ref{PeakSegJoint} in these data
+\ref{PeakSegJoint} was designed for supervised, multi-sample peak
+detection problems such as the benchmark data sets that we
+considered. We observed that the single-sample \ref{PeakSeg} model is
+as accurate as \ref{PeakSegJoint} in these data
 (Figure~\ref{fig:test-error-dots}). However, any single-sample model
 is qualitatively inferior to a multi-sample model since it can not
 predict overlapping peaks at the exact same positions. Furthermore,
@@ -795,21 +795,19 @@ the $O(B \log B)$ \JointHeuristic\ algorithm can compute the
 
 \subsection{PeakSegJoint versus other joint peak detectors}
 
-We attempted to compare with the multi-sample JAMM and PePr
-algorithms, two joint peak detectors from the bioinformatics
-literature \citep{JAMM, PePr}. The \ref{PeakSegJoint} model is more
-interpretable than these existing methods, since can model any number
-of samples regardless of their cell types. This was advantageous in
-data sets such as Figure~\ref{fig:good-bad}, which contains 3 cell
-types: tcell, bcell, and monocyte. The \ref{PeakSegJoint} model can be fit
-once on all cell types, and the resulting model can be easily
-interpreted to find the differences, since peaks occur in the exact
-same locations across samples. In contrast, existing methods such as
-JAMM or PePr are less suitable to analyze this data set since they are
-limited to modeling only 1 or 2 cell types. We nevertheless downloaded
+\ref{PeakSegJoint} was designed for data sets with
+multiple samples from any number of cell types
+(Figure~\ref{fig:good-bad}). \ref{PeakSegJoint} can be fit once on all
+samples, and the resulting model can be easily interpreted to find the
+differences. In contrast, the multi-sample JAMM and PePr algorithms
+assume that multiple samples are replicates with the same peaks
+\citep{JAMM, PePr}. Because of this assumption, they must be run 3
+times (once for each cell type) in the data set of
+Figure~\ref{fig:good-bad}, and overlapping peaks in different cell
+types will not occur at the same positions. We nevertheless downloaded
 and ran the algorithms separately on each sample type, but both JAMM
 and PePr produced errors and so were unable to analyze the benchmark
-data sets.
+data sets. 
 
 \section{Conclusions}
 \label{sec:conclusions}
