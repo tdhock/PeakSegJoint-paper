@@ -786,12 +786,12 @@ hyper-parameters.
 detection problems such as the benchmark data sets that we
 considered. We observed that the single-sample \ref{PeakSeg} model is
 as accurate as \ref{PeakSegJoint} in these data
-(Figure~\ref{fig:test-error-dots}). However, any single-sample model
-is qualitatively inferior to a multi-sample model since it can not
-predict overlapping peaks at the exact same positions. Furthermore,
-the $O(B \log B)$ \JointHeuristic\ algorithm can compute the
-\ref{PeakSegJoint} model much faster than the $O(B^2)$ cDPA of
-\ref{PeakSeg} (Figure~\ref{fig:timings}).
+(Figure~\ref{fig:test-error-dots}). However, single-sample models can
+not guarantee overlapping peaks at the same positions across
+samples, so are qualitatively inferior to multi-sample
+models. Furthermore, the $O(B \log B)$ \JointHeuristic\ algorithm can
+compute the \ref{PeakSegJoint} model much faster than the $O(B^2)$
+cDPA of \ref{PeakSeg} (Figure~\ref{fig:timings}).
 
 \subsection{PeakSegJoint versus other joint peak detectors}
 
