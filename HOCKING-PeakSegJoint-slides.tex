@@ -5,6 +5,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage{hyperref}
 \usepackage{graphicx}
+\usepackage{algorithmic}
 
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\Lik}{Lik}
@@ -169,7 +170,8 @@ maxIter 20
 \input{figure-profiles-PeakSeg}
 
 \begin{frame}
-  \frametitle{PeakSeg single-sample model}
+  \frametitle{PeakSeg: most likely $0, \dots, p_{\text{max}}$ peaks in
+    a single sample}
 
   \begin{itemize}
     \item Count data $\mathbf Z = \left[
@@ -206,16 +208,101 @@ maxIter 20
 \input{figure-profiles}
 
 \begin{frame}
-  \frametitle{PeakSegJoint multi-sample model}
+  \frametitle{PeakSegJoint: best common peak in $0, \dots, S$
+    samples}
+
+  \begin{itemize}
+  \item $\mathbf Z = \left[
+    \begin{array}{ccc}
+      \mathbf z_1 & \dots & \mathbf z_S
+    \end{array}
+  \right]\in\ZZ_+^{B\times S}$ for $B$ bases and $S$ samples.
+  \item For $p\in\{0,\dots, S\}$ samples each with 1 common peak,
+    compute the mean matrix
+  \end{itemize}
+\vskip -0.5cm
+\begin{align}
+  \nonumber \mathbf{\hat M}^p(\mathbf Z)  =
+  \argmin_{\mathbf M\in\RR^{B\times S}} &\ \ 
+  \sum_{s=1}^S 
+  \text{PoissonLoss}(\mathbf m_s, \mathbf z_s) 
+  \\
+  \text{up, down, up, down:}&\ \nonumber
+  \forall s\in\{1, \dots, S\},\,
+  \forall j\in\{2, \dots, B\},\\
+  &\ P_j(\mathbf m_s) \in\{0, 1\},
+  \\
+  \text{peaks per sample:} &\ 
+  \forall s\in\{1, \dots, S\},\, 
+  \Peaks(\mathbf m_s)\in\{0, 1\},  
+  \\
+  \text{total peaks:}&\ 
+  p = \sum_{s=1}^S \Peaks(\mathbf m_s),
+  \\
+  \text{same starts/ends:} \nonumber &\ \forall s_1\neq s_2\mid
+  \Peaks(\mathbf m_{s_1})=\Peaks(\mathbf  m_{s_2})=1,\, \\
+   &\ \forall j\in\{1, \dots, B\},\,
+  P_j(\mathbf m_{s_1}) = P_j(\mathbf m_{s_2}).
+\end{align}
+
+Hocking and Bourque, arXiv:1506.01286.
   
 \end{frame}
 
 \begin{frame}
-  \frametitle{Demonstration of heuristic algorithm}
+  \frametitle{Demonstration of approximate JointZoom algorithm}
 
   \includegraphics[width=\textwidth]{figure-heuristic-algo}
 
   Interactive figure at \url{http://bit.ly/1AA6TgK}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example runs of approximate JointZoom algorithm}
+Previous slide: small data with $B=24$ bases.
+\begin{itemize}
+\item Zoom in to a bin size of 4 bases.
+\item That gives $b=7$ bins.
+\item Consider all peak starts/ends = $O(b^2)=15$ models.
+\item Consider 16 models each at bin sizes 2 and 1.
+\end{itemize}
+Real data: $B=85846$ bases.
+\begin{itemize}
+\item Zoom in to a bin size of 16384 bases.
+\item That gives $b=6$ bins.
+\item Consider all peak starts/ends = $O(b^2)=10$ models.
+\item Consider 16 models each at bin sizes 8192, 4096, ..., 4, 2, 1.
+\end{itemize}
+  Zoom factor parameter fixed at $\beta=2$.
+\end{frame}
+\begin{frame}
+  \frametitle{Time complexity of approximate JointZoom algorithm}
+
+\begin{algorithmic}[1]
+  \REQUIRE count data $\mathbf Z\in\ZZ_+^{B\times S}$, zoom factor
+  $\beta\in\{2, 3, \dots\}$, number of samples with 1
+  peak $p\in\{0, \dots, S\}$.
+  \STATE $\textrm{BinSize} \gets \textsc{MaxBinSize}(B, \beta)$. 
+  \STATE $\textrm{Peak}, \textrm{Samples} \gets \label{gridsearch}
+  \textsc{GridSearch}(\mathbf Z, p, \textrm{BinSize})$.
+  \WHILE{$1 < \textrm{BinSize}$}
+  \STATE $\textrm{BinSize} \gets \textrm{BinSize} / \beta$. 
+  \STATE $\textrm{Peak} \gets
+  \textsc{SearchNearPeak}(\mathbf Z, \textrm{Samples}, \label{searchnear}
+  \textrm{BinSize}, \textrm{Peak})$
+  \ENDWHILE
+  \RETURN \textrm{Peak}, \textrm{Samples}.
+\end{algorithmic}
+
+\begin{itemize}
+\item \textsc{GridSearch} checks $O(1)$ models.
+\item Each \textsc{SearchNearPeak} checks $O(\beta^2)$ models.
+\item While loop executed $O(\log B)$ times.
+\item Computing feasibility and maximum likelihood is $O(pB)$.
+\item Time for one model: $O(\beta^2 pB\log B)$.
+\item Time for $S+1$ models: $O(\beta^2 S B\log B)$.
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}
