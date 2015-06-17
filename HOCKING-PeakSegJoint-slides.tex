@@ -198,7 +198,7 @@ maxIter 20
   \item Peak indicator: $P_j(\mathbf m) = \sum_{k=2}^j \sign( m_{k} - m_{k-1} )$.
   \item Hyper-parameters to choose: genomic window size $B$, maximum
     number of peaks $p_{\text{max}}$.
-  \item $O(p_{\text{max}} B \log B)$ Constrained Dynamic Programming
+  \item $O(p_{\text{max}} B^2)$ Constrained Dynamic Programming
     Algorithm (cDPA), Hocking et al, ICML 2015.
   \end{itemize}
 \end{frame}
