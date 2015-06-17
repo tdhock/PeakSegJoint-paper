@@ -1,5 +1,5 @@
 works_with_R("3.2.0",
-             "tdhock/PeakSegJoint@86bee0a4620160e2d4b904e7819b5792280d51de",
+             "tdhock/PeakSegJoint@191489bb2c754da8abe1396f9812490ef7b11eed",
              data.table="1.9.4",
              tikzDevice="0.7.0",
              ggplot2="1.0")
@@ -22,11 +22,16 @@ label.df <-
   data.frame(data="seconds",
              algorithm=c("cDPA PeakSeg", "pDPA", "JointZoom PeakSegJoint"),
              complexity=c("$O(B^2)$", "$O(B\\log B)$", "$O(B\\log B)$"),
-             n.data=c(8000, 8000, 5e3),
-             seconds=c(last("cDPA"), last("pDPA"), 5e-4))
+             n.data=c(8000, 8000, 500),
+             seconds=c(last("cDPA"), last("pDPA"), 1e-4))
 
 timings$problems[, bases := problemEnd-problemStart]
 problem.range <- timings$problems[, .(min=min(bases), max=max(bases))]
+
+labfun <- function(val){
+  paste(val)
+}
+labfun <- scales::scientific
 
 gg <- 
 ggplot()+
@@ -34,16 +39,16 @@ ggplot()+
                 data=problem.range,
                 fill="black",
                 alpha=0.1)+
-  scale_x_log10("data size to segment $B$")+
-  scale_y_log10("seconds")+
-  geom_point(aes(n.data, time/1e9, color=expr),
+  scale_x_log10("data size to segment $B$", labels=labfun)+
+  scale_y_log10("seconds", limits=c(5e-5, 2e1),labels=labfun)+
+  geom_point(aes(n.data, time/1e9, color=algorithm),
              pch=1,
              data=data.frame(timings$seconds, data="seconds"))+
   scale_size_manual(values=c("JointZoom PeakSegJoint"=2,
                       "cDPA PeakSeg"=2, pDPA=1))+
   theme_bw()+
   guides(size="none", color="none")+
-  geom_text(aes(n.data, seconds, label=paste(algorithm, complexity, sep="\n"),
+  geom_text(aes(n.data, seconds, label=paste(algorithm, complexity),
                 color=algorithm),
             show_guide=FALSE,
             size=3,
@@ -58,6 +63,14 @@ options(tikzMetricsDictionary="tikzMetrics",
 tikz("figure-timings-small.tex", h=2, w=4)
 print(gg)
 dev.off()
+
+
+label.df <-
+  data.frame(data="seconds",
+             algorithm=c("cDPA PeakSeg", "pDPA", "JointZoom PeakSegJoint"),
+             complexity=c("$O(B^2)$", "$O(B\\log B)$", "$O(B\\log B)$"),
+             n.data=c(8000, 8000, 5e3),
+             seconds=c(last("cDPA"), last("pDPA"), 5e-4))
 
 gg <- 
 ggplot()+
