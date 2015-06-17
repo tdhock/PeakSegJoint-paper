@@ -4,11 +4,16 @@ works_with_R("3.2.0",
              data.table="1.9.5",
              ggplot2="1.0",
              dplyr="0.4.0",
-             "tdhock/PeakSegDP@fe06a5b91d68c5d1ec471cb15c3ec3935dc2624d",
-             "tdhock/PeakSegJoint@2a20461096bf2f8b43c45a91999de3637cf6dce9",
+             "tdhock/PeakSegDP@6520faad59fcf8c94ed4345d2b0d826b7f61faf9",
+             "tdhock/PeakSegJoint@0390d43851e5427d3b2b45cb5a2b80b8007db67a",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732")
 
 data(H3K36me3.TDH.other.chunk1)
+
+all.regions <- H3K36me3.TDH.other.chunk1$regions
+to.rep <- all.regions$chromEnd==43223588
+all.regions$chromStart[to.rep] <- 43205000
+all.regions$chromEnd[to.rep] <- 43260000
 
 ann.colors <-
   c(noPeaks="#f6f4bf",
@@ -17,8 +22,7 @@ ann.colors <-
     peaks="#a445ee")
 
 profile.list <- with(H3K36me3.TDH.other.chunk1, split(counts, counts$sample.id))
-region.list <-
-  with(H3K36me3.TDH.other.chunk1, split(regions, regions$sample.id))
+region.list <- split(all.regions, all.regions$sample.id)
 ## Comment for() loop below to ignore extra peakEnd annotation.
 ## for(sample.id in names(region.list)){
 ##   df <- region.list[[sample.id]]
@@ -29,7 +33,6 @@ region.list <-
 ##   r$annotation <- "peakEnd"
 ##   region.list[[sample.id]] <- rbind(df, r)
 ## }
-all.regions <- do.call(rbind, region.list)
 
 chrom.range <- with(H3K36me3.TDH.other.chunk1$counts, {
   c(min(chromStart), max(chromEnd))
@@ -443,8 +446,8 @@ ggplot()+
                 alpha=0.5,
                 color="grey",
                 data=all.regions)+
-  scale_color_manual(values=c(PeakSeg="deepskyblue",
-                       PeakSegJoint="black"),
+  scale_color_manual(values=c(PeakSeg="black",
+                       PeakSegJoint="deepskyblue"),
                      limits=c("PeakSegJoint", "PeakSeg"))+
   geom_segment(aes(chromStart/1e3, y,
                    color=model,
@@ -490,7 +493,7 @@ ggplot()+
 problemsPlot+
   coord_cartesian(xlim=c(43214142, 43223588)/1e3)
 
-png("figure-H3K36me3-profiles.png", width=9, h=7, res=200, units="in")
+png("figure-H3K36me3-profiles.png", width=9, h=6, res=200, units="in")
 print(problemsPlot)
 dev.off()
 

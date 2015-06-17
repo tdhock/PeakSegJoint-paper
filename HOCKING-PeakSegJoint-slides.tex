@@ -164,9 +164,51 @@ maxIter 20
   negatives).
 \end{frame}
 
-\section{The PeakSegJoint model}
+\section{The PeakSeg and PeakSegJoint models} 
+
+\input{figure-profiles-PeakSeg}
+
+\begin{frame}
+  \frametitle{PeakSeg single-sample model}
+
+  \begin{itemize}
+    \item Count data $\mathbf Z = \left[
+    \begin{array}{ccc}
+      \mathbf z_1 & \dots & \mathbf z_S
+    \end{array}
+    \right]\in\ZZ_+^{B\times S}$ for $S$ samples and $B$ bases.
+  \item For $p\in\{0, \dots, p_{\text{max}}\}$ peaks, and for each
+    sample $\mathbf z\in\ZZ_+^B$, compute the piecewise constant mean
+    vector:
+  \end{itemize}
+  \begin{align*}
+    \mathbf{\tilde m}^p(\mathbf z)  =
+    \argmin_{\mathbf m\in\RR^{B}} &\ \ 
+    \text{PoissonLoss}(\mathbf m, \mathbf z) 
+    \\
+    \text{such that} &\ \ 
+    \Peaks(\mathbf m)=p,  \\
+    &\ \  \alert<1>{\forall j\in\{2, \dots, B\},} 
+    \ \ \alert<1>{P_j(\mathbf m) \in\{0, 1\}.}\\
+    &\ \  \alert<1>{\text{up, down, up, down constraint.}}\\
+    %\forall j\in\{1, \dots, B\}, &\ \ P_j(\mathbf m) \in\{0, 1\},
+  \end{align*}
+  \vskip -1cm
+  \begin{itemize}
+  \item Peak indicator: $P_j(\mathbf m) = \sum_{k=2}^j \sign( m_{k} - m_{k-1} )$.
+  \item Hyper-parameters to choose: genomic window size $B$, maximum
+    number of peaks $p_{\text{max}}$.
+  \item $O(p_{\text{max}} B \log B)$ Constrained Dynamic Programming
+    Algorithm (cDPA), Hocking et al, ICML 2015.
+  \end{itemize}
+\end{frame}
 
 \input{figure-profiles}
+
+\begin{frame}
+  \frametitle{PeakSegJoint multi-sample model}
+  
+\end{frame}
 
 \begin{frame}
   \frametitle{Demonstration of heuristic algorithm}
@@ -175,6 +217,16 @@ maxIter 20
 
   Interactive figure at \url{http://bit.ly/1AA6TgK}
 \end{frame}
+
+\begin{frame}
+  \frametitle{H3K36me3 data, PeakSeg and Joint model}
+
+  \includegraphics[width=1.1\textwidth]{figure-H3K36me3-profiles}
+
+  \url{http://bl.ocks.org/tdhock/raw/b77c1a7e4d6aee40bf6c/}
+\end{frame}
+
+\section{Speed and test error results}
 
 \begin{frame}
   \frametitle{PeakSegJoint much faster than other Poisson
@@ -188,12 +240,6 @@ maxIter 20
 
   cDPA from PeakSegDP R package (Hocking et al, ICML 2015).
 
-\end{frame}
-
-\begin{frame}
-  \frametitle{H3K36me3 data, PeakSeg and Joint model}
-
-  \includegraphics[width=\textwidth]{figure-H3K36me3-profiles}
 \end{frame}
 
 \begin{frame}
