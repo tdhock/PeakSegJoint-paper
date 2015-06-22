@@ -215,8 +215,8 @@ for(peaks.str in names(dp.model)){
                  size=1)
   if(0 < peaks){
     gg <- gg+
-    geom_segment(aes(chromStart/1e3, -1,
-                     xend=chromEnd/1e3, yend=-1),
+    geom_segment(aes(chromStart/1e3, 0,
+                     xend=chromEnd/1e3, yend=0),
                  data=one.sample.peaks,
                  size=2,
                  color="deepskyblue")

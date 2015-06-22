@@ -201,7 +201,7 @@ maxIter 20
   \item Hyper-parameters to choose: genomic window size $B$, maximum
     number of peaks $p_{\text{max}}$.
   \item $O(p_{\text{max}} B^2)$ Constrained Dynamic Programming
-    Algorithm (cDPA), Hocking et al, ICML 2015.
+    Algorithm (cDPA), Hocking, Rigaill, Bourque, ICML 2015.
   \end{itemize}
 \end{frame}
 
@@ -249,6 +249,31 @@ Hocking and Bourque, arXiv:1506.01286.
   
 \end{frame}
 
+\section{Fast JointZoom algorithm for approximately solving
+  PeakSegJoint}
+
+\begin{frame}
+  \frametitle{Comparison of algorithms for Poisson segmentation}
+
+  For $B$ data points to segment,
+
+  \vskip 1cm
+  
+  \begin{tabular}{ccccc}
+    Model & Reference & Algorithm & Time & Exact?\\
+    \hline
+    Unconstrained & Rigaill  & pDPA & $O(B \log B)$ & Yes. \\
+    (no peaks) & arXiv 2010\\
+    \hline
+    PeakSeg & H et al. & cDPA & $O(B^2)$ & No.\\
+    & ICML 2015 \\
+    \hline
+    PeakSegJoint & H et al. & JointZoom & $O(B\log B)$ & No.\\
+    & arXiv 2015
+  \end{tabular}
+  
+\end{frame}
+
 \begin{frame}
   \frametitle{Demonstration of approximate JointZoom algorithm}
 
@@ -261,14 +286,14 @@ Hocking and Bourque, arXiv:1506.01286.
   \frametitle{Example runs of approximate JointZoom algorithm}
 Previous slide: small data with $B=24$ bases.
 \begin{itemize}
-\item Zoom in to a bin size of 4 bases.
+\item \textbf{Zoom out} to a bin size of 4 bases.
 \item That gives $b=7$ bins.
 \item Consider all peak starts/ends = $O(b^2)=15$ models.
-\item Consider 16 models each at bin sizes 2 and 1.
+\item \textbf{Zoom in} and consider 16 models each at bin sizes 2 and 1.
 \end{itemize}
 Real data: $B=85846$ bases.
 \begin{itemize}
-\item Zoom in to a bin size of 16384 bases.
+\item Zoom out to a bin size of 16384 bases.
 \item That gives $b=6$ bins.
 \item Consider all peak starts/ends = $O(b^2)=10$ models.
 \item Consider 16 models each at bin sizes 8192, 4096, ..., 4, 2, 1.
@@ -306,16 +331,6 @@ Real data: $B=85846$ bases.
 \end{frame}
 
 \begin{frame}
-  \frametitle{H3K36me3 data, PeakSeg and Joint model}
-
-  \includegraphics[width=1.1\textwidth]{figure-H3K36me3-profiles}
-
-  \url{http://bl.ocks.org/tdhock/raw/b77c1a7e4d6aee40bf6c/}
-\end{frame}
-
-\section{Speed and test error results}
-
-\begin{frame}
   \frametitle{PeakSegJoint much faster than other Poisson
     segmentation algorithms}
 
@@ -327,6 +342,16 @@ Real data: $B=85846$ bases.
 
   cDPA from PeakSegDP R package (Hocking et al, ICML 2015).
 
+\end{frame}
+
+\section{Speed and test error on benchmark data sets}
+
+\begin{frame}
+  \frametitle{H3K36me3 data, PeakSeg and Joint model}
+
+  \includegraphics[width=1.1\textwidth]{figure-H3K36me3-profiles}
+
+  \url{http://bl.ocks.org/tdhock/raw/b77c1a7e4d6aee40bf6c/}
 \end{frame}
 
 \begin{frame}
@@ -354,11 +379,153 @@ Real data: $B=85846$ bases.
 
 \end{frame}
 
+\begin{frame}
+  \frametitle{Accuracy benchmark: 7 manually labeled data sets}
+  \url{http://cbio.ensmp.fr/~thocking/chip-seq-chunk-db/}
+  \begin{itemize}
+  \item 4 annotators (AM, TDH, PGP, XJ).
+  \item 8 cell types.
+  \item 37 annotated H3K4me3 profiles (sharp peak pattern).
+  \item 29 annotated H3K36me3 profiles (broad peak pattern).
+  \item 12,826 annotated regions in total.
+  \item 2752 separate segmentation problems.
+  \end{itemize}
+  Goal for each data set: divide labels into half train, half test,\\
+  then find a peak caller $c:\ZZ_+^{B\times S} \rightarrow
+  \{0,1\}^{B\times S}$
+  \begin{equation*}
+    \minimize_c \sum_{i\in\text{test}} E[c(\mathbf Z_i),  L_i],
+  \end{equation*}
+  where $E$ is the number of incorrect labels\\(false positives + false
+  negatives).
+\end{frame}
+
+\begin{frame}
+  \frametitle{Learned penalty functions for PeakSeg model}
+
+Predicted number of segments for profile:
+
+\begin{equation*}
+  \hat s_i = 
+  \argmin_{s\in\{1,3,\dots, s_{\text{max}}=19\}}
+  \text{PoissonLoss}\left[
+    \mathbf{\tilde m}^s(\mathbf z_i),
+    \mathbf z_i
+  \right]
+  + 
+  \overbrace{
+    \underbrace{\alert<1>{h(s, B_i)}}_{\text{given}}
+    \underbrace{\alert<2>{\lambda_i}}_{\text{learned}}
+  }^{\text{penalty}},
+\end{equation*}
+
+  Names: (model complexity).(number of parameters learned):
+
+  \begin{center}
+  \begin{tabular}{ll}
+    \textbf{name} & \textbf{model complexity} \alert<1>{$h(s, B_i)$} (not learned) \\
+    \hline
+    AIC/BIC.* & \alert<1>{$s$}\\
+    oracle.* & \alert<1>{$s\left(1 + 4\sqrt{1.1 + \log(B_i/s)}\right)^2$}
+  \end{tabular}
+\end{center}
+
+  \begin{center}
+  \begin{tabular}{lllll}
+    \textbf{name} & \textbf{learned} \alert<2>{$\lambda_i = \exp f(\mathbf x_i)$} & 
+    \textbf{parameters} & \textbf{learning algorithm} \\
+    \hline
+    *.0 & AIC=\alert<2>{2}, BIC=\alert<2>{$\log B_i$} & none & unsupervised \\
+    *.1 & 
+    \alert<2>{$\beta$} & 
+    $\beta\in\RR_+$ & grid search \\
+    *.3 & 
+    \alert<2>{$e^\beta B_i^{w_1} (\max \mathbf z_i)^{w_{2}}$} & 
+    $\beta, w_1, w_{2}\in\RR$ & interval regression \\
+    *.41 & 
+    \alert<2>{$\exp(\beta + \mathbf w^\intercal \mathbf x_i)$} & 
+    $\beta\in\RR, \mathbf w\in\RR^{40}$ & 
+    interval regression \\
+  \end{tabular}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Unsupervised constrained optimization algorithm works
+    for both H3K36me3 and H3K4me3 data types}
+
+  ...except in the H3K4me3\_XJ\_immune data set.
+
+  \includegraphics[width=\textwidth]{../PeakSeg-paper/figure-dp-peaks-regression-dots-unsupervised}
+  
+  Six train/test splits (open circles) and mean (shaded circle).
+\end{frame}
+
+\begin{frame}
+  \frametitle{Training 1 parameter with grid search reduces test error}
+
+  ...except for macs, good defaults for 3/4 H3K4me3 data sets.
+
+  \includegraphics[width=\textwidth]{../PeakSeg-paper/figure-dp-peaks-regression-dots-grid}
+
+  Six train/test splits (open circles) and mean (shaded circle).
+\end{frame}
+
+\begin{frame}
+  \frametitle{Training several parameters with interval regression 
+    further reduces test error}
+
+  ...except when there are few train data (H3K36me3\_TDH).
+
+  \includegraphics[width=\textwidth]{../PeakSeg-paper/figure-dp-peaks-regression-dots}
+
+  Six train/test splits (open circles) and mean (shaded circle).
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{PeakSegJoint error comparable to PeakSeg}
+
+  \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
+
+  Six train/test splits (open circles) and mean (shaded circle).
+\end{frame}
+
 \section{Conclusions}
+
+\begin{frame}
+  \frametitle{Conclusions and future work}
+  PeakSeg: \textbf{Peak} detection via constrained optimal
+  \textbf{Seg}mentation.\\
+  PeakSegJoint: identical overlapping peaks in multiple samples.
+  \begin{itemize}
+  \item First supervised peak detectors (input=visual peak labels).
+  \item State-of-the-art peak detection for both sharp H3K4me3 and
+    broad H3K36me3 profiles.
+  \item Oracle model complexity more accurate than AIC/BIC.
+  \end{itemize}
+  Future work:
+  \begin{itemize}
+  \item Constrained version of Pruned Dynamic Programming (Rigaill
+    arXiv:1004.0887) to compute PeakSeg in $O(B\log B)$ time.
+  \item Efficient algorithms for provably computing
+    PeakSeg/PeakSegJoint models?
+  \item Oracle model complexity for PeakSegJoint \`a la
+    Cleynen+Lebarbier?  (2014)
+  \item Relaxing the PeakSegJoint 1 peak per sample constraint.
+  \end{itemize}
+\end{frame}
 
 \begin{frame}
   \frametitle{Thanks for your attention!}
   Write me at \alert{\texttt{toby.hocking@mail.mcgill.ca}} to collaborate!
+
+  \vskip 1cm
+
+  R packages:\\
+  \url{https://github.com/tdhock/PeakSegDP}\\
+  \url{https://github.com/tdhock/PeakSegJoint}
 
   \vskip 1cm
 
