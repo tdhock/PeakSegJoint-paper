@@ -1,4 +1,4 @@
 PeakSegJoint paper and slides
 
-Paper and [[file:HOCKING-PeakSegJoint-slides.pdf][slides]] to explain the PeakSegJoint model for supervised
+[[http://arxiv.org/abs/1506.01286][Paper]] and [[file:HOCKING-PeakSegJoint-slides.pdf][slides]] to explain the PeakSegJoint model for supervised
 joint peak detection in several ChIP-seq samples.
