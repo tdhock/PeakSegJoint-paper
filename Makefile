@@ -7,7 +7,9 @@ HOCKING-PeakSegJoint-paper.pdf: HOCKING-PeakSegJoint-paper.tex figure-PeakSegJoi
 HOCKING-PeakSegJoint-slides.pdf: HOCKING-PeakSegJoint-slides.tex figure-profiles.tex table-H3K36me3.tex table-H3K4me3.tex figure-bin-factor.pdf table-nrsf.tex table-H3K27ac.tex figure-heuristic-loss.pdf figure-weighted-error.pdf figure-lasso-path.pdf figure-scatter-cheating-step1.pdf figure-timings.tex
 	rm -f *.aux *.bbl
 	pdflatex HOCKING-PeakSegJoint-slides
-figure-consistency.pdf: figure-consistency.R
+PeakConsistency.RData: PeakConsistency.R
+	R --no-save < $<
+figure-consistency.pdf: figure-consistency.R PeakConsistency.RData
 	R --no-save < $<
 figure-profiles.tex: figure-profiles.R
 	R --no-save < $<
