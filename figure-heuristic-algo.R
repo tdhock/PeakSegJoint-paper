@@ -1,6 +1,6 @@
-works_with_R("3.2.0",
-             ggplot2="1.0",
-             "tdhock/animint@a0677f2062b455da97138b43ede1f158e4bd36ae",
+works_with_R("3.2.2",
+             ggplot2="1.0.1",
+             "tdhock/animint@61b8aed14e64a95fdbe9dfcd44c80254858305fd",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
              "tdhock/PeakSegJoint@86bee0a4620160e2d4b904e7819b5792280d51de")
 
@@ -649,43 +649,92 @@ viz.breaks <-
          min(chromStart) < chromStart &
          sample.id == sample.id[1], select=-sample.id)
 
+loss.show$feasible.fac <- ifelse(loss.show$feasible, "feasible", "infeasible")
+search.df$feasible.fac <- ifelse(search.df$feasible, "feasible", "infeasible")
+best.df$feasible.fac <- "feasible"
+loss.show.ord$feasible.fac <- "feasible"
+
+getRect <- function(peakStart, peakEnd, total.loss, res, y, feasible.fac){
+  data.frame(peakStart, peakEnd, total.loss,
+             sample.id=factor(res, levels(search.df$sample.id)),
+             y, feasible.fac)
+}
+not.unique.models <- rbind(with(loss.show, {
+  getRect(chromStart, chromEnd, total.loss, 4, model.i, feasible.fac)
+}), with(search.df, {
+  getRect(left.chromStart, right.chromEnd, total.loss, bases.per.bin.zoom, y*16,
+          feasible.fac)
+}))
+not.unique.models$peak <-
+  with(not.unique.models, makePeak(peakStart, peakEnd))
+u.cols <- ! (names(not.unique.models) %in% c("sample.id", "y"))
+unique.models <- unique(not.unique.models[u.cols])
+only.feasible <- subset(not.unique.models, feasible.fac=="feasible")
+by.res <- split(only.feasible, only.feasible$sample.id)
+selected.text <- do.call(rbind, lapply(by.res, function(df){
+  subset(df, total.loss==min(total.loss))
+}))
+
+rect.h <- 0.4
 viz <-
   list(panels=ggplot()+
          scale_x_continuous("data to segment (base position along chromosome)",
                             breaks=1:24)+
-         scale_color_continuous("Poisson loss")+
          scale_y_continuous("", breaks=NULL)+
          geom_point(aes(chromEnd, count),
                     data=data.frame(sub.norm.df, what="data"),
                     color="black")+
-         geom_segment(aes(chromStart+0.5, model.i,
-                          clickSelects=peak,
-                          xend=chromEnd+0.5, yend=model.i,
-                          linetype=ifelse(feasible, "feasible", "infeasible"),
-                          color=total.loss),
-                      size=4,
-                      data=loss.show)+
-         geom_segment(aes(left.chromStart+0.5, y,
-                          clickSelects=peak,
+         geom_segment(aes(x=peakStart+0.5, xend=peakEnd+0.5,
+                          y=y, yend=y,
+                          linetype=feasible.fac,
                           color=total.loss,
-                          linetype=ifelse(feasible, "feasible", "infeasible"),
-                          xend=right.chromEnd+0.5, yend=y),
-                      data=search.df,
-                      size=4)+
+                          clickSelects=peak,
+                          fill=total.loss),
+                      size=6,
+                   data=not.unique.models)+
          scale_linetype_discrete("feasible?")+
+         scale_color_continuous("Poisson loss")+
+         ## geom_segment(aes(chromStart+0.5, model.i,
+         ##                  clickSelects=peak,
+         ##                  xend=chromEnd+0.5, yend=model.i,
+         ##                  linetype=feasible.fac,
+         ##                  color=total.loss),
+         ##              size=4,
+         ##              data=loss.show)+
+         ## geom_segment(aes(left.chromStart+0.5, y,
+         ##                  clickSelects=peak,
+         ##                  color=total.loss,
+         ##                  linetype=feasible.fac,
+         ##                  xend=right.chromEnd+0.5, yend=y),
+         ##              data=search.df,
+         ##              size=4)+
+         ## scale_fill_continuous("Poisson loss")+
+         ## geom_rect(aes(xmin=peakStart+0.5, xmax=peakEnd+0.5,
+         ##               ymin=y-rect.h, ymax=y+rect.h,
+         ##               clickSelects=peak,
+         ##               fill=total.loss),
+         ##           data=not.unique.models)+
          ##guides(linetype=guide_legend(order=2))+
-         geom_text(aes(right.chromEnd+0.5, y-0.05,
+         ## geom_text(aes(right.chromEnd+0.5, y-0.05,
+         ##               showSelected=feasible.fac,
+         ##               clickSelects=peak,
+         ##               label=" selected"),
+         ##           data=best.df,
+         ##           ##size=3,
+         ##           hjust=0)+
+         ## geom_text(aes(chromStart+0.5, model.i-0.5,
+         ##               clickSelects=peak,
+         ##               showSelected=feasible.fac,
+         ##               label="selected "),
+         ##           data=loss.show.ord,
+         ##           ##size=3,
+         ##           hjust=1)+
+         geom_text(aes(ifelse(sample.id=="4", peakStart, peakEnd)+0.5, y-0.5,
                        clickSelects=peak,
-                       label=" selected"),
-                   data=best.df,
-                   ##size=3,
-                   hjust=0)+
-         geom_text(aes(chromStart+0.5, model.i-0.5,
-                       clickSelects=peak,
-                       label="selected "),
-                   data=loss.show.ord,
-                   ##size=3,
-                   hjust=1)+
+                       showSelected=feasible.fac,
+                       hjust=ifelse(sample.id=="4", 1, 0),
+                       label=" selected "),
+                   data=selected.text)+
          theme_bw()+
          theme(panel.margin=grid::unit(0, "cm"))+
          facet_grid(sample.id ~ ., labeller=function(var, val){
@@ -701,14 +750,28 @@ viz <-
                     data=viz.breaks,
                     color="green",
                     linetype="dotted")+
-         ggtitle("click blue models to select peak start/end")+
+         ggtitle("Click blue models to select peak start/end")+
          theme_animint(width=1000, height=600),
-
+       matrix=ggplot()+
+         ggtitle("Matrix of all starts/ends considered")+
+         ##theme_animint(width=1000, height=400)+
+         scale_fill_continuous("Poisson loss")+
+         geom_rect(aes(xmin=peakStart-0.5, xmax=peakStart+0.5,
+                       ymin=peakEnd-0.5, ymax=peakEnd+0.5,
+                       clickSelects=peak,
+                       showSelected=feasible.fac,
+                       fill=total.loss),
+                   data=unique.models)+
+         coord_equal()+
+        geom_point(aes(peakStart, peakEnd),
+                   color="white",
+                   data=subset(unique.models, feasible.fac=="infeasible")),
        duration=list(peak=500),
-
        first=list(peak=subset(best.df, sample.id==1)$peak),
-
        title="PeakSegJoint fast heuristic segmentation algorithm")
+
+viz$matrix
+viz$panels
 
 animint2dir(viz, "figure-heuristic-algo")
 
