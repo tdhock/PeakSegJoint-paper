@@ -1,9 +1,9 @@
 ## -*- compile-command: "make HOCKING-PeakSegJoint-slides.pdf" -*-
-works_with_R("3.2.0",
-             ggplot2="1.0",
+works_with_R("3.2.2",
+             ggplot2="1.0.1",
              "tdhock/PeakError@d9196abd9ba51ad1b8f165d49870039593b94732",
              "tdhock/PeakSegDP@6520faad59fcf8c94ed4345d2b0d826b7f61faf9",
-             "tdhock/PeakSegJoint@0390d43851e5427d3b2b45cb5a2b80b8007db67a")
+             "tdhock/PeakSegJoint@76e773f8ae91378e60acf1d99902884d2c1d1d78")
 
 data(H3K36me3.TDH.other.chunk1)
 
@@ -61,7 +61,13 @@ zoom.peak.list <-
 zoom.seg.list <- with(converted, split(segments, segments$peaks))
 
 sample.order.list <- sapply(zoom.peak.list, function(df)paste(df$sample.id))
-sample.order <- unique(unlist(sample.order.list))
+sample.order <-
+  unique(unlist(sample.order.list))
+sample.order <- c(
+  "McGill0023",  "McGill0022", 
+  "McGill0013",  "McGill0037", 
+  "McGill0036",  "McGill0016", 
+  "McGill0012",  "McGill0019")
 sort.samples <- function(df){
   df$sample.id <- factor(df$sample.id, sample.order)
   df

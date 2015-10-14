@@ -71,13 +71,12 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Existing peak detection algorithms}
+  \frametitle{Previous work in genomic peak detection}
   \begin{itemize}
   \item Model-based analysis of ChIP-Seq (MACS), Zhang et al, 2008.
-  \item SICER, Zang et al, 2009.
-  \item HOMER findPeaks, Heinz et al, 2010.
-  \item RSEG, Song and Smith, 2011.
   \item Histone modifications in cancer (HMCan), Ashoor et al, 2013.
+  \item Joint Analysis Mixture Model (JAMM), Ibrahim et al, 2014.
+  \item Peak-calling prioritization (PePr), Zhang et al, 2014.
   \item ... dozens of others.
   \end{itemize}
   Two big questions: how to choose the best...
@@ -85,6 +84,31 @@
   \item ...algorithm?
   \item ...parameters?
   \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Previous work in joint peak detection}
+  Assumption: samples are replicates.\\
+  (peaks occur in same locations in each sample)
+
+  \vskip 0.2cm
+
+  \parbox[t]{0.45\linewidth}{
+    \centering 
+    JAMM (Ibrahim et al, 2014)
+    \includegraphics[width=0.9\linewidth]{JAMM-cropped}
+  }
+  \hskip 0.1\linewidth
+  \parbox[t]{0.4\linewidth}{
+    \centering
+    PePr (Zhang et al, 2014)
+    \includegraphics[width=\linewidth]{PePr-cropped}
+  }
+
+  \vskip 0.2cm
+
+  Problem: how to jointly analyze non-replicate samples?\\
+  (samples may or may not have each peak)
 \end{frame}
 
 \begin{frame}[fragile]
@@ -131,6 +155,7 @@ maxIter 20
     246 papers & 873 citations & Hocking et al, 2014. \\
      &
   \end{tabular}
+  Demo: \url{http://bioviz.rocq.inria.fr}\\
   Sources: \url{http://en.wikipedia.org/wiki/Face_detection}\\
   Jones et al PNAS 2009. Scoring diverse cellular morphologies in
   image-based screens with iterative feedback and machine learning.
@@ -149,21 +174,53 @@ maxIter 20
 \end{frame}
 
 \begin{frame}
+  \frametitle{Two annotators provide consistent labels, but different
+    precision}
+  \includegraphics[width=1.1\textwidth]{screenshot-several-annotators}
+
+  \begin{itemize}
+  \item TDH peakStart/peakEnd more precise than AM peaks.
+  \item AM noPeaks more precise than TDH no label.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Labels are like controls or test cases}
+  \begin{description}
+  \item[Controlled experiments] only trust experiments in
+    which negative controls have no band, and positive controls have a
+    band. Photo: Doyon et al, Nature Biotech 2008.
+
+    \includegraphics[width=0.5\textwidth]{SuppFig8}
+
+  \item[Tested computer programs] only use a function that works for
+    all known input/output pairs, and fails for all bad inputs.
+
+  \item[Supervised machine learning] choose model+parameters that minimize the
+    number of incorrectly predicted labels.
+  \end{description}
+\end{frame}
+
+\begin{frame}
   \frametitle{Goal: minimize number of incorrect labels in test data}
   \begin{itemize}
   \item $S=4$ samples.
   \item $B=50,000$ base positions.
   \item $\mathbf Z \in\ZZ_+^{B\times S}$ matrix of count data.
   \item Set of labels $L$ (peaks, noPeaks, peakStart, peakEnd).
-  \item Goal: find a peak caller $c:\ZZ_+^{B\times S} \rightarrow
+  \item \textbf{Goal}: find a peak caller $c:\ZZ_+^{B\times S} \rightarrow
     \{0,1\}^{B\times S}$ 
-  \end{itemize}
   \begin{equation*}
     \label{eq:min_test_err}
     \minimize_c \sum_{i\in\text{test}} E[c(\mathbf Z_i),  L_i],
   \end{equation*}
   where $E$ is the number of incorrect labels\\(false positives + false
   negatives).
+\item \textbf{Not}: find the ``true'' peaks (nobody knows, without
+  further experiments).
+\item \textbf{Goal}: a search engine that finds peaks consistent with
+  the labels.
+\end{itemize}
 \end{frame}
 
 \section{The PeakSeg and PeakSegJoint models} 
@@ -250,102 +307,7 @@ Hocking and Bourque, arXiv:1506.01286.
   
 \end{frame}
 
-\section{Fast JointZoom algorithm for approximately solving
-  PeakSegJoint}
-
-\begin{frame}
-  \frametitle{Comparison of algorithms for Poisson segmentation}
-
-  For $B$ data points to segment,
-
-  \vskip 1cm
-  
-  \begin{tabular}{ccccc}
-    Model & Reference & Algorithm & Time & Exact?\\
-    \hline
-    Unconstrained & Rigaill  & pDPA & $O(B \log B)$ & Yes. \\
-    (no peaks) & arXiv 2010\\
-    \hline
-    PeakSeg & H et al. & cDPA & $O(B^2)$ & No.\\
-    & ICML 2015 \\
-    \hline
-    PeakSegJoint & H et al. & JointZoom & $O(B\log B)$ & No.\\
-    & arXiv 2015
-  \end{tabular}
-  
-\end{frame}
-
-\begin{frame}
-  \frametitle{Demonstration of approximate JointZoom algorithm}
-
-  \includegraphics[width=\textwidth]{figure-heuristic-algo}
-
-  Interactive figure at \url{http://bit.ly/1AA6TgK}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Example runs of approximate JointZoom algorithm}
-Previous slide: small data with $B=24$ bases.
-\begin{itemize}
-\item \textbf{Zoom out} to a bin size of 4 bases.
-\item That gives $b=7$ bins.
-\item Consider all peak starts/ends = $O(b^2)=15$ models.
-\item \textbf{Zoom in} and consider 16 models each at bin sizes 2 and 1.
-\end{itemize}
-Real data: $B=85846$ bases.
-\begin{itemize}
-\item Zoom out to a bin size of 16384 bases.
-\item That gives $b=6$ bins.
-\item Consider all peak starts/ends = $O(b^2)=10$ models.
-\item Consider 16 models each at bin sizes 8192, 4096, ..., 4, 2, 1.
-\end{itemize}
-  Zoom factor parameter fixed at $\beta=2$.
-\end{frame}
-\begin{frame}
-  \frametitle{Time complexity of approximate JointZoom algorithm}
-
-\begin{algorithmic}[1]
-  \REQUIRE count data $\mathbf Z\in\ZZ_+^{B\times S}$, zoom factor
-  $\beta\in\{2, 3, \dots\}$, number of samples with 1
-  peak $p\in\{0, \dots, S\}$.
-  \STATE $\textrm{BinSize} \gets \textsc{MaxBinSize}(B, \beta)$. 
-  \STATE $\textrm{Peak}, \textrm{Samples} \gets \label{gridsearch}
-  \textsc{GridSearch}(\mathbf Z, p, \textrm{BinSize})$.
-  \WHILE{$1 < \textrm{BinSize}$}
-  \STATE $\textrm{BinSize} \gets \textrm{BinSize} / \beta$. 
-  \STATE $\textrm{Peak} \gets
-  \textsc{SearchNearPeak}(\mathbf Z, \textrm{Samples}, \label{searchnear}
-  \textrm{BinSize}, \textrm{Peak})$
-  \ENDWHILE
-  \RETURN \textrm{Peak}, \textrm{Samples}.
-\end{algorithmic}
-
-\begin{itemize}
-\item \textsc{GridSearch} checks $O(1)$ models.
-\item Each \textsc{SearchNearPeak} checks $O(\beta^2)$ models.
-\item While loop executed $O(\log B)$ times.
-\item Computing feasibility and maximum likelihood is $O(pB)$.
-\item Time for one model: $O(\beta^2 pB\log B)$.
-\item Time for $S+1$ models: $O(\beta^2 S B\log B)$.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{PeakSegJoint much faster than other Poisson
-    segmentation algorithms}
-
-  Data: simulated single-sample, single-peak.
-
-  \input{figure-timings-small} 
-
-  pDPA from Segmentor3IsBack R package (Cleynen et al, 2014).
-
-  cDPA from PeakSegDP R package (Hocking et al, ICML 2015).
-
-\end{frame}
-
-\section{Speed, train and test error on benchmark data sets}
+\section{Train and test error on benchmark data sets}
 
 \begin{frame}
   \frametitle{H3K36me3 data, PeakSeg and Joint model}
@@ -353,31 +315,6 @@ Real data: $B=85846$ bases.
   \includegraphics[width=1.1\textwidth]{figure-H3K36me3-profiles}
 
   \url{http://bl.ocks.org/tdhock/raw/b77c1a7e4d6aee40bf6c/}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Timings on example H3K36me3 data}
-
-  \small
-
-  Find best 0,...,9 peaks in each of 8 samples (80 PeakSeg
-  models):
-
-  \scriptsize
-
-  \input{table-H3K36me3-PeakSeg}
-
-  \vskip 0.2 cm
-
-  \small
-
-  Find best common peak in 0,...,8 samples in each of 5 genomic
-  regions (45 PeakSegJoint models):
-
-  \scriptsize
-
-  \input{table-H3K36me3}
-
 \end{frame}
 
 \begin{frame}
@@ -410,6 +347,162 @@ Real data: $B=85846$ bases.
   \frametitle{Train error on H3K36me3 data}
   \includegraphics[width=\textwidth]{../PeakSeg-paper/figure-dp-peaks-train-2}
 \end{frame}
+
+\begin{frame}
+  \frametitle{PeakSegJoint and PeakSeg work
+ for both broad H3K36me3
+    and sharp H3K4me3 data}
+
+  \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
+
+  \begin{itemize}
+  \item Six train/test splits (open circles) and mean (shaded circle).
+  \item grid search: default values for all parameters except
+    significance threshold, chosen to minimize number of incorrect
+    labels in train set (macs=qvalue, hmcan.broad=finalThreshold).
+  \end{itemize}
+\end{frame}
+
+\section{PeakSegJoint model of 393 H3K27ac+Input samples}
+
+\begin{frame}
+  \frametitle{Train error data visualization}
+  \includegraphics[width=0.5\textwidth]{screenshot-train-errors}
+
+  \url{http://hubs.hpc.mcgill.ca/~thocking/blueprint-H3K27ac-PeakSegJoint-chunks/figure-train-errors/}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Test error data visualization}
+  \includegraphics[width=\textwidth]{Screenshot-test-errors}
+
+  \url{http://hubs.hpc.mcgill.ca/~thocking/blueprint-H3K27ac-PeakSegJoint-chunks/figure-test-errors/14.png}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Monocyte and neutrophil samples with common peaks}
+
+  \includegraphics[width=\textwidth]{screenshot-H3K27ac-viz-results}
+
+  \url{http://bl.ocks.org/tdhock/raw/189ede5590712facd9c1/}
+
+\end{frame}
+
+\section{Conclusions}
+
+\begin{frame}[fragile]
+  \frametitle{Unsupervised peak detector input: data + parameters}
+\scriptsize
+19 parameters for Model-based analysis of ChIP-Seq (MACS), Zhang et al, 2008.
+\begin{verbatim}
+  [-g GSIZE]
+  [-s TSIZE] [--bw BW] [-m MFOLD MFOLD] [--fix-bimodal]
+  [--nomodel] [--extsize EXTSIZE | --shiftsize SHIFTSIZE]
+  [-q QVALUE | -p PVALUE | -F FOLDENRICHMENT] [--to-large]
+  [--down-sample] [--seed SEED] [--nolambda]
+  [--slocal SMALLLOCAL] [--llocal LARGELOCAL]
+  [--shift-control] [--half-ext] [--broad]
+  [--broad-cutoff BROADCUTOFF] [--call-summits]
+\end{verbatim}
+10 parameters for Histone modifications in cancer (HMCan),
+Ashoor et al, 2013.
+\begin{verbatim}
+minLength 145
+medLength 150
+maxLength 155
+smallBinLength 50
+largeBinLength 100000
+pvalueThreshold 0.01
+mergeDistance 200
+iterationThreshold 5
+finalThreshold 0
+maxIter 20
+\end{verbatim}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Supervised peak detector input: data + labels}
+
+  \includegraphics[width=\textwidth]{figure-good-bad}
+
+  Goal: learn a model with minimal incorrect labels on test data.
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusions and future work}
+  PeakSeg: \textbf{Peak} detection via constrained optimal
+  \textbf{Seg}mentation.\\
+  PeakSegJoint: identical overlapping peaks in multiple samples.
+  \begin{itemize}
+  \item First supervised peak detectors (input = data + labels).
+  \item State-of-the-art peak detection for both sharp H3K4me3 and
+    broad H3K36me3 profiles.
+  \item Oracle model complexity more accurate than AIC/BIC.
+  \end{itemize}
+  Future work:
+  \begin{itemize}
+  \item \textbf{Speed}: constrained Pruned Dynamic Programming (Rigaill
+    arXiv:1004.0887) to compute PeakSeg in $O(B\log B)$ time.
+  \item \textbf{Accuracy}: algorithms for provably computing
+    PeakSeg/PeakSegJoint models?
+  \item \textbf{Modeling}: relaxing the PeakSegJoint 1 peak per sample
+    constraint.
+  \item \textbf{Theory}: oracle model complexity for PeakSegJoint \`a
+    la Cleynen+Lebarbier?  (2014)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{2pm Tutorial on named capture regular expressions}
+\small
+\begin{verbatim}
+thocking@silene:~/projects/PeakSegJoint-paper(master*)$ python
+Python 2.7.3 (default, Jun 22 2015, 19:33:41) 
+[GCC 4.6.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import re
+>>> subject = 'chr10:213,054,000-213,055,000'
+>>> compiled_pattern = re.compile(r"""
+... (?P<chrom>chr.*?)
+... :
+... (?P<chromStart>.*?)
+... -
+... (?P<chromEnd>[0-9,]*)
+... """, re.VERBOSE)
+>>> match = compiled_pattern.match(subject)
+>>> print match.groups()[1]
+213,054,000
+>>> print match.groupdict()["chromStart"]
+213,054,000
+>>> 
+\end{verbatim}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Thanks for your attention!}
+  Write me at \alert{\texttt{toby.hocking@mail.mcgill.ca}} to collaborate!
+
+  \vskip 1cm
+
+  R packages:\\
+  \url{https://github.com/tdhock/PeakSegDP}\\
+  \url{https://github.com/tdhock/PeakSegJoint}
+
+  \vskip 1cm
+
+  Source code for slides, figures, paper online!\\
+  \small
+  \url{https://github.com/tdhock/PeakSegJoint-paper}
+  \vskip 1cm
+
+  Supplementary slides appear after this one.
+
+\end{frame}
+
+\section*{PeakSeg test error results}
 
 \begin{frame}
   \frametitle{Learned penalty functions for PeakSeg model}
@@ -498,98 +591,128 @@ Predicted number of peaks for each profile $i$:
 \end{frame}
 
 
-\begin{frame}
-  \frametitle{PeakSegJoint error comparable to PeakSeg}
-
-  \includegraphics[width=\textwidth]{figure-test-error-dots.pdf}
-
-  Six train/test splits (open circles) and mean (shaded circle).
-\end{frame}
-
-\section{Conclusions}
-
-\begin{frame}[fragile]
-  \frametitle{Unsupervised peak detector input: data + parameters}
-\scriptsize
-19 parameters for Model-based analysis of ChIP-Seq (MACS), Zhang et al, 2008.
-\begin{verbatim}
-  [-g GSIZE]
-  [-s TSIZE] [--bw BW] [-m MFOLD MFOLD] [--fix-bimodal]
-  [--nomodel] [--extsize EXTSIZE | --shiftsize SHIFTSIZE]
-  [-q QVALUE | -p PVALUE | -F FOLDENRICHMENT] [--to-large]
-  [--down-sample] [--seed SEED] [--nolambda]
-  [--slocal SMALLLOCAL] [--llocal LARGELOCAL]
-  [--shift-control] [--half-ext] [--broad]
-  [--broad-cutoff BROADCUTOFF] [--call-summits]
-\end{verbatim}
-10 parameters for Histone modifications in cancer (HMCan),
-Ashoor et al, 2013.
-\begin{verbatim}
-minLength 145
-medLength 150
-maxLength 155
-smallBinLength 50
-largeBinLength 100000
-pvalueThreshold 0.01
-mergeDistance 200
-iterationThreshold 5
-finalThreshold 0
-maxIter 20
-\end{verbatim}
-\end{frame}
+\section*{Fast JointZoom algorithm for approximately solving
+  PeakSegJoint}
 
 \begin{frame}
-  \frametitle{Supervised peak detector input: data + labels}
+  \frametitle{Comparison of algorithms for Poisson segmentation}
 
-  \includegraphics[width=\textwidth]{figure-good-bad}
-
-  Goal: learn a model with minimal incorrect labels on test data.
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{Conclusions and future work}
-  PeakSeg: \textbf{Peak} detection via constrained optimal
-  \textbf{Seg}mentation.\\
-  PeakSegJoint: identical overlapping peaks in multiple samples.
-  \begin{itemize}
-  \item First supervised peak detectors (input = data + labels).
-  \item State-of-the-art peak detection for both sharp H3K4me3 and
-    broad H3K36me3 profiles.
-  \item Oracle model complexity more accurate than AIC/BIC.
-  \end{itemize}
-  Future work:
-  \begin{itemize}
-  \item Constrained version of Pruned Dynamic Programming (Rigaill
-    arXiv:1004.0887) to compute PeakSeg in $O(B\log B)$ time.
-  \item Efficient algorithms for provably computing
-    PeakSeg/PeakSegJoint models?
-  \item Oracle model complexity for PeakSegJoint \`a la
-    Cleynen+Lebarbier?  (2014)
-  \item Relaxing the PeakSegJoint 1 peak per sample constraint.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Thanks for your attention!}
-  Write me at \alert{\texttt{toby.hocking@mail.mcgill.ca}} to collaborate!
+  For $B$ data points to segment,
 
   \vskip 1cm
+  
+  \begin{tabular}{ccccc}
+    Model & Reference & Algorithm & Time & Exact?\\
+    \hline
+    Unconstrained & Rigaill  & pDPA & $O(B \log B)$ & Yes. \\
+    (no peaks) & arXiv 2010\\
+    \hline
+    PeakSeg & H et al. & cDPA & $O(B^2)$ & No.\\
+    & ICML 2015 \\
+    \hline
+    PeakSegJoint & H et al. & JointZoom & $O(B\log B)$ & No.\\
+    & arXiv 2015
+  \end{tabular}
+  
+\end{frame}
 
-  R packages:\\
-  \url{https://github.com/tdhock/PeakSegDP}\\
-  \url{https://github.com/tdhock/PeakSegJoint}
+\begin{frame}
+  \frametitle{Demonstration of approximate JointZoom algorithm}
 
-  \vskip 1cm
+  \includegraphics[width=\textwidth]{figure-heuristic-algo}
 
-  Source code for slides, figures, paper online!\\
+  Interactive figure at
+  \url{http://bl.ocks.org/tdhock/raw/aef616ba22fee33e82f5/}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example runs of approximate JointZoom algorithm}
+Previous slide: small data with $B=24$ bases.
+\begin{itemize}
+\item \textbf{Zoom out} to a bin size of 4 bases.
+\item That gives $b=7$ bins.
+\item Consider all peak starts/ends = $O(b^2)=15$ models.
+\item \textbf{Zoom in} and consider 16 models each at bin sizes 2 and 1.
+\end{itemize}
+Real data: $B=85846$ bases.
+\begin{itemize}
+\item Zoom out to a bin size of 16384 bases.
+\item That gives $b=6$ bins.
+\item Consider all peak starts/ends = $O(b^2)=10$ models.
+\item Consider 16 models each at bin sizes 8192, 4096, ..., 4, 2, 1.
+\end{itemize}
+  Zoom factor parameter fixed at $\beta=2$.
+\end{frame}
+\begin{frame}
+  \frametitle{Time complexity of approximate JointZoom algorithm}
+
+\begin{algorithmic}[1]
+  \REQUIRE count data $\mathbf Z\in\ZZ_+^{B\times S}$, zoom factor
+  $\beta\in\{2, 3, \dots\}$, number of samples with 1
+  peak $p\in\{0, \dots, S\}$.
+  \STATE $\textrm{BinSize} \gets \textsc{MaxBinSize}(B, \beta)$. 
+  \STATE $\textrm{Peak}, \textrm{Samples} \gets \label{gridsearch}
+  \textsc{GridSearch}(\mathbf Z, p, \textrm{BinSize})$.
+  \WHILE{$1 < \textrm{BinSize}$}
+  \STATE $\textrm{BinSize} \gets \textrm{BinSize} / \beta$. 
+  \STATE $\textrm{Peak} \gets
+  \textsc{SearchNearPeak}(\mathbf Z, \textrm{Samples}, \label{searchnear}
+  \textrm{BinSize}, \textrm{Peak})$
+  \ENDWHILE
+  \RETURN \textrm{Peak}, \textrm{Samples}.
+\end{algorithmic}
+
+\begin{itemize}
+\item \textsc{GridSearch} checks $O(1)$ models.
+\item Each \textsc{SearchNearPeak} checks $O(\beta^2)$ models.
+\item While loop executed $O(\log B)$ times.
+\item Computing feasibility and maximum likelihood is $O(pB)$.
+\item Time for one model: $O(\beta^2 pB\log B)$.
+\item Time for $S+1$ models: $O(\beta^2 S B\log B)$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{PeakSegJoint much faster than other Poisson
+    segmentation algorithms}
+
+  Data: simulated single-sample, single-peak.
+
+  \input{figure-timings-small} 
+
+  pDPA from Segmentor3IsBack R package (Cleynen et al, 2014).
+
+  cDPA from PeakSegDP R package (Hocking et al, ICML 2015).
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Timings on example H3K36me3 data}
+
   \small
-  \url{https://github.com/tdhock/PeakSegJoint-paper}
-  \vskip 1cm
 
-  Supplementary slides appear after this one.
+  Find best 0,...,9 peaks in each of 8 samples (80 PeakSeg
+  models):
+
+  \scriptsize
+
+  \input{table-H3K36me3-PeakSeg}
+
+  \vskip 0.2 cm
+
+  \small
+
+  Find best common peak in 0,...,8 samples in each of 5 genomic
+  regions (45 PeakSegJoint models):
+
+  \scriptsize
+
+  \input{table-H3K36me3}
 
 \end{frame}
+
+\section*{supplementary}
 
 \begin{frame}
   \frametitle{H3K27ac and Input data, PeakSeg and Joint model}
