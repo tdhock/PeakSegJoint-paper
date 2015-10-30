@@ -222,11 +222,13 @@ Although not the subject of this paper, there are several algorithms
 designed for the analysis of data from several different ChIP-seq
 experiments \citep{chromhmm,segway,jmosaics}. In these models, the
 input is one sample (e.g. monocyte cells) with different experiments
-such as H3K4me3 and H3K36me3. Also,
-\citet{hierarchical-joint} proposed a model for one sample with both
-ChIP-seq and ChIP-chip data. In contrast, 
-\ref{PeakSegJoint} takes as input several samples
+such as H3K4me3 and H3K36me3. Also, \citet{hierarchical-joint}
+proposed a model for one sample with both ChIP-seq and ChIP-chip
+data. In contrast, \ref{PeakSegJoint} takes as input several samples
 (e.g. monocyte, tcell, bcell) for one experiment such as H3K4me3.
+ChromDiff is an unsupervised method for comparing two groups of
+samples, assuming samples are replicates with several experiments
+\ref{ChromDiff}.
 
 \section{Models}\label{sec:models}
 
