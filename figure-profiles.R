@@ -195,9 +195,9 @@ for(peaks.str in names(dp.model)){
   error <- PeakErrorChrom(one.sample.peaks, one.sample.regions)
   peaks <- as.numeric(peaks.str)
   tit <-
-    paste0("PeakSeg model with ",
-           peaks, " peak",
-           ifelse(peaks==1, "", "s"))
+    paste0(peaks, " sample",
+           ifelse(peaks==1, "", "s"),
+           " with a common peak")
   zoom.segs <- segs.by.peaks[[peaks.str]]
   breaks <- subset(zoom.segs, min(chromStart) < chromStart)
   gg <- 
@@ -390,8 +390,9 @@ gg3 <- regions.plot +
       if(var=="sample.id"){
         sub("McGill0", "sample\n", val)
       }else{
-        s <- ifelse(val==1, "", "s")
-        paste0("PeakSegJoint model with ", val, " peak", s)
+        ifelse(val==1,
+               "1 sample with a peak",
+               paste0(val, " samples with a common peak"))
       }
     })+
     guides(linetype=guide_legend(order=2,
