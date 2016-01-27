@@ -291,7 +291,7 @@ figure.list[["H3K36me3 data and labels (zoom to one peak)"]] <- regions.plot <-
                 alpha=0.5,
                 color="grey",
                 data=sort.samples(some.regions))+
-  scale_fill_manual(values=ann.colors)+
+  scale_fill_manual("label", values=ann.colors)+
   geom_step(aes(chromStart/1e3, count),
             data=sort.samples(some.counts),
             color="grey50")+
@@ -304,6 +304,9 @@ figure.list[["H3K36me3 data and labels (zoom to one peak)"]] <- regions.plot <-
 ## Compute PeakError on this sequence of models.
 regions.by.sample <- split(some.regions, some.regions$sample.id)
 error.list <- list()
+error.regions.list <- list()
+segs.list <- list()
+breaks.list <- list()
 for(peaks.str in names(zoom.peak.list)){
   several.samples <- zoom.peak.list[[peaks.str]]
   peaks.by.sample <- split(several.samples, several.samples$sample.id)
@@ -320,6 +323,8 @@ for(peaks.str in names(zoom.peak.list)){
     error.by.sample[[sample.id]] <- data.frame(sample.id, error)
   }
   peaks.error <- do.call(rbind, error.by.sample)
+  error.regions.list[[peaks.str]] <-
+    data.frame(peaks=as.integer(peaks.str), peaks.error)
   fp <- sum(peaks.error$fp)
   fn <- sum(peaks.error$fn)
   error.list[[peaks.str]] <-
@@ -330,6 +335,8 @@ for(peaks.str in names(zoom.peak.list)){
            ifelse(peaks==1, "", "s"))
   zoom.segs <- zoom.seg.list[[peaks.str]]
   breaks <- subset(zoom.segs, min(chromStart) < chromStart)
+  segs.list[[peaks.str]] <- zoom.segs
+  breaks.list[[peaks.str]] <- breaks
   figure.list[[tit]] <- 
   regions.plot +
     guides(linetype=guide_legend(order=2,
@@ -373,5 +380,39 @@ ggplot()+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "cm"))+
   facet_grid(what ~ ., scales="free")
+show.peaks.vec <- paste(1:3)
+show.breaks <- do.call(rbind, breaks.list[show.peaks.vec])
+show.segs <- do.call(rbind, segs.list[show.peaks.vec])
+show.regions <- do.call(rbind, error.regions.list[show.peaks.vec])
+
+gg3 <- regions.plot +
+    facet_grid(sample.id ~ peaks, scales="free", labeller=function(var, val){
+      if(var=="sample.id"){
+        sub("McGill0", "sample\n", val)
+      }else{
+        s <- ifelse(val==1, "", "s")
+        paste0("PeakSegJoint model with ", val, " peak", s)
+      }
+    })+
+    guides(linetype=guide_legend(order=2,
+             override.aes=list(fill="white")))+
+    geom_tallrect(aes(xmin=chromStart/1e3, xmax=chromEnd/1e3,
+                      linetype=status),
+                  fill=NA,
+                  color="black",
+                  size=1.5,
+                  data=sort.samples(show.regions))+
+    geom_vline(aes(xintercept=chromStart/1e3),
+               data=sort.samples(show.breaks),
+               color="green",
+               linetype="dashed")+
+    geom_segment(aes(chromStart/1e3, mean,
+                     xend=chromEnd/1e3, yend=mean),
+                 data=sort.samples(show.segs),
+                 color="green",
+                 size=1)
+pdf("figure-profiles-3peaks.pdf", width=10)
+print(gg3)
+dev.off()
 
 make.tex("figure-profiles")

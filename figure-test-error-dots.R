@@ -88,6 +88,23 @@ show.means <- show.stats %>%
   group_by(set.name, algorithm, learning, algo.type) %>%
   summarise(percent=mean(percent))
 
+## Some quantitative results for the epigenomics abstract.
+med.stats <- show.stats %>%
+  group_by(set.name, algorithm, learning, algo.type) %>%
+  summarise(median=median(percent),
+            mean=mean(percent),
+            sd=sd(percent),
+            quartile25=quantile(percent, 0.25),
+            quartile75=quantile(percent, 0.75)) %>%
+  filter(grepl("TDH_immune", set.name),
+         algorithm != "PeakSeg") %>%
+  group_by()
+
+med.stats %>%
+  select(set.name, algorithm, quartile25, median, quartile75) 
+med.stats %>%
+  select(set.name, algorithm, mean, sd) 
+
 show.vlines <- show.means %>%
   group_by(set.name) %>%
   filter(seq_along(percent) == which.min(percent)) %>%

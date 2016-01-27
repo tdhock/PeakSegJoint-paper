@@ -369,7 +369,7 @@ Hocking and Bourque, arXiv:1506.01286.
   \frametitle{Train error data visualization}
   \includegraphics[width=0.5\textwidth]{screenshot-train-errors}
 
-  \url{http://hubs.hpc.mcgill.ca/~thocking/blueprint-H3K27ac-PeakSegJoint-chunks/figure-train-errors/}
+  \url{http://hubs.hpc.mcgill.ca/~thocking/labels/H3K27ac/PeakSegJoint-chunks/figure-train-errors/}
 
 \end{frame}
 
@@ -377,7 +377,7 @@ Hocking and Bourque, arXiv:1506.01286.
   \frametitle{Test error data visualization}
   \includegraphics[width=\textwidth]{Screenshot-test-errors}
 
-  \url{http://hubs.hpc.mcgill.ca/~thocking/blueprint-H3K27ac-PeakSegJoint-chunks/figure-test-errors/14.png}
+  \url{http://hubs.hpc.mcgill.ca/~thocking/labels/H3K27ac/PeakSegJoint-chunks/figure-test-errors/14.png}
 
 \end{frame}
 
@@ -438,9 +438,11 @@ maxIter 20
   PeakSegJoint: identical overlapping peaks in multiple samples.
   \begin{itemize}
   \item First supervised peak detectors (input = data + labels).
-  \item State-of-the-art peak detection for both sharp H3K4me3 and
-    broad H3K36me3 profiles.
-  \item Oracle model complexity more accurate than AIC/BIC.
+  \item State-of-the-art accuracy for both sharp H3K4me3 and broad
+    H3K36me3 profiles.
+  \item PeakSegJoint is the first multi-sample model that does NOT
+    assume samples are replicates.
+  %\item Oracle model complexity more accurate than AIC/BIC.
   \end{itemize}
   Future work:
   \begin{itemize}
@@ -448,37 +450,12 @@ maxIter 20
     arXiv:1004.0887) to compute PeakSeg in $O(B\log B)$ time.
   \item \textbf{Accuracy}: algorithms for provably computing
     PeakSeg/PeakSegJoint models?
-  \item \textbf{Modeling}: relaxing the PeakSegJoint 1 peak per sample
-    constraint.
-  \item \textbf{Theory}: oracle model complexity for PeakSegJoint \`a
-    la Cleynen+Lebarbier?  (2014)
+  % \item \textbf{Theory}: oracle model complexity for PeakSegJoint \`a
+  %   la Cleynen+Lebarbier? (2014)
+  \item \textbf{Interactive}: add/edit labels in a genome browser.
+  \item \textbf{Collaboration}: would you like to run PeakSegJoint on
+    your ChIP-seq data sets?
   \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{2pm Tutorial on named capture regular expressions}
-\small
-\begin{verbatim}
-thocking@silene:~/projects/PeakSegJoint-paper(master*)$ python
-Python 2.7.3 (default, Jun 22 2015, 19:33:41) 
-[GCC 4.6.3] on linux2
-Type "help", "copyright", "credits" or "license" for more information.
->>> import re
->>> subject = 'chr10:213,054,000-213,055,000'
->>> compiled_pattern = re.compile(r"""
-... (?P<chrom>chr.*?)
-... :
-... (?P<chromStart>.*?)
-... -
-... (?P<chromEnd>[0-9,]*)
-... """, re.VERBOSE)
->>> match = compiled_pattern.match(subject)
->>> print match.groups()[1]
-213,054,000
->>> print match.groupdict()["chromStart"]
-213,054,000
->>> 
-\end{verbatim}
 \end{frame}
 
 \begin{frame}

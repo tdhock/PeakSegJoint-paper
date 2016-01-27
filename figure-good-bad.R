@@ -158,7 +158,7 @@ ggplot()+
                 alpha=0.5,
                 color="grey",
                 data=some.regions)+
-  scale_fill_manual(values=ann.colors)+
+  scale_fill_manual("label", values=ann.colors)+
   geom_step(aes(chromStart/1e3, count),
             data=some.counts,
             color="grey50")+
